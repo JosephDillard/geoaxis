@@ -87,6 +87,7 @@ tasks.named('bootRun') {
 }
 
 tasks.withType(GroovyCompile) {
+    options.incremental = false
     configure(groovyOptions) {
         forkOptions.jvmArgs = ['-Xmx1024m']
     }
