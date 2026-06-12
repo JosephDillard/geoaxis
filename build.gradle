@@ -88,6 +88,7 @@ bootRun {
     sourceResources sourceSets.main
     String springProfilesActive = 'spring.profiles.active'
     systemProperty springProfilesActive, System.getProperty(springProfilesActive)
+    systemProperty 'server.port', System.getProperty('server.port', '18088')
 }
 
 tasks.withType(GroovyCompile) {
