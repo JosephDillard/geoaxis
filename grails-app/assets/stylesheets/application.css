@@ -13,3 +13,224 @@
 *= require mobile
 *= require_self
 */
+
+.navbar-static-top {
+    background: #24313f;
+    border-color: #24313f;
+}
+
+.geoaxis-brand {
+    font-weight: 700;
+    letter-spacing: 0;
+}
+
+.geoaxis-user {
+    color: #dce6ed;
+    margin-right: 1rem;
+}
+
+.geoaxis-logout-form {
+    margin: 0.25rem 0 0 0.75rem;
+}
+
+.geoaxis-page,
+.auth-page {
+    min-height: calc(100vh - 122px);
+    background: #eef3f4;
+}
+
+.geoaxis-page {
+    padding: 2rem;
+}
+
+.geoaxis-hero {
+    align-items: flex-end;
+    background: #ffffff;
+    border-bottom: 4px solid #1f7a8c;
+    display: flex;
+    justify-content: space-between;
+    margin: 0 auto 1.5rem auto;
+    max-width: 1120px;
+    padding: 2rem;
+}
+
+.geoaxis-kicker {
+    color: #1f7a8c;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.geoaxis-hero h1,
+.auth-panel h1 {
+    color: #17212b;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+}
+
+.geoaxis-subtitle {
+    color: #56616b;
+    font-size: 1rem;
+    margin: 0;
+    max-width: 620px;
+}
+
+.geoaxis-session {
+    background: #f6f8f8;
+    border: 1px solid #d7e0e3;
+    border-radius: 6px;
+    color: #56616b;
+    min-width: 220px;
+    padding: 1rem;
+}
+
+.geoaxis-session span,
+.geoaxis-session strong {
+    display: block;
+}
+
+.geoaxis-session strong {
+    color: #17212b;
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.geoaxis-section {
+    margin: 0 auto;
+    max-width: 1120px;
+}
+
+.geoaxis-section-title {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.geoaxis-section-title h2 {
+    color: #17212b;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.geoaxis-module-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.geoaxis-module {
+    background: #ffffff;
+    border: 1px solid #d7e0e3;
+    border-radius: 6px;
+    color: #17212b;
+    display: block;
+    min-height: 120px;
+    padding: 1rem;
+    text-decoration: none;
+}
+
+.geoaxis-module:hover,
+.geoaxis-module:focus {
+    border-color: #1f7a8c;
+    color: #17212b;
+    text-decoration: none;
+}
+
+.geoaxis-module span,
+.geoaxis-module small {
+    display: block;
+}
+
+.geoaxis-module span {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.geoaxis-module small {
+    color: #6d7881;
+    overflow-wrap: anywhere;
+}
+
+.geoaxis-empty-state {
+    background: #ffffff;
+    border: 1px solid #d7e0e3;
+    border-radius: 6px;
+    margin: 0 auto;
+    max-width: 720px;
+    padding: 2rem;
+}
+
+.geoaxis-empty-state h1,
+.geoaxis-empty-state h3 {
+    color: #17212b;
+    font-weight: 700;
+    margin-top: 0;
+}
+
+.geoaxis-empty-state p {
+    color: #56616b;
+    margin-bottom: 0;
+}
+
+.auth-page {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.auth-panel {
+    background: #ffffff;
+    border: 1px solid #d7e0e3;
+    border-radius: 6px;
+    max-width: 420px;
+    padding: 2rem;
+    width: 100%;
+}
+
+.auth-message {
+    background: #fff6df;
+    border: 1px solid #e3bd62;
+    border-radius: 6px;
+    color: #604600;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+}
+
+.auth-message-success {
+    background: #eaf6ef;
+    border-color: #8bc59f;
+    color: #245736;
+}
+
+.auth-check {
+    margin-bottom: 1rem;
+}
+
+.geoaxis-footer {
+    background: #17212b;
+    color: #dce6ed;
+    padding: 1rem 2rem;
+}
+
+@media (max-width: 720px) {
+    .geoaxis-page {
+        padding: 1rem;
+    }
+
+    .geoaxis-hero {
+        align-items: flex-start;
+        display: block;
+        padding: 1.25rem;
+    }
+
+    .geoaxis-session {
+        margin-top: 1rem;
+        min-width: 0;
+    }
+}

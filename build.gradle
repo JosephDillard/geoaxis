@@ -60,6 +60,8 @@ dependencies {
     implementation "org.grails.plugins:events"
     implementation "org.grails.plugins:gsp"
     implementation 'org.grails.plugins:spring-security-core:5.2.1'
+    implementation project(':gsb-airport')
+    implementation project(':gsb-incidents')
     profile "org.grails.profiles:web"
     runtimeOnly "org.glassfish.web:el-impl:2.2.1-b05"
     runtimeOnly "com.h2database:h2"
@@ -98,6 +100,14 @@ tasks.withType(GroovyCompile) {
 
 tasks.withType(Test) {
     useJUnitPlatform()
+}
+
+tasks.named('bootWar') {
+    archiveFileName = 'GeoStatusBoard.war'
+}
+
+tasks.named('war') {
+    enabled = false
 }
 
 webdriverBinaries {
