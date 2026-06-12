@@ -17,14 +17,21 @@
         </div>
         <g:form controller="map" action="index" method="GET" class="geo-map-form">
             <input type="hidden" name="layer" value="${selectedLayer}"/>
-            <div class="geo-map-field">
-                <label for="field">Filter field</label>
-                <input id="field" name="field" type="text" value="${selectedField}"/>
-            </div>
+            <button id="geo-filter-toggle"
+                    type="button"
+                    class="geo-map-form-toggle"
+                    aria-expanded="${selectedValue ? 'true' : 'false'}"
+                    aria-controls="geo-filter-fields">Filter</button>
+            <div id="geo-filter-fields" class="geo-filter-fields"${selectedValue ? '' : ' hidden'}>
+                <div class="geo-map-field">
+                    <label for="field">Filter field</label>
+                    <input id="field" name="field" type="text" value="${selectedField}"/>
+                </div>
 
-            <div class="geo-map-field">
-                <label for="value">Filter value</label>
-                <input id="value" name="value" type="text" value="${selectedValue}"/>
+                <div class="geo-map-field">
+                    <label for="value">Filter value</label>
+                    <input id="value" name="value" type="text" value="${selectedValue}"/>
+                </div>
             </div>
 
             <button type="submit" class="btn btn-primary">Load</button>
@@ -83,25 +90,40 @@
             </details>
         </aside>
 
-        <div id="geo-map-tools" class="geo-map-tools" aria-label="Map tools">
-            <div id="geo-view-tools" class="geo-map-tool-group">
-                <span class="geo-map-tool-title">View</span>
-                <div class="geo-map-tool-actions">
-                    <button id="geo-fit-layer" type="button" class="geo-map-tool-button">Fit Layers</button>
-                </div>
+        <div id="geo-left-map-controls" class="geo-left-map-controls" aria-label="Map controls">
+            <div id="geo-zoom-control" class="geo-zoom-control" aria-label="Zoom controls">
+                <button id="geo-zoom-in" type="button" class="geo-map-square-button" aria-label="Zoom in" title="Zoom in">+</button>
+                <select id="geo-zoom-level" aria-label="Zoom level"></select>
+                <button id="geo-zoom-out" type="button" class="geo-map-square-button" aria-label="Zoom out" title="Zoom out">-</button>
             </div>
-            <div id="geo-measure-tools" class="geo-map-tool-group">
-                <span class="geo-map-tool-title">Measure</span>
-                <div class="geo-map-tool-actions">
-                    <button id="geo-measure-toggle" type="button" class="geo-map-tool-button">Distance</button>
+            <div id="geo-view-tools" class="geo-view-control">
+                <button id="geo-fit-layer"
+                        type="button"
+                        class="geo-map-square-button geo-fit-layer-button"
+                        aria-label="Fit layers"
+                        title="Fit layers">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
+            <div id="geo-measure-tools" class="geo-measure-control">
+                <button id="geo-measure-toggle"
+                        type="button"
+                        class="geo-map-square-button geo-measure-toggle"
+                        aria-label="Measure distance"
+                        aria-expanded="false"
+                        aria-pressed="false"
+                        title="Measure distance">
+                    <span aria-hidden="true"></span>
+                </button>
+                <div id="geo-measure-panel" class="geo-measure-panel" hidden>
+                    <output id="geo-measure-output" class="geo-map-tool-output">0 mi</output>
                     <button id="geo-measure-clear" type="button" class="geo-map-tool-button">Clear</button>
                 </div>
-                <output id="geo-measure-output" class="geo-map-tool-output">0 mi</output>
             </div>
-            <div id="geo-draw-tools" class="geo-map-tool-group">
-                <span class="geo-map-tool-title">Draw</span>
-                <output id="geo-draw-output" class="geo-map-tool-output">Ready</output>
-            </div>
+        </div>
+
+        <div id="geo-draw-tools" class="geo-draw-summary" aria-label="Draw summary">
+            <output id="geo-draw-output" class="geo-map-tool-output">Ready</output>
         </div>
 
         <div id="geo-coordinate-panel" class="geo-coordinate-panel" aria-label="Coordinates">
@@ -110,6 +132,9 @@
                 <option value="latLon">Lat/Lon</option>
                 <option value="dms">DMS</option>
             </select>
+            <label class="geo-coordinate-copy-toggle" title="Copy selected coordinate when clicking the map">
+                <input id="geo-coordinate-click-copy" type="checkbox" aria-label="Copy selected coordinate when clicking the map"/>
+            </label>
             <output id="geo-coordinate-output">Move over map</output>
         </div>
         <div id="geo-map" class="geo-map-canvas"></div>
@@ -136,13 +161,21 @@
     var basemapPicker = document.getElementById('geo-basemap-picker');
     var basemapToggle = document.getElementById('geo-basemap-toggle');
     var basemapMenu = document.getElementById('geo-basemap-menu');
+    var filterToggle = document.getElementById('geo-filter-toggle');
+    var filterFields = document.getElementById('geo-filter-fields');
     var coordinatePanel = document.getElementById('geo-coordinate-panel');
     var coordinateOutput = document.getElementById('geo-coordinate-output');
     var coordinateFormat = document.getElementById('geo-coordinate-format');
+    var coordinateClickCopy = document.getElementById('geo-coordinate-click-copy');
+    var zoomInButton = document.getElementById('geo-zoom-in');
+    var zoomOutButton = document.getElementById('geo-zoom-out');
+    var zoomLevelSelect = document.getElementById('geo-zoom-level');
+    var zoomControl = document.getElementById('geo-zoom-control');
     var viewTools = document.getElementById('geo-view-tools');
     var fitLayer = document.getElementById('geo-fit-layer');
     var measureTools = document.getElementById('geo-measure-tools');
     var measureToggle = document.getElementById('geo-measure-toggle');
+    var measurePanel = document.getElementById('geo-measure-panel');
     var measureClear = document.getElementById('geo-measure-clear');
     var measureOutput = document.getElementById('geo-measure-output');
     var drawTools = document.getElementById('geo-draw-tools');
@@ -177,6 +210,87 @@
 
     function sourceIdFor(key) {
         return 'status-source-' + safeId(key);
+    }
+
+    function setFilterOpen(open) {
+        if (!filterToggle || !filterFields) {
+            return;
+        }
+        filterFields.hidden = !open;
+        filterToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        filterToggle.classList.toggle('is-active', open);
+    }
+
+    function configuredZoomLevels() {
+        var rawLevels = Array.isArray(config.zoomLevels) ? config.zoomLevels : [];
+        var levels = rawLevels.map(function (level) {
+            return Number(level);
+        }).filter(function (level) {
+            return Number.isFinite(level);
+        }).sort(function (a, b) {
+            return a - b;
+        });
+
+        if (!levels.length) {
+            for (var level = 3; level <= 18; level++) {
+                levels.push(level);
+            }
+        }
+        return levels.filter(function (level, index) {
+            return index === 0 || level !== levels[index - 1];
+        });
+    }
+
+    function zoomLabel(level) {
+        return Number.isInteger(level) ? String(level) : level.toFixed(1);
+    }
+
+    var zoomLevels = configuredZoomLevels();
+
+    function closestZoomLevel(value) {
+        return zoomLevels.reduce(function (closest, level) {
+            return Math.abs(level - value) < Math.abs(closest - value) ? level : closest;
+        }, zoomLevels[0]);
+    }
+
+    function populateZoomLevels() {
+        if (!zoomLevelSelect) {
+            return;
+        }
+        zoomLevelSelect.innerHTML = '';
+        zoomLevels.forEach(function (level) {
+            var option = document.createElement('option');
+            option.value = String(level);
+            option.textContent = zoomLabel(level);
+            zoomLevelSelect.appendChild(option);
+        });
+    }
+
+    function updateZoomLevelControl() {
+        if (!zoomLevelSelect || !zoomLevels.length) {
+            return;
+        }
+        var currentZoom = map.getZoom();
+        var selected = closestZoomLevel(currentZoom);
+        zoomLevelSelect.value = String(selected);
+        if (zoomInButton) {
+            zoomInButton.disabled = currentZoom >= zoomLevels[zoomLevels.length - 1] - 0.01;
+        }
+        if (zoomOutButton) {
+            zoomOutButton.disabled = currentZoom <= zoomLevels[0] + 0.01;
+        }
+    }
+
+    function stepZoom(direction) {
+        var currentZoom = map.getZoom();
+        var target = direction > 0
+            ? zoomLevels.find(function (level) { return level > currentZoom + 0.01; })
+            : zoomLevels.slice().reverse().find(function (level) { return level < currentZoom - 0.01; });
+
+        if (target == null) {
+            target = closestZoomLevel(currentZoom);
+        }
+        map.easeTo({ zoom: target });
     }
 
     function layerIdsFor(key) {
@@ -530,7 +644,12 @@
     function setMeasureMode(enabled) {
         measureMode = enabled;
         measureToggle.classList.toggle('is-active', measureMode);
-        measureToggle.textContent = measureMode ? 'Measuring' : 'Distance';
+        measureToggle.setAttribute('aria-pressed', measureMode ? 'true' : 'false');
+        measureToggle.setAttribute('aria-expanded', measureMode ? 'true' : 'false');
+        measureToggle.title = measureMode ? 'Stop measuring' : 'Measure distance';
+        if (measurePanel) {
+            measurePanel.hidden = !measureMode;
+        }
         map.getCanvas().style.cursor = measureMode ? 'crosshair' : '';
     }
 
@@ -582,6 +701,14 @@
                 setStatus('Clipboard is not available for this browser session.', true);
             });
         }
+    }
+
+    function setCoordinateCopyMode(enabled) {
+        if (!coordinatePanel || !coordinateClickCopy) {
+            return;
+        }
+        coordinateClickCopy.checked = enabled;
+        coordinatePanel.classList.toggle('is-copy-enabled', enabled);
     }
 
     function decorateGeoJson(key, geojson) {
@@ -1122,6 +1249,8 @@
         setStatus('GeoServer WFS URL is not configured.', true);
     }
 
+    setFilterOpen(!!(filterFields && !filterFields.hidden));
+    populateZoomLevels();
     viewTools.hidden = !config.tools.fitLayer;
     measureTools.hidden = !config.tools.measureDistance;
     drawTools.hidden = !config.tools.drawing;
@@ -1137,6 +1266,7 @@
             option.hidden = !config.tools.mgrs;
         }
     });
+    setCoordinateCopyMode(false);
 
     var map = new maplibregl.Map({
         container: 'geo-map',
@@ -1145,11 +1275,12 @@
         zoom: config.zoom || 6
     });
 
-    map.addControl(new maplibregl.NavigationControl(), 'top-right');
     if (config.tools.fullscreen && maplibregl.FullscreenControl) {
         map.addControl(new maplibregl.FullscreenControl(), 'top-right');
     }
-    map.addControl(new maplibregl.ScaleControl({ unit: 'imperial' }), 'bottom-right');
+    map.addControl(new maplibregl.ScaleControl({ unit: 'imperial' }), 'bottom-left');
+    updateZoomLevelControl();
+    map.on('zoomend', updateZoomLevelControl);
 
     appendLayerRows(internalLayerList, config.layers || {}, 'internal');
     appendLayerRows(externalLayerList, config.externalLayers || {}, 'external');
@@ -1218,8 +1349,9 @@
             updateMeasureGraphics();
             return;
         }
-        if (config.tools.coordinates) {
+        if (config.tools.coordinates && coordinateClickCopy && coordinateClickCopy.checked) {
             copyCoordinateAt(event.lngLat);
+            return;
         }
         var layerIds = allInternalRenderLayerIds().concat(Object.keys(externalLayerState).map(function (key) {
             return externalLayerIdFor(key);
@@ -1271,6 +1403,11 @@
             setLayerDrawerOpen(false);
         });
     }
+    if (filterToggle) {
+        filterToggle.addEventListener('click', function () {
+            setFilterOpen(filterFields.hidden);
+        });
+    }
     if (basemapToggle) {
         basemapToggle.addEventListener('click', function () {
             var open = basemapMenu.hidden;
@@ -1285,6 +1422,21 @@
             basemapToggle.setAttribute('aria-expanded', 'false');
         });
     });
+    if (zoomInButton) {
+        zoomInButton.addEventListener('click', function () {
+            stepZoom(1);
+        });
+    }
+    if (zoomOutButton) {
+        zoomOutButton.addEventListener('click', function () {
+            stepZoom(-1);
+        });
+    }
+    if (zoomLevelSelect) {
+        zoomLevelSelect.addEventListener('change', function () {
+            map.easeTo({ zoom: Number(zoomLevelSelect.value) });
+        });
+    }
     if (measureToggle) {
         measureToggle.addEventListener('click', function () {
             setMeasureMode(!measureMode);
@@ -1301,6 +1453,11 @@
             if (hoverCoordinate) {
                 updateCoordinateReadout(hoverCoordinate);
             }
+        });
+    }
+    if (coordinateClickCopy) {
+        coordinateClickCopy.addEventListener('change', function () {
+            setCoordinateCopyMode(coordinateClickCopy.checked);
         });
     }
     window.addEventListener('resize', function () {

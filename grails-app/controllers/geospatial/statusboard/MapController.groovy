@@ -36,6 +36,7 @@ class MapController {
             defaultSrs      : geoserverConfig.defaultSrs?.toString() ?: 'EPSG:4326',
             center          : viewerConfig.center ?: [-106.0, 34.5],
             zoom            : viewerConfig.zoom ?: 6,
+            zoomLevels      : normalizeZoomLevels(viewerConfig.zoomLevels),
             maxFeatures     : viewerConfig.maxFeatures ?: 500,
             selectedLayer   : selectedLayer,
             selectedBasemap : selectedBasemap,
@@ -159,6 +160,16 @@ class MapController {
             fullscreen     : asBoolean(rawTools.fullscreen, true),
             fitLayer       : asBoolean(rawTools.fitLayer, true)
         ]
+    }
+
+    private List<BigDecimal> normalizeZoomLevels(Object rawLevels) {
+        List levels = rawLevels instanceof Collection ? rawLevels as List : (3..18).toList()
+
+        levels.collect { Object value ->
+            value instanceof Number ? value as BigDecimal : value?.toString()?.isNumber() ? value.toString() as BigDecimal : null
+        }.findAll { BigDecimal value ->
+            value != null
+        }.unique().sort()
     }
 
     private Map asMap(Object value) {
