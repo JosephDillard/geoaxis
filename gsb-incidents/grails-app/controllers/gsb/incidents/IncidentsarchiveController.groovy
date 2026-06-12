@@ -3,7 +3,7 @@ import org.springframework.security.access.annotation.Secured
 import static org.springframework.http.HttpStatus.*
 import grails.gorm.transactions.Transactional
 @Secured(['ROLE_USER'])
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, connection = 'geocmtthree')
 class IncidentsarchiveController {
     def filterPaneService
 
@@ -93,7 +93,7 @@ class IncidentsarchiveController {
         respond new Incidents(params)
     }
 
-    @Transactional
+    @Transactional(connection = 'geocmtthree')
     def save(Incidents incidents) {
         if (incidents == null) {
             notFound()
@@ -120,7 +120,7 @@ class IncidentsarchiveController {
         respond incidents
     }
 
-    @Transactional
+    @Transactional(connection = 'geocmtthree')
     def update(Incidents incidents) {
         if (incidents == null) {
             notFound()
@@ -143,7 +143,7 @@ class IncidentsarchiveController {
         }
     }
 
-    @Transactional
+    @Transactional(connection = 'geocmtthree')
     def delete(Incidents incidents) {
 
         if (incidents == null) {

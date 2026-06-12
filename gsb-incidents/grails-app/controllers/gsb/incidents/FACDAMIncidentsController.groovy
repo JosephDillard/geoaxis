@@ -3,7 +3,7 @@ package gsb.incidents
 import static org.springframework.http.HttpStatus.*
 import grails.gorm.transactions.Transactional
 
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, connection = 'geocmtthree')
 class FACDAMIncidentsController {
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
@@ -21,7 +21,7 @@ class FACDAMIncidentsController {
         respond new FACDAMIncidents(params)
     }
 
-    @Transactional
+    @Transactional(connection = 'geocmtthree')
     def save(FACDAMIncidents FACDAMIncidents) {
         if (FACDAMIncidents == null) {
             transactionStatus.setRollbackOnly()
@@ -50,7 +50,7 @@ class FACDAMIncidentsController {
         respond FACDAMIncidents
     }
 
-    @Transactional
+    @Transactional(connection = 'geocmtthree')
     def update(FACDAMIncidents FACDAMIncidents) {
         if (FACDAMIncidents == null) {
             transactionStatus.setRollbackOnly()
@@ -75,7 +75,7 @@ class FACDAMIncidentsController {
         }
     }
 
-    @Transactional
+    @Transactional(connection = 'geocmtthree')
     def delete(FACDAMIncidents FACDAMIncidents) {
 
         if (FACDAMIncidents == null) {

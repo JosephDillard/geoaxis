@@ -11,7 +11,7 @@ import org.springframework.security.access.annotation.Secured
 import static org.springframework.http.HttpStatus.*
 
 @Secured(['ROLE_USER'])
-@Transactional(readOnly = true)
+@Transactional(readOnly = true, connection = 'geocmtfour')
 class NavaidController {
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
@@ -29,7 +29,7 @@ class NavaidController {
         respond new Navaid(params)
     }
 
-    @Transactional
+    @Transactional(connection = 'geocmtfour')
     def save(Navaid navaidInstance) {
         if (navaidInstance == null) {
             notFound()
@@ -56,7 +56,7 @@ class NavaidController {
         respond navaidInstance
     }
 
-    @Transactional
+    @Transactional(connection = 'geocmtfour')
     def update(Navaid navaidInstance) {
         if (navaidInstance == null) {
             notFound()
@@ -79,7 +79,7 @@ class NavaidController {
         }
     }
 
-    @Transactional
+    @Transactional(connection = 'geocmtfour')
     def delete(Navaid navaidInstance) {
 
         if (navaidInstance == null) {
