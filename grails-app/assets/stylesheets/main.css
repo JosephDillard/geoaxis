@@ -740,10 +740,82 @@ img.grails-logo {
 }
 
 .geo-map-status {
+    align-items: flex-start;
+    display: flex;
+    gap: 0.45rem;
     left: 12px;
     max-width: min(540px, calc(100% - 24px));
-    padding: 0.55rem 0.7rem;
+    min-height: 38px;
+    padding: 0.35rem 0.65rem 0.45rem 0.35rem;
     top: 12px;
+    transition: max-width 160ms ease, padding 160ms ease;
+    z-index: 8;
+}
+
+.geo-map-status-toggle {
+    align-items: center;
+    background: rgba(15, 53, 96, 0.86);
+    border: 1px solid rgba(147, 197, 253, 0.42);
+    border-radius: 4px;
+    color: #eef6ff;
+    cursor: pointer;
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 0.75rem;
+    font-weight: 800;
+    gap: 0.2rem;
+    height: 28px;
+    justify-content: center;
+    min-width: 28px;
+    padding: 0 0.35rem;
+}
+
+.geo-map-status-toggle:hover,
+.geo-map-status-toggle:focus {
+    background: #38bdf8;
+    border-color: #7dd3fc;
+    color: #031525;
+    outline: none;
+}
+
+.geo-map-status-count {
+    align-items: center;
+    background: rgba(125, 211, 252, 0.22);
+    border-radius: 999px;
+    display: inline-flex;
+    justify-content: center;
+    min-width: 18px;
+    padding: 0 0.25rem;
+}
+
+.geo-map-status:not(.has-layer-issues):not(.is-collapsed) .geo-map-status-count {
+    display: none;
+}
+
+.geo-map-status.has-layer-issues .geo-map-status-count {
+    background: rgba(251, 113, 133, 0.94);
+    color: #fff1f2;
+}
+
+.geo-map-status-message {
+    line-height: 1.35;
+    padding-top: 0.2rem;
+}
+
+.geo-map-status.is-collapsed {
+    max-width: 48px;
+    overflow: hidden;
+    padding: 0.35rem;
+}
+
+.geo-map-status.is-collapsed .geo-map-status-message,
+.geo-map-status.is-collapsed .geo-map-status-icon {
+    display: none;
+}
+
+.geo-map-status.is-collapsed .geo-map-status-toggle {
+    padding: 0;
+    width: 28px;
 }
 
 .geo-map-status-error {
@@ -1237,7 +1309,7 @@ img.grails-logo {
 
 .geo-draw-summary {
     bottom: 170px;
-    left: 12px;
+    left: 56px;
     max-width: min(240px, calc(100% - 24px));
     opacity: 0.78;
     padding: 0.32rem 0.45rem;
@@ -1347,6 +1419,10 @@ img.grails-logo {
         top: 8px;
     }
 
+    .geo-map-status.is-collapsed {
+        right: auto;
+    }
+
     .geo-map-thumb-controls {
         bottom: 48px;
         right: 8px;
@@ -1389,6 +1465,6 @@ img.grails-logo {
 
     .geo-draw-summary {
         bottom: 166px;
-        left: 8px;
+        left: 52px;
     }
 }

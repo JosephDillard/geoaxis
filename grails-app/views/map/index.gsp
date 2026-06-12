@@ -39,7 +39,18 @@
     </section>
 
     <section class="geo-map-shell" aria-label="Geospatial map">
-        <div id="geo-map-status" class="geo-map-status">Loading map...</div>
+        <div id="geo-map-status" class="geo-map-status" aria-label="Map messages">
+            <button id="geo-map-status-toggle"
+                    type="button"
+                    class="geo-map-status-toggle"
+                    aria-label="Collapse map messages"
+                    aria-expanded="true"
+                    title="Collapse map messages">
+                <span id="geo-map-status-count" class="geo-map-status-count">0</span>
+                <span id="geo-map-status-icon" class="geo-map-status-icon" aria-hidden="true">&lt;</span>
+            </button>
+            <span id="geo-map-status-message" class="geo-map-status-message" aria-live="polite">Loading map...</span>
+        </div>
 
         <div class="geo-map-thumb-controls" aria-label="Map panels">
             <button id="geo-layer-toggle"
@@ -122,7 +133,7 @@
             </div>
         </div>
 
-        <div id="geo-draw-tools" class="geo-draw-summary" aria-label="Draw summary">
+        <div id="geo-draw-tools" class="geo-draw-summary" aria-label="Draw summary" hidden>
             <output id="geo-draw-output" class="geo-map-tool-output">Ready</output>
         </div>
 
@@ -153,6 +164,10 @@
 (function () {
     var config = ${raw(mapConfigJson)};
     var statusEl = document.getElementById('geo-map-status');
+    var statusMessage = document.getElementById('geo-map-status-message');
+    var statusToggle = document.getElementById('geo-map-status-toggle');
+    var statusCount = document.getElementById('geo-map-status-count');
+    var statusIcon = document.getElementById('geo-map-status-icon');
     var layerToggle = document.getElementById('geo-layer-toggle');
     var layerDrawer = document.getElementById('geo-layer-drawer');
     var layerClose = document.getElementById('geo-layer-close');
@@ -189,14 +204,40 @@
     var internalLayerState = {};
     var externalLayerState = {};
     var renderLayerToLayerKey = {};
+    var layerIssueState = {};
     var measureMode = false;
     var measurePoints = [];
     var hoverCoordinate = null;
     var draw = null;
 
     function setStatus(message, isError) {
-        statusEl.textContent = message;
+        var collapsed = statusEl.classList.contains('is-collapsed');
+        statusMessage.textContent = message;
         statusEl.className = isError ? 'geo-map-status geo-map-status-error' : 'geo-map-status';
+        statusEl.classList.toggle('is-collapsed', collapsed);
+        updateStatusIssueCount();
+    }
+
+    function layerIssueCount() {
+        return Object.keys(layerIssueState).filter(function (key) {
+            return layerIssueState[key];
+        }).length;
+    }
+
+    function updateStatusIssueCount() {
+        var count = layerIssueCount();
+        statusCount.textContent = String(count);
+        statusEl.classList.toggle('has-layer-issues', count > 0);
+        statusToggle.setAttribute('aria-label', (statusEl.classList.contains('is-collapsed') ? 'Expand' : 'Collapse') +
+            ' map messages. ' + count + ' layer issue' + (count === 1 ? '' : 's') + '.');
+    }
+
+    function setStatusCollapsed(collapsed) {
+        statusEl.classList.toggle('is-collapsed', collapsed);
+        statusToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        statusToggle.title = collapsed ? 'Expand map messages' : 'Collapse map messages';
+        statusIcon.textContent = collapsed ? '>' : '<';
+        updateStatusIssueCount();
     }
 
     function firstKey(object) {
@@ -1015,10 +1056,12 @@
     function updateDrawSummary() {
         if (!draw) {
             drawOutput.textContent = 'Unavailable';
+            drawTools.hidden = true;
             return;
         }
         var data = draw.getAll();
         var features = data.features || [];
+        drawTools.hidden = features.length === 0;
         var totalLength = features.reduce(function (sum, feature) {
             return sum + featureLengthMeters(feature);
         }, 0);
@@ -1159,6 +1202,8 @@
         if (output) {
             output.textContent = message || '';
         }
+        layerIssueState[kind + ':' + key] = message === 'Error' || message === 'Unavailable';
+        updateStatusIssueCount();
     }
 
     function groupedEntries(object) {
@@ -1253,7 +1298,7 @@
     populateZoomLevels();
     viewTools.hidden = !config.tools.fitLayer;
     measureTools.hidden = !config.tools.measureDistance;
-    drawTools.hidden = !config.tools.drawing;
+    drawTools.hidden = true;
     coordinatePanel.hidden = !config.tools.coordinates;
     layerDrawer.hidden = !config.tools.layerList;
     layerToggle.hidden = !config.tools.layerList;
@@ -1401,6 +1446,11 @@
     if (layerClose) {
         layerClose.addEventListener('click', function () {
             setLayerDrawerOpen(false);
+        });
+    }
+    if (statusToggle) {
+        statusToggle.addEventListener('click', function () {
+            setStatusCollapsed(!statusEl.classList.contains('is-collapsed'));
         });
     }
     if (filterToggle) {
