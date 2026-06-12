@@ -31,7 +31,7 @@ class NavaidAdmin {
     static mapping = {
         statusNote type: 'text', sqlType: 'clob'
         airfieldName column: 'SITE_NAME'
-        datasource 'geocmtfour'
+        datasource 'geodbfour'
         table 'NAVIGATIONALAID'
         version false
     }

@@ -597,7 +597,7 @@
     <ul>
         <ul>
             <li><a href="${createLink(uri: 'http://192.169.0.203/GeoBaseMCKSec/')}" target="_blank">GeoBase Home</a></li>
-            <li><a class="map" href="${createLink(uri: 'http://192.169.0.217/acc/app.jsp?site=geocmt')}" target="_blank">ACC COP</a></li>
+            <li><a class="map" href="${createLink(uri: 'http://192.169.0.217/acc/app.jsp?site=geodb')}" target="_blank">ACC COP</a></li>
         </ul>
     </ul>
 </div>

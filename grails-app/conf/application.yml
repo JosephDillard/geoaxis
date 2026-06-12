@@ -246,13 +246,13 @@ dataSource:
     username: sa
     password: ''
 dataSources:
-    geocmtthree:
+    geodbthree:
         pooled: true
         jmxExport: true
         driverClassName: org.h2.Driver
         username: sa
         password: ''
-    geocmtfour:
+    geodbfour:
         pooled: true
         jmxExport: true
         driverClassName: org.h2.Driver
@@ -265,23 +265,23 @@ environments:
             dbCreate: create-drop
             url: jdbc:h2:mem:devDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
         dataSources:
-            geocmtthree:
+            geodbthree:
                 dbCreate: create-drop
-                url: jdbc:h2:mem:geocmtthreeDevDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
-            geocmtfour:
+                url: jdbc:h2:mem:geodbthreeDevDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+            geodbfour:
                 dbCreate: create-drop
-                url: jdbc:h2:mem:geocmtfourDevDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+                url: jdbc:h2:mem:geodbfourDevDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
     test:
         dataSource:
             dbCreate: update
             url: jdbc:h2:mem:testDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
         dataSources:
-            geocmtthree:
+            geodbthree:
                 dbCreate: update
-                url: jdbc:h2:mem:geocmtthreeTestDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
-            geocmtfour:
+                url: jdbc:h2:mem:geodbthreeTestDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+            geodbfour:
                 dbCreate: update
-                url: jdbc:h2:mem:geocmtfourTestDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+                url: jdbc:h2:mem:geodbfourTestDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
     production:
         dataSource:
             dbCreate: none
@@ -305,9 +305,9 @@ environments:
                 jdbcInterceptors: ConnectionState
                 defaultTransactionIsolation: 2 # TRANSACTION_READ_COMMITTED
         dataSources:
-            geocmtthree:
+            geodbthree:
                 dbCreate: none
-                url: jdbc:h2:./prodGeocmtThreeDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
-            geocmtfour:
+                url: jdbc:h2:./prodGeodbThreeDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+            geodbfour:
                 dbCreate: none
-                url: jdbc:h2:./prodGeocmtFourDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
+                url: jdbc:h2:./prodGeodbFourDb;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE

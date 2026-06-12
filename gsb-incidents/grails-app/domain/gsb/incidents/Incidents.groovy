@@ -47,7 +47,7 @@ class Incidents {
         eventDescHan type: 'text', sqlType: 'clob'
         //incidentId column: 'OBJECTID_1'
         table "AFIM_EVENT_ARCHIVE"
-        datasource 'geocmtthree'
+        datasource 'geodbthree'
 
     }
 }

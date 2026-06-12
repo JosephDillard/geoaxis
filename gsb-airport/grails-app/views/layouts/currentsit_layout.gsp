@@ -7,7 +7,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title><g:layoutTitle default="GeoCMT Dashboard"/></title>
+    <title><g:layoutTitle default="GeoDB Dashboard"/></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="${assetPath(src: 'faviconL.ico')}" type="image/x-icon">
     <asset:stylesheet src="application.css"/>
@@ -22,8 +22,8 @@
 <sec:ifNotLoggedIn><div align="right" class="buttonslogin"><g:link controller="login"
                                                                    action="auth">Login</g:link></div></sec:ifNotLoggedIn>
 <div id="grailsLogo" role="banner"><a
-        href="//GeoCMTDashboard/"><asset:image
-            src="cedashboard.png" alt="GeoCMT Dashboard"/></a></div>
+        href="//GeoDBDashboard/"><asset:image
+            src="cedashboard.png" alt="GeoDB Dashboard"/></a></div>
 
 
 <g:layoutBody/>

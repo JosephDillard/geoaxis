@@ -8,7 +8,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="Refresh" content="300"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title><g:layoutTitle default="GeoCMT Dashboard"/></title>
+    <title><g:layoutTitle default="GeoDB Dashboard"/></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="${assetPath(src: 'faviconstat.ico')}" type="image/x-icon">
     <asset:stylesheet src="mainceindexfeb16.css"/>
@@ -17,7 +17,7 @@
 </head>
 
 <body>
-<div id="grailsLogo" role="banner"><a href="http://192.169.0.196/GeoBaseMCKSec/"><asset:image src="cedashboardAug2015.png" alt="GeoCMT Dashboard"/></a></div>
+<div id="grailsLogo" role="banner"><a href="http://192.169.0.196/GeoBaseMCKSec/"><asset:image src="cedashboardAug2015.png" alt="GeoDB Dashboard"/></a></div>
 
 <g:layoutBody/>
 <div class="footer" role="contentinfo"></div>

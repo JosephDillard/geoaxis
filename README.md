@@ -124,7 +124,7 @@ See:
 The root app configures the default datasource plus named datasources used by the included modules:
 
 - `dataSource` - Root app data.
-- `geocmtfour` - Airport and airfield status data.
-- `geocmtthree` - Incident data.
+- `geodbfour` - Airport and airfield status data.
+- `geodbthree` - Incident data.
 
 Development and test environments use H2 databases by default.

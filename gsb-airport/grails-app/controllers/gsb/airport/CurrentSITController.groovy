@@ -10,7 +10,7 @@ import static org.springframework.http.HttpStatus.*
 import grails.gorm.transactions.Transactional
 
 @Secured(['ROLE_USER'])
-@Transactional(readOnly = true, connection = 'geocmtfour')
+@Transactional(readOnly = true, connection = 'geodbfour')
 class CurrentSITController {
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
@@ -47,7 +47,7 @@ class CurrentSITController {
         respond new CurrentSIT(params)
     }
 
-    @Transactional(connection = 'geocmtfour')
+    @Transactional(connection = 'geodbfour')
     def save(CurrentSIT currentSIT) {
         if (currentSIT == null) {
             notFound()
@@ -74,7 +74,7 @@ class CurrentSITController {
         respond currentSIT
     }
 
-    @Transactional(connection = 'geocmtfour')
+    @Transactional(connection = 'geodbfour')
     def update(CurrentSIT currentSIT) {
         if (currentSIT == null) {
             notFound()
@@ -97,7 +97,7 @@ class CurrentSITController {
         }
     }
 
-    @Transactional(connection = 'geocmtfour')
+    @Transactional(connection = 'geodbfour')
     def delete(CurrentSIT currentSIT) {
 
         if (currentSIT == null) {

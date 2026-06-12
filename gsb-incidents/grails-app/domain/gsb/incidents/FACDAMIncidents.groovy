@@ -73,6 +73,6 @@ class FACDAMIncidents {
         //incidentId column: 'OBJECTID_1'
         version false
         table 'AFIM_EVENT_POINT_BM0914'
-        datasource 'geocmtthree'
+        datasource 'geodbthree'
     }
 }

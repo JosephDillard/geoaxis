@@ -34,7 +34,7 @@ class AirfieldSurfaceStatus {
         notes column: 'DES'
         airfieldName column: 'SITE_NAME'
         lastUpdated column: 'UPDATED_DATE'
-        datasource 'geocmtfour'
+        datasource 'geodbfour'
         table 'RUNWAYDAMAGEPOLYS'
         version false
     }

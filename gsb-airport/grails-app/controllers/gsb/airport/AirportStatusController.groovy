@@ -5,7 +5,7 @@ import static org.springframework.http.HttpStatus.*
 import grails.gorm.transactions.Transactional
 
 @Secured(['ROLE_USER'])
-@Transactional(readOnly = true, connection = 'geocmtfour')
+@Transactional(readOnly = true, connection = 'geodbfour')
 class AirportStatusController {
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
@@ -23,7 +23,7 @@ class AirportStatusController {
         respond new AirportStatus(params)
     }
 
-    @Transactional(connection = 'geocmtfour')
+    @Transactional(connection = 'geodbfour')
     def save(AirportStatus airportStatus) {
         if (airportStatus == null) {
             notFound()
@@ -50,7 +50,7 @@ class AirportStatusController {
         respond airportStatus
     }
 
-    @Transactional(connection = 'geocmtfour')
+    @Transactional(connection = 'geodbfour')
     def update(AirportStatus airportStatus) {
         if (airportStatus == null) {
             notFound()
@@ -73,7 +73,7 @@ class AirportStatusController {
         }
     }
 
-    @Transactional(connection = 'geocmtfour')
+    @Transactional(connection = 'geodbfour')
     def delete(AirportStatus airportStatus) {
 
         if (airportStatus == null) {

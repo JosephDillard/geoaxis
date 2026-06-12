@@ -19,6 +19,6 @@ class UtilityStatus {
     }
 
     static mapping = {
-        datasource 'geocmtfour'
+        datasource 'geodbfour'
     }
 }

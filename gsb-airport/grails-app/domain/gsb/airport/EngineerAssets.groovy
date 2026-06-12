@@ -28,7 +28,7 @@ class EngineerAssets {
         numExcess formula: 'avai - auth'
         percentage formula: 'DECODE(auth,0,0, avai / auth)'
         remarks type: 'text', sqlType: 'clob'
-        datasource 'geocmtfour'
+        datasource 'geodbfour'
     }
     static constraints = {
         airfieldName nullable: true, blank: true

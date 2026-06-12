@@ -105,7 +105,7 @@ class AirportStatus {
         lastUpdated column: 'UPDATED_DATE'
         sort sortBy: 'asc'
         table 'INDEX_AIRFIELDS'
-        datasource 'geocmtfour'
+        datasource 'geodbfour'
         version false
     }
 }

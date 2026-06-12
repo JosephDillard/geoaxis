@@ -6,7 +6,7 @@ import static org.springframework.http.HttpStatus.*
 import grails.gorm.transactions.Transactional
 
 @Secured(['ROLE_USER'])
-@Transactional(readOnly = true, connection = 'geocmtfour')
+@Transactional(readOnly = true, connection = 'geodbfour')
 class EngineerAssetsController {
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
@@ -46,7 +46,7 @@ class EngineerAssetsController {
         respond new EngineerAssets(params)
     }
 
-    @Transactional(connection = 'geocmtfour')
+    @Transactional(connection = 'geodbfour')
     def save(EngineerAssets engineerAssets) {
         if (engineerAssets == null) {
             notFound()
@@ -73,7 +73,7 @@ class EngineerAssetsController {
         respond engineerAssets
     }
 
-    @Transactional(connection = 'geocmtfour')
+    @Transactional(connection = 'geodbfour')
     def update(EngineerAssets engineerAssets) {
         if (engineerAssets == null) {
             notFound()
@@ -96,7 +96,7 @@ class EngineerAssetsController {
         }
     }
 
-    @Transactional(connection = 'geocmtfour')
+    @Transactional(connection = 'geodbfour')
     def delete(EngineerAssets engineerAssets) {
 
         if (engineerAssets == null) {
