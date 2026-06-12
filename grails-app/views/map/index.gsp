@@ -34,9 +34,40 @@
     <section class="geo-map-shell" aria-label="Geospatial map">
         <div id="geo-map-status" class="geo-map-status">Loading map...</div>
 
-        <button id="geo-layer-toggle" type="button" class="geo-map-drawer-toggle" aria-expanded="true">
-            Layers
-        </button>
+        <div class="geo-map-thumb-controls" aria-label="Map panels">
+            <button id="geo-layer-toggle"
+                    type="button"
+                    class="geo-map-thumb-button geo-map-drawer-toggle"
+                    aria-label="Layers"
+                    title="Layers"
+                    aria-expanded="true">
+                <span class="geo-layer-thumb" aria-hidden="true">
+                    <span></span><span></span><span></span>
+                </span>
+            </button>
+            <div id="geo-basemap-picker" class="geo-basemap-picker" aria-label="Basemaps">
+                <button id="geo-basemap-toggle"
+                        type="button"
+                        class="geo-map-thumb-button"
+                        aria-label="Basemaps"
+                        title="Basemaps"
+                        aria-expanded="false">
+                    <span class="geo-basemap-toggle-preview" aria-hidden="true"></span>
+                </button>
+                <div id="geo-basemap-menu" class="geo-basemap-menu" hidden>
+                    <g:each in="${basemaps}" var="entry">
+                        <button type="button"
+                                class="geo-basemap-card"
+                                data-basemap-key="${entry.key}"
+                                aria-label="${entry.value.title}"
+                                title="${entry.value.title}"
+                                style="--basemap-preview: ${entry.value.preview};">
+                            <span class="geo-basemap-preview" aria-hidden="true"></span>
+                        </button>
+                    </g:each>
+                </div>
+            </div>
+        </div>
         <aside id="geo-layer-drawer" class="geo-layer-drawer" aria-label="Map layers">
             <div class="geo-layer-drawer-header">
                 <strong>Layers</strong>
@@ -73,45 +104,13 @@
             </div>
         </div>
 
-        <div id="geo-basemap-picker" class="geo-basemap-picker" aria-label="Basemaps">
-            <button id="geo-basemap-toggle" type="button" class="geo-map-tool-button" aria-expanded="false">
-                Basemap
-            </button>
-            <div id="geo-basemap-menu" class="geo-basemap-menu" hidden>
-                <g:each in="${basemaps}" var="entry">
-                    <button type="button"
-                            class="geo-basemap-card"
-                            data-basemap-key="${entry.key}"
-                            style="--basemap-preview: ${entry.value.preview};">
-                        <span class="geo-basemap-preview"></span>
-                        <span>${entry.value.title}</span>
-                    </button>
-                </g:each>
-            </div>
-        </div>
-
         <div id="geo-coordinate-panel" class="geo-coordinate-panel" aria-label="Coordinates">
-            <div>
-                <span>Lat/Lon</span>
-                <output id="geo-latlon-output">Move over map</output>
-            </div>
-            <div>
-                <span>DMS</span>
-                <output id="geo-dms-output">Move over map</output>
-            </div>
-            <div>
-                <span>MGRS</span>
-                <output id="geo-mgrs-output">Move over map</output>
-            </div>
-            <div class="geo-coordinate-copy">
-                <label for="geo-coordinate-format">Copy</label>
-                <select id="geo-coordinate-format">
-                    <option value="mgrs">MGRS</option>
-                    <option value="latLon">Lat/Lon</option>
-                    <option value="dms">DMS</option>
-                </select>
-                <button id="geo-coordinate-copy" type="button" class="geo-map-tool-button" disabled="disabled">Copy MGRS</button>
-            </div>
+            <select id="geo-coordinate-format" aria-label="Coordinate format">
+                <option value="mgrs">MGRS</option>
+                <option value="latLon">Lat/Lon</option>
+                <option value="dms">DMS</option>
+            </select>
+            <output id="geo-coordinate-output">Move over map</output>
         </div>
         <div id="geo-map" class="geo-map-canvas"></div>
     </section>
@@ -138,11 +137,8 @@
     var basemapToggle = document.getElementById('geo-basemap-toggle');
     var basemapMenu = document.getElementById('geo-basemap-menu');
     var coordinatePanel = document.getElementById('geo-coordinate-panel');
-    var latLonOutput = document.getElementById('geo-latlon-output');
-    var dmsOutput = document.getElementById('geo-dms-output');
-    var mgrsOutput = document.getElementById('geo-mgrs-output');
+    var coordinateOutput = document.getElementById('geo-coordinate-output');
     var coordinateFormat = document.getElementById('geo-coordinate-format');
-    var coordinateCopy = document.getElementById('geo-coordinate-copy');
     var viewTools = document.getElementById('geo-view-tools');
     var fitLayer = document.getElementById('geo-fit-layer');
     var measureTools = document.getElementById('geo-measure-tools');
@@ -162,8 +158,7 @@
     var renderLayerToLayerKey = {};
     var measureMode = false;
     var measurePoints = [];
-    var lastCoordinate = null;
-    var lastCoordinateFormats = null;
+    var hoverCoordinate = null;
     var draw = null;
 
     function setStatus(message, isError) {
@@ -294,6 +289,10 @@
     }
 
     function updateBasemapCards() {
+        var basemap = selectedBasemap();
+        if (basemapToggle) {
+            basemapToggle.style.setProperty('--basemap-preview', basemap.preview || basemap.background || '#183d66');
+        }
         Array.prototype.forEach.call(document.querySelectorAll('.geo-basemap-card'), function (card) {
             card.classList.toggle('is-active', card.getAttribute('data-basemap-key') === activeBasemapKey);
         });
@@ -560,21 +559,29 @@
         };
     }
 
-    function updateCoordinateCopyLabel() {
-        if (!coordinateCopy || !coordinateFormat) {
-            return;
-        }
-        var label = coordinateFormat.options[coordinateFormat.selectedIndex].text;
-        coordinateCopy.textContent = 'Copy ' + label;
+    function updateCoordinateReadout(lngLat) {
+        hoverCoordinate = lngLat;
+        coordinateOutput.textContent = formatCoordinate(lngLat)[coordinateFormat.value] || '';
     }
 
-    function updateCoordinateReadout(lngLat) {
-        lastCoordinate = lngLat;
-        lastCoordinateFormats = formatCoordinate(lngLat);
-        latLonOutput.textContent = lastCoordinateFormats.latLon;
-        dmsOutput.textContent = lastCoordinateFormats.dms;
-        mgrsOutput.textContent = lastCoordinateFormats.mgrs;
-        coordinateCopy.disabled = false;
+    function flashCoordinateCopied() {
+        coordinatePanel.classList.add('is-copied');
+        window.setTimeout(function () {
+            coordinatePanel.classList.remove('is-copied');
+        }, 850);
+    }
+
+    function copyCoordinateAt(lngLat) {
+        var value = formatCoordinate(lngLat)[coordinateFormat.value] || '';
+        if (!value) {
+            return;
+        }
+        coordinateOutput.textContent = value;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(value).then(flashCoordinateCopied).catch(function () {
+                setStatus('Clipboard is not available for this browser session.', true);
+            });
+        }
     }
 
     function decorateGeoJson(key, geojson) {
@@ -1122,8 +1129,6 @@
     layerDrawer.hidden = !config.tools.layerList;
     layerToggle.hidden = !config.tools.layerList;
     basemapPicker.hidden = !config.tools.basemapSelector;
-    dmsOutput.parentElement.hidden = !config.tools.dms;
-    mgrsOutput.parentElement.hidden = !config.tools.mgrs;
     Array.prototype.forEach.call(coordinateFormat.options, function (option) {
         if (option.value === 'dms') {
             option.hidden = !config.tools.dms;
@@ -1148,9 +1153,8 @@
 
     appendLayerRows(internalLayerList, config.layers || {}, 'internal');
     appendLayerRows(externalLayerList, config.externalLayers || {}, 'external');
-    setLayerDrawerOpen(!!config.tools.layerList);
+    setLayerDrawerOpen(false);
     updateBasemapCards();
-    updateCoordinateCopyLabel();
 
     map.on('load', function () {
         window.setTimeout(function () {
@@ -1177,7 +1181,7 @@
                     },
                     styles: drawStyles()
                 });
-                map.addControl(draw, 'top-left');
+                map.addControl(draw, 'bottom-left');
                 map.on('draw.create', updateDrawSummary);
                 map.on('draw.update', updateDrawSummary);
                 map.on('draw.delete', updateDrawSummary);
@@ -1213,6 +1217,9 @@
             measurePoints.push([event.lngLat.lng, event.lngLat.lat]);
             updateMeasureGraphics();
             return;
+        }
+        if (config.tools.coordinates) {
+            copyCoordinateAt(event.lngLat);
         }
         var layerIds = allInternalRenderLayerIds().concat(Object.keys(externalLayerState).map(function (key) {
             return externalLayerIdFor(key);
@@ -1290,16 +1297,9 @@
         fitLayer.addEventListener('click', fitAllLoadedFeatures);
     }
     if (coordinateFormat) {
-        coordinateFormat.addEventListener('change', updateCoordinateCopyLabel);
-    }
-    if (coordinateCopy) {
-        coordinateCopy.addEventListener('click', function () {
-            if (!lastCoordinateFormats) {
-                return;
-            }
-            var value = lastCoordinateFormats[coordinateFormat.value] || '';
-            if (value) {
-                navigator.clipboard.writeText(value);
+        coordinateFormat.addEventListener('change', function () {
+            if (hoverCoordinate) {
+                updateCoordinateReadout(hoverCoordinate);
             }
         });
     }

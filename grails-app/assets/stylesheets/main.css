@@ -644,8 +644,7 @@ img.grails-logo {
     min-width: 0;
 }
 
-.geo-map-form label,
-.geo-coordinate-copy label {
+.geo-map-form label {
     color: #d5e7ff;
     font-size: 0.72rem;
     font-weight: 700;
@@ -655,8 +654,7 @@ img.grails-logo {
 }
 
 .geo-map-form select,
-.geo-map-form input,
-.geo-coordinate-copy select {
+.geo-map-form input {
     background: #12365d;
     border: 1px solid rgba(147, 197, 253, 0.5);
     border-radius: 4px;
@@ -667,8 +665,7 @@ img.grails-logo {
 }
 
 .geo-map-form select:focus,
-.geo-map-form input:focus,
-.geo-coordinate-copy select:focus {
+.geo-map-form input:focus {
     border-color: var(--geo-map-accent);
     box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
     outline: none;
@@ -702,9 +699,7 @@ img.grails-logo {
 .geo-map-status,
 .geo-map-tools,
 .geo-coordinate-panel,
-.geo-layer-drawer,
-.geo-map-drawer-toggle,
-.geo-basemap-picker {
+.geo-layer-drawer {
     backdrop-filter: blur(12px);
     background: var(--geo-map-panel);
     border: 1px solid var(--geo-map-border);
@@ -726,33 +721,92 @@ img.grails-logo {
     color: #fecdd3;
 }
 
-.geo-map-drawer-toggle {
-    cursor: pointer;
-    font-weight: 800;
-    left: 12px;
-    min-height: 34px;
-    padding: 0.35rem 0.7rem;
-    top: 72px;
+.geo-map-thumb-controls {
+    display: grid;
+    gap: 0.45rem;
+    position: absolute;
+    right: 12px;
+    bottom: 54px;
+    z-index: 7;
 }
 
-.geo-map-drawer-toggle:hover,
-.geo-map-drawer-toggle:focus,
-.geo-map-drawer-toggle.is-active {
-    background: #38bdf8;
+.geo-map-thumb-button {
+    backdrop-filter: blur(12px);
+    background: rgba(11, 39, 73, 0.82);
+    border: 1px solid var(--geo-map-border);
+    border-radius: 6px;
+    color: var(--geo-map-text);
+    cursor: pointer;
+    height: 58px;
+    padding: 0.25rem;
+    width: 58px;
+}
+
+.geo-map-thumb-button:hover,
+.geo-map-thumb-button:focus,
+.geo-map-thumb-button.is-active {
+    background: rgba(56, 189, 248, 0.86);
     border-color: #7dd3fc;
     color: #031525;
     outline: none;
 }
 
+.geo-layer-thumb,
+.geo-basemap-toggle-preview,
+.geo-basemap-preview {
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    border-radius: 4px;
+    display: block;
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+}
+
+.geo-layer-thumb {
+    background: linear-gradient(135deg, rgba(30, 64, 175, 0.82), rgba(20, 184, 166, 0.75));
+    display: grid;
+    gap: 0.22rem;
+    padding: 0.32rem;
+}
+
+.geo-layer-thumb span {
+    background: rgba(239, 246, 255, 0.9);
+    border-radius: 999px;
+    display: block;
+    height: 6px;
+}
+
+.geo-layer-thumb span:nth-child(2) {
+    margin-left: 0.45rem;
+    opacity: 0.8;
+}
+
+.geo-layer-thumb span:nth-child(3) {
+    margin-left: 0.2rem;
+    opacity: 0.72;
+}
+
+.geo-basemap-toggle-preview {
+    background: var(--basemap-preview, linear-gradient(135deg, #183d66 0%, #215782 52%, #69a7cb 100%));
+}
+
+.geo-basemap-preview {
+    background: var(--basemap-preview);
+}
+
+.geo-map-drawer-toggle {
+    cursor: pointer;
+}
+
 .geo-layer-drawer {
     display: grid;
     gap: 0.65rem;
-    left: 12px;
-    max-height: calc(100% - 174px);
+    bottom: 54px;
+    right: 84px;
+    max-height: min(520px, calc(100% - 108px));
     overflow: auto;
     padding: 0.65rem;
-    top: 114px;
-    width: min(340px, calc(100% - 24px));
+    width: min(340px, calc(100% - 112px));
 }
 
 .geo-layer-drawer-header {
@@ -914,18 +968,22 @@ img.grails-logo {
 }
 
 .geo-basemap-picker {
-    bottom: 50px;
-    display: grid;
-    gap: 0.5rem;
-    padding: 0.55rem;
-    right: 12px;
+    position: relative;
 }
 
 .geo-basemap-menu {
+    backdrop-filter: blur(12px);
+    background: rgba(11, 39, 73, 0.94);
+    border: 1px solid var(--geo-map-border);
+    border-radius: 6px;
     display: grid;
     gap: 0.45rem;
-    grid-template-columns: repeat(2, minmax(96px, 1fr));
-    width: min(260px, calc(100vw - 48px));
+    grid-template-columns: repeat(2, 66px);
+    padding: 0.45rem;
+    position: absolute;
+    right: 68px;
+    bottom: 0;
+    width: auto;
 }
 
 .geo-basemap-card {
@@ -934,10 +992,9 @@ img.grails-logo {
     border-radius: 5px;
     color: #eef6ff;
     cursor: pointer;
-    display: grid;
-    gap: 0.35rem;
-    padding: 0.35rem;
-    text-align: left;
+    height: 58px;
+    padding: 0.2rem;
+    width: 66px;
 }
 
 .geo-basemap-card:hover,
@@ -947,45 +1004,46 @@ img.grails-logo {
     outline: none;
 }
 
-.geo-basemap-preview {
-    background: var(--basemap-preview);
-    border: 1px solid rgba(255, 255, 255, 0.55);
-    border-radius: 3px;
-    display: block;
-    height: 54px;
-}
-
 .geo-coordinate-panel {
-    bottom: 18px;
-    display: grid;
-    gap: 0.55rem;
-    grid-template-columns: minmax(150px, 1fr) minmax(170px, 1.1fr) minmax(170px, 1fr) minmax(170px, auto);
-    left: 12px;
-    max-width: min(980px, calc(100% - 320px));
-    padding: 0.65rem;
+    align-items: center;
+    background: rgba(11, 39, 73, 0.62);
+    bottom: 12px;
+    display: flex;
+    gap: 0.35rem;
+    left: 50%;
+    max-width: min(520px, calc(100% - 190px));
+    padding: 0.3rem;
+    transform: translateX(-50%);
 }
 
-.geo-coordinate-panel div {
-    display: grid;
-    gap: 0.15rem;
-    min-width: 0;
+.geo-coordinate-panel.is-copied {
+    background: rgba(56, 189, 248, 0.74);
+    color: #031525;
+}
+
+.geo-coordinate-panel select {
+    background: rgba(15, 53, 96, 0.86);
+    border: 1px solid rgba(147, 197, 253, 0.42);
+    border-radius: 4px;
+    color: #eef6ff;
+    font-size: 0.76rem;
+    min-height: 28px;
+    padding: 0.2rem 0.35rem;
+    width: 76px;
 }
 
 .geo-coordinate-panel output {
-    overflow-wrap: anywhere;
-}
-
-.geo-coordinate-copy {
-    align-items: end;
-    grid-template-columns: minmax(84px, 1fr) auto;
-}
-
-.geo-coordinate-copy label {
-    grid-column: 1 / -1;
-}
-
-.geo-coordinate-copy button {
+    color: #e6f0ff;
+    font-size: 0.78rem;
+    line-height: 1.15;
+    max-width: min(390px, calc(100vw - 300px));
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.geo-coordinate-panel.is-copied output {
+    color: #031525;
 }
 
 .geo-map-popup {
@@ -1044,8 +1102,7 @@ img.grails-logo {
     }
 
     .geo-coordinate-panel {
-        grid-template-columns: 1fr 1fr;
-        max-width: min(620px, calc(100% - 24px));
+        max-width: min(460px, calc(100% - 180px));
     }
 }
 
@@ -1066,16 +1123,17 @@ img.grails-logo {
         top: 8px;
     }
 
-    .geo-map-drawer-toggle {
-        left: 8px;
-        top: 66px;
+    .geo-map-thumb-controls {
+        bottom: 48px;
+        right: 8px;
     }
 
     .geo-layer-drawer {
         left: 8px;
-        max-height: 44%;
-        top: 106px;
-        width: calc(100% - 16px);
+        bottom: 116px;
+        max-height: 42%;
+        right: 8px;
+        width: auto;
     }
 
     .geo-map-tools {
@@ -1085,18 +1143,20 @@ img.grails-logo {
         top: 154px;
     }
 
-    .geo-basemap-picker {
-        bottom: 42px;
-        right: 8px;
+    .geo-basemap-menu {
+        bottom: 0;
+        right: 66px;
     }
 
     .geo-coordinate-panel {
         bottom: 8px;
-        grid-template-columns: 1fr;
         left: 8px;
-        max-height: 34%;
-        max-width: calc(100% - 16px);
-        overflow: auto;
-        right: 8px;
+        max-width: calc(100% - 98px);
+        right: auto;
+        transform: none;
+    }
+
+    .geo-coordinate-panel output {
+        max-width: calc(100vw - 198px);
     }
 }
