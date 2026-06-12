@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <title>
-        <g:layoutTitle default="GeoAxis"/>
+        <g:layoutTitle default="Geospatial Status Board"/>
     </title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <asset:link rel="icon" href="favicon.ico" type="image/x-ico"/>
@@ -18,7 +18,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark navbar-static-top" role="navigation">
     <div class="container-fluid">
-        <g:link class="navbar-brand geoaxis-brand" uri="/">GeoAxis</g:link>
+        <g:link class="navbar-brand geospatial-status-board-brand" uri="/">Geospatial Status Board</g:link>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -28,10 +28,10 @@
                 <g:pageProperty name="page.nav"/>
                 <sec:ifLoggedIn>
                     <li class="nav-item">
-                        <span class="navbar-text geoaxis-user"><sec:username/></span>
+                        <span class="navbar-text geospatial-status-board-user"><sec:username/></span>
                     </li>
                     <li class="nav-item">
-                        <g:form controller="logout" action="index" method="POST" class="geoaxis-logout-form">
+                        <g:form controller="logout" action="index" method="POST" class="geospatial-status-board-logout-form">
                             <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
                         </g:form>
                     </li>
@@ -48,9 +48,9 @@
 
 <g:layoutBody/>
 
-<footer class="geoaxis-footer" role="contentinfo">
+<footer class="geospatial-status-board-footer" role="contentinfo">
     <div class="container-fluid">
-        <span>GeoAxis</span>
+        <span>Geospatial Status Board</span>
     </div>
 </footer>
 

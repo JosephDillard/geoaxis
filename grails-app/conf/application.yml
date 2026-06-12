@@ -2,7 +2,7 @@
 grails:
     profile: web
     codegen:
-        defaultPackage: geoaxis
+        defaultPackage: geospatial.statusboard
     gorm:
         reactor:
             # Whether to translate GORM events into Reactor events
@@ -11,10 +11,10 @@ grails:
     plugin:
         springsecurity:
             userLookup:
-                userDomainClassName: geoaxis.User
-                authorityJoinClassName: geoaxis.UserRole
+                userDomainClassName: geospatial.statusboard.User
+                authorityJoinClassName: geospatial.statusboard.UserRole
             authority:
-                className: geoaxis.Role
+                className: geospatial.statusboard.Role
             securityConfigType: Annotation
             rejectIfNoRule: true
             fii:

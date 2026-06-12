@@ -1,4 +1,4 @@
-package geoaxis
+package geospatial.statusboard
 
 import grails.compiler.GrailsCompileStatic
 import groovy.transform.EqualsAndHashCode

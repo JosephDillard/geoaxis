@@ -1,4 +1,4 @@
-package geoaxis
+package geospatial.statusboard
 
 import grails.boot.GrailsApp
 import grails.boot.config.GrailsAutoConfiguration

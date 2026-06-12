@@ -19,31 +19,31 @@
     border-color: #24313f;
 }
 
-.geoaxis-brand {
+.geospatial-status-board-brand {
     font-weight: 700;
     letter-spacing: 0;
 }
 
-.geoaxis-user {
+.geospatial-status-board-user {
     color: #dce6ed;
     margin-right: 1rem;
 }
 
-.geoaxis-logout-form {
+.geospatial-status-board-logout-form {
     margin: 0.25rem 0 0 0.75rem;
 }
 
-.geoaxis-page,
+.geospatial-status-board-page,
 .auth-page {
     min-height: calc(100vh - 122px);
     background: #eef3f4;
 }
 
-.geoaxis-page {
+.geospatial-status-board-page {
     padding: 2rem;
 }
 
-.geoaxis-hero {
+.geospatial-status-board-hero {
     align-items: flex-end;
     background: #ffffff;
     border-bottom: 4px solid #1f7a8c;
@@ -54,7 +54,7 @@
     padding: 2rem;
 }
 
-.geoaxis-kicker {
+.geospatial-status-board-kicker {
     color: #1f7a8c;
     font-size: 0.8rem;
     font-weight: 700;
@@ -63,7 +63,7 @@
     text-transform: uppercase;
 }
 
-.geoaxis-hero h1,
+.geospatial-status-board-hero h1,
 .auth-panel h1 {
     color: #17212b;
     font-size: 2rem;
@@ -71,14 +71,14 @@
     margin: 0 0 0.5rem 0;
 }
 
-.geoaxis-subtitle {
+.geospatial-status-board-subtitle {
     color: #56616b;
     font-size: 1rem;
     margin: 0;
     max-width: 620px;
 }
 
-.geoaxis-session {
+.geospatial-status-board-session {
     background: #f6f8f8;
     border: 1px solid #d7e0e3;
     border-radius: 6px;
@@ -87,43 +87,43 @@
     padding: 1rem;
 }
 
-.geoaxis-session span,
-.geoaxis-session strong {
+.geospatial-status-board-session span,
+.geospatial-status-board-session strong {
     display: block;
 }
 
-.geoaxis-session strong {
+.geospatial-status-board-session strong {
     color: #17212b;
     font-size: 0.9rem;
     margin-top: 0.25rem;
 }
 
-.geoaxis-section {
+.geospatial-status-board-section {
     margin: 0 auto;
     max-width: 1120px;
 }
 
-.geoaxis-section-title {
+.geospatial-status-board-section-title {
     align-items: center;
     display: flex;
     justify-content: space-between;
     margin-bottom: 1rem;
 }
 
-.geoaxis-section-title h2 {
+.geospatial-status-board-section-title h2 {
     color: #17212b;
     font-size: 1.1rem;
     font-weight: 700;
     margin: 0;
 }
 
-.geoaxis-module-grid {
+.geospatial-status-board-module-grid {
     display: grid;
     gap: 1rem;
     grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
 }
 
-.geoaxis-module {
+.geospatial-status-board-module {
     background: #ffffff;
     border: 1px solid #d7e0e3;
     border-radius: 6px;
@@ -134,29 +134,29 @@
     text-decoration: none;
 }
 
-.geoaxis-module:hover,
-.geoaxis-module:focus {
+.geospatial-status-board-module:hover,
+.geospatial-status-board-module:focus {
     border-color: #1f7a8c;
     color: #17212b;
     text-decoration: none;
 }
 
-.geoaxis-module span,
-.geoaxis-module small {
+.geospatial-status-board-module span,
+.geospatial-status-board-module small {
     display: block;
 }
 
-.geoaxis-module span {
+.geospatial-status-board-module span {
     font-weight: 700;
     margin-bottom: 0.5rem;
 }
 
-.geoaxis-module small {
+.geospatial-status-board-module small {
     color: #6d7881;
     overflow-wrap: anywhere;
 }
 
-.geoaxis-empty-state {
+.geospatial-status-board-empty-state {
     background: #ffffff;
     border: 1px solid #d7e0e3;
     border-radius: 6px;
@@ -165,14 +165,14 @@
     padding: 2rem;
 }
 
-.geoaxis-empty-state h1,
-.geoaxis-empty-state h3 {
+.geospatial-status-board-empty-state h1,
+.geospatial-status-board-empty-state h3 {
     color: #17212b;
     font-weight: 700;
     margin-top: 0;
 }
 
-.geoaxis-empty-state p {
+.geospatial-status-board-empty-state p {
     color: #56616b;
     margin-bottom: 0;
 }
@@ -212,24 +212,24 @@
     margin-bottom: 1rem;
 }
 
-.geoaxis-footer {
+.geospatial-status-board-footer {
     background: #17212b;
     color: #dce6ed;
     padding: 1rem 2rem;
 }
 
 @media (max-width: 720px) {
-    .geoaxis-page {
+    .geospatial-status-board-page {
         padding: 1rem;
     }
 
-    .geoaxis-hero {
+    .geospatial-status-board-hero {
         align-items: flex-start;
         display: block;
         padding: 1.25rem;
     }
 
-    .geoaxis-session {
+    .geospatial-status-board-session {
         margin-top: 1rem;
         min-width: 0;
     }

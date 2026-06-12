@@ -1,4 +1,4 @@
-package geoaxis
+package geospatial.statusboard
 
 import grails.web.mapping.LinkGenerator
 import org.springframework.web.util.HtmlUtils

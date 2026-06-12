@@ -1,4 +1,4 @@
-package geoaxis
+package geospatial.statusboard
 
 import grails.events.annotation.gorm.Listener
 import grails.plugin.springsecurity.SpringSecurityService

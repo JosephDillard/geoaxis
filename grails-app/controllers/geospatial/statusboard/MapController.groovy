@@ -1,4 +1,4 @@
-package geoaxis
+package geospatial.statusboard
 
 import grails.core.GrailsApplication
 import grails.plugin.springsecurity.annotation.Secured

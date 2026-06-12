@@ -1,4 +1,4 @@
-package geoaxis
+package geospatial.statusboard
 
 class UrlMappings {
 
