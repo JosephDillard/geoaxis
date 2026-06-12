@@ -1019,7 +1019,8 @@ img.grails-logo {
 
 .geo-zoom-control,
 .geo-measure-control,
-.geo-view-control {
+.geo-view-control,
+.geo-north-control {
     position: relative;
     width: 42px;
 }
@@ -1092,6 +1093,27 @@ img.grails-logo {
 .geo-map-square-button:disabled {
     cursor: default;
     opacity: 0.5;
+}
+
+.geo-north-arrow-button {
+    flex-direction: column;
+    gap: 1px;
+}
+
+.geo-north-label {
+    font-size: 0.68rem;
+    line-height: 1;
+}
+
+.geo-north-arrow-indicator {
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 18px solid currentColor;
+    display: block;
+    height: 0;
+    transform-origin: 50% 60%;
+    transition: transform 120ms ease;
+    width: 0;
 }
 
 .geo-fit-layer-button span {

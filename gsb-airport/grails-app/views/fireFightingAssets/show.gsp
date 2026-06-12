@@ -41,7 +41,7 @@
         </g:if>
         <g:if test="${fireFightingAssets?.serviceOwner}">
             <li class="fieldcontain">
-                <span id="serviceOwner-label" class="property-label"><g:message code="fireFightingAssets.serviceOwner.label" default="Owner"/></span>
+                <span id="serviceOwner-label" class="property-label"><g:message code="fireFightingAssets.serviceOwner.label" default="Agency"/></span>
 
                 <span class="property-value" aria-labelledby="serviceOwner-label"><g:fieldValue bean="${fireFightingAssets}" field="serviceOwner"/></span>
 
@@ -160,7 +160,7 @@
             <li class="fieldcontain">
                 <span id="dateCreated-label" class="property-label"><g:message code="fireFightingAssets.dateCreated.label" default="Date Created"/></span>
 
-                <span class="property-value" aria-labelledby="dateCreated-label"><g:formatDate timeZone="Asia/Seoul"  date="${fireFightingAssets?.dateCreated}"/></span>
+                <span class="property-value" aria-labelledby="dateCreated-label"><g:formatDate timeZone="America/Denver"  date="${fireFightingAssets?.dateCreated}"/></span>
 
             </li>
         </g:if>
@@ -169,7 +169,7 @@
             <li class="fieldcontain">
                 <span id="lastUpdated-label" class="property-label"><g:message code="fireFightingAssets.lastUpdated.label" default="Last Updated"/></span>
 
-                <span class="property-value" aria-labelledby="lastUpdated-label"><g:formatDate timeZone="Asia/Seoul"  date="${fireFightingAssets?.lastUpdated}"/></span>
+                <span class="property-value" aria-labelledby="lastUpdated-label"><g:formatDate timeZone="America/Denver"  date="${fireFightingAssets?.lastUpdated}"/></span>
 
             </li>
         </g:if>

@@ -47,7 +47,7 @@
         <g:if test="${engineerAssets?.serviceOwner}">
             <li class="fieldcontain">
                 <span id="serviceOwner-label" class="property-label"><g:message code="engineerAssets.serviceOwner.label"
-                                                                                default="Owner"/></span>
+                                                                                default="Agency"/></span>
 
                 <span class="property-value" aria-labelledby="serviceOwner-label"><g:fieldValue
                         bean="${engineerAssets}" field="serviceOwner"/></span>
@@ -192,7 +192,7 @@
                 <span id="dateCreated-label" class="property-label"><g:message code="engineerAssets.dateCreated.label"
                                                                                default="Date Created"/></span>
 
-                <span class="property-value" aria-labelledby="dateCreated-label"><g:formatDate timeZone="Asia/Seoul"
+                <span class="property-value" aria-labelledby="dateCreated-label"><g:formatDate timeZone="America/Denver"
                         date="${engineerAssets?.dateCreated}"/></span>
 
             </li>
@@ -203,7 +203,7 @@
                 <span id="lastUpdated-label" class="property-label"><g:message code="engineerAssets.lastUpdated.label"
                                                                                default="Last Updated"/></span>
 
-                <span class="property-value" aria-labelledby="lastUpdated-label"><g:formatDate timeZone="Asia/Seoul"
+                <span class="property-value" aria-labelledby="lastUpdated-label"><g:formatDate timeZone="America/Denver"
                         date="${engineerAssets?.lastUpdated}"/></span>
 
             </li>

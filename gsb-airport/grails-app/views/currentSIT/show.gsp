@@ -73,7 +73,7 @@
             <li class="fieldcontain">
                 <span id="lastUpdated-label" class="property-label"><g:message code="currentSIT.lastUpdated.label" default="Last Updated"/></span>
 
-                <span class="property-value" aria-labelledby="lastUpdated-label"><g:formatDate timeZone="Asia/Seoul"  date="${currentSIT?.lastUpdated}"/></span>
+                <span class="property-value" aria-labelledby="lastUpdated-label"><g:formatDate timeZone="America/Denver"  date="${currentSIT?.lastUpdated}"/></span>
 
             </li>
         </g:if>

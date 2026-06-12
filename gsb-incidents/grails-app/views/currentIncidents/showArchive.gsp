@@ -34,7 +34,6 @@
 
         <g:sortableColumn property="eventDesc" title="${message(code: 'incident.eventDesc.label', default: 'Description')}"/>
 
-        <g:sortableColumn property="eventDescHan" title="${message(code: 'incident.eventDescHan.label', default: '서술')}"/>
 
         <g:sortableColumn property="mgrsCoord" title="${message(code: 'incident.mgrsCoord.label', default: 'MGRS')}"/>
 
@@ -67,13 +66,12 @@
 
             <td>${fieldValue(bean: archiveIncidents, field: "eventCat")}</td>
 
-            <td><g:formatDate timeZone="Asia/Seoul"  date="${archiveIncidents.eventDate}"/></td>
+            <td><g:formatDate timeZone="America/Denver"  date="${archiveIncidents.eventDate}"/></td>
 
             <td>${fieldValue(bean: archiveIncidents, field: "eventName")}</td>
 
             <td>${fieldValue(bean: archiveIncidents, field: "eventDesc")}</td>
 
-            <td>${fieldValue(bean: archiveIncidents, field: "eventDescHan")}</td>
 
             <td>${fieldValue(bean: archiveIncidents, field: "mgrsCoord")}</td>
 
@@ -87,9 +85,9 @@
 
             <td>${fieldValue(bean: archiveIncidents, field: "createdBy")}</td>
 
-            <td><g:formatDate timeZone="Asia/Seoul"  date="${archiveIncidents.createdDate}"/></td>
+            <td><g:formatDate timeZone="America/Denver"  date="${archiveIncidents.createdDate}"/></td>
 
-            <td><g:formatDate timeZone="Asia/Seoul"  date="${archiveIncidents.updatedDate}"/></td>
+            <td><g:formatDate timeZone="America/Denver"  date="${archiveIncidents.updatedDate}"/></td>
 
             <td>${fieldValue(bean: archiveIncidents, field: "updatedBy")}</td>
         </tr>
@@ -139,7 +137,7 @@
             %{--<li class="fieldcontain">--}%
                 %{--<span id="eventDate-label" class="property-label"><g:message code="currentIncidents.eventDate.label" default="Event Date" /></span>--}%
 
-                %{--<span class="property-value" aria-labelledby="eventDate-label"><g:formatDate timeZone="Asia/Seoul"  date="${currentIncidents?.eventDate}" /></span>--}%
+                %{--<span class="property-value" aria-labelledby="eventDate-label"><g:formatDate timeZone="America/Denver"  date="${currentIncidents?.eventDate}" /></span>--}%
 
             %{--</li>--}%
         %{--</g:if>--}%
@@ -162,11 +160,8 @@
             %{--</li>--}%
         %{--</g:if>--}%
 
-        %{--<g:if test="${currentIncidents?.eventDescHan}">--}%
             %{--<li class="fieldcontain">--}%
-                %{--<span id="eventDescHan-label" class="property-label"><g:message code="currentIncidents.eventDescHan.label" default="서술" /></span>--}%
 
-                %{--<span class="property-value" aria-labelledby="eventDescHan-label"><g:fieldValue bean="${currentIncidents}" field="eventDescHan"/></span>--}%
 
             %{--</li>--}%
         %{--</g:if>--}%

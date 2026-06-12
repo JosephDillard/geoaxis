@@ -63,7 +63,7 @@
 
                 <td>${fieldValue(bean: navaid, field: "statusNote")}</td>
 
-                <td><g:formatDate timeZone="Asia/Seoul"  date="${navaid.lastUpdated}"/></td>
+                <td><g:formatDate timeZone="America/Denver"  date="${navaid.lastUpdated}"/></td>
 
             </tr>
         </g:each>

@@ -55,7 +55,7 @@
             <li class="fieldcontain">
                 <span id="eventDate-label" class="property-label"><g:message code="FACDAMIncidents.eventDate.label" default="Event Date" /></span>
 
-                <span class="property-value" aria-labelledby="eventDate-label"><g:formatDate timeZone="Asia/Seoul"  date="${FACDAMIncidents?.eventDate}" /></span>
+                <span class="property-value" aria-labelledby="eventDate-label"><g:formatDate timeZone="America/Denver"  date="${FACDAMIncidents?.eventDate}" /></span>
 
             </li>
         </g:if>
@@ -78,14 +78,6 @@
             </li>
         </g:if>
 
-        <g:if test="${FACDAMIncidents?.eventDescHan}">
-            <li class="fieldcontain">
-                <span id="eventDescHan-label" class="property-label"><g:message code="FACDAMIncidents.eventDescHan.label" default="서술" /></span>
-
-                <span class="property-value" aria-labelledby="eventDescHan-label"><g:fieldValue bean="${FACDAMIncidents}" field="eventDescHan"/></span>
-
-            </li>
-        </g:if>
 
         <g:if test="${FACDAMIncidents?.mgrsCoord}">
             <li class="fieldcontain">

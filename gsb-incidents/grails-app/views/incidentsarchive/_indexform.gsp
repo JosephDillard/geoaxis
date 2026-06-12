@@ -13,7 +13,6 @@
 
         <g:sortableColumn property="eventDesc" title="${message(code: 'incidentsarchive.eventDesc.label', default: 'Description')}" />
 
-        <g:sortableColumn property="eventDescHan" title="${message(code: 'incidentsarchive.eventDescHan.label', default: '서술')}" />
 
         <g:sortableColumn property="mgrsCoord" title="${message(code: 'incidentsarchive.mgrsCoord.label', default: 'MGRS')}" />
 
@@ -43,13 +42,12 @@
 
             <td>${fieldValue(bean: incidents, field: "eventType")}</td>
 
-            <td><g:formatDate timeZone="Asia/Seoul"  date="${incidents.eventDate}" /></td>
+            <td><g:formatDate timeZone="America/Denver"  date="${incidents.eventDate}" /></td>
 
             <td>${fieldValue(bean: incidents, field: "eventName")}</td>
 
             <td>${fieldValue(bean: incidents, field: "eventDesc")}</td>
 
-            <td>${fieldValue(bean: incidents, field: "eventDescHan")}</td>
 
             <td>${fieldValue(bean: incidents, field: "mgrsCoord")}</td>
 
@@ -63,11 +61,11 @@
 
             <td>${fieldValue(bean: incidents, field: "createdBy")}</td>
 
-            <td><g:formatDate timeZone="Asia/Seoul"  date="${incidents.createdDate}" /></td>
+            <td><g:formatDate timeZone="America/Denver"  date="${incidents.createdDate}" /></td>
 
             <td>${fieldValue(bean: incidents, field: "updatedBy")}</td>
 
-            <td><g:formatDate timeZone="Asia/Seoul"  date="${incidents.updatedDate}" /></td>
+            <td><g:formatDate timeZone="America/Denver"  date="${incidents.updatedDate}" /></td>
 
         </tr>
     </g:each>

@@ -21,13 +21,13 @@
 
 <div class="fieldcontain ${hasErrors(bean: fireFightingAssets, field: 'serviceOwner', 'error')} ">
     <label for="serviceOwner">
-        <g:message code="fireFightingAssets.serviceOwner.label" default="Owner"/>
+        <g:message code="fireFightingAssets.serviceOwner.label" default="Agency"/>
 
     </label>
     <airportLookup:select name="serviceOwner"
                           category="asset.serviceOwner"
                           value="${fireFightingAssets?.serviceOwner}"
-                          noSelection="['Other': 'Select Owner....']"/>
+                          noSelection="['Other': 'Select Agency....']"/>
 
 </div>
 

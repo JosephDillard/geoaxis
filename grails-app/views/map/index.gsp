@@ -131,6 +131,16 @@
                     <button id="geo-measure-clear" type="button" class="geo-map-tool-button">Clear</button>
                 </div>
             </div>
+            <div id="geo-north-control" class="geo-north-control">
+                <button id="geo-reset-north"
+                        type="button"
+                        class="geo-map-square-button geo-north-arrow-button"
+                        aria-label="Reset north"
+                        title="Reset north">
+                    <span class="geo-north-label" aria-hidden="true">N</span>
+                    <span id="geo-north-arrow-indicator" class="geo-north-arrow-indicator" aria-hidden="true"></span>
+                </button>
+            </div>
         </div>
 
         <div id="geo-draw-tools" class="geo-draw-summary" aria-label="Draw summary" hidden>
@@ -193,6 +203,8 @@
     var measurePanel = document.getElementById('geo-measure-panel');
     var measureClear = document.getElementById('geo-measure-clear');
     var measureOutput = document.getElementById('geo-measure-output');
+    var resetNorth = document.getElementById('geo-reset-north');
+    var northArrowIndicator = document.getElementById('geo-north-arrow-indicator');
     var drawTools = document.getElementById('geo-draw-tools');
     var drawOutput = document.getElementById('geo-draw-output');
     var measureSourceId = 'measure-features';
@@ -332,6 +344,12 @@
             target = closestZoomLevel(currentZoom);
         }
         map.easeTo({ zoom: target });
+    }
+
+    function updateNorthArrow() {
+        if (northArrowIndicator) {
+            northArrowIndicator.style.transform = 'rotate(' + (-map.getBearing()) + 'deg)';
+        }
     }
 
     function layerIdsFor(key) {
@@ -1325,7 +1343,10 @@
     }
     map.addControl(new maplibregl.ScaleControl({ unit: 'imperial' }), 'bottom-left');
     updateZoomLevelControl();
+    updateNorthArrow();
     map.on('zoomend', updateZoomLevelControl);
+    map.on('rotate', updateNorthArrow);
+    map.on('rotateend', updateNorthArrow);
 
     appendLayerRows(internalLayerList, config.layers || {}, 'internal');
     appendLayerRows(externalLayerList, config.externalLayers || {}, 'external');
@@ -1497,6 +1518,11 @@
     }
     if (fitLayer) {
         fitLayer.addEventListener('click', fitAllLoadedFeatures);
+    }
+    if (resetNorth) {
+        resetNorth.addEventListener('click', function () {
+            map.easeTo({ bearing: 0, pitch: 0, duration: 450 });
+        });
     }
     if (coordinateFormat) {
         coordinateFormat.addEventListener('change', function () {

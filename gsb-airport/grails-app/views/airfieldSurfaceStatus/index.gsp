@@ -63,7 +63,7 @@
 
                 <td>${fieldValue(bean: airfieldSurfaceStatus, field: "repairStatus")}</td>
 
-                <td><g:formatDate timeZone="Asia/Seoul"  date="${airfieldSurfaceStatus.lastUpdated}"/></td>
+                <td><g:formatDate timeZone="America/Denver"  date="${airfieldSurfaceStatus.lastUpdated}"/></td>
 
             </tr>
         </g:each>

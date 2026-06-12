@@ -635,7 +635,7 @@
                 <span id="lastUpdated-label" class="property-label"><g:message code="airportStatus.lastUpdated.label"
                                                                                default="Last Updated"/></span>
 
-                <span class="property-value" aria-labelledby="lastUpdated-label"><g:formatDate timeZone="Asia/Seoul"
+                <span class="property-value" aria-labelledby="lastUpdated-label"><g:formatDate timeZone="America/Denver"
                         date="${airportStatus?.lastUpdated}"/></span>
 
             </li>

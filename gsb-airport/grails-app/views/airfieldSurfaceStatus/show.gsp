@@ -97,7 +97,7 @@
             <li class="fieldcontain">
                 <span id="lastUpdated-label" class="property-label"><g:message code="airfieldSurfaceStatus.lastUpdated.label" default="Last Updated"/></span>
 
-                <span class="property-value" aria-labelledby="lastUpdated-label"><g:formatDate timeZone="Asia/Seoul"  date="${airfieldSurfaceStatus?.lastUpdated}"/></span>
+                <span class="property-value" aria-labelledby="lastUpdated-label"><g:formatDate timeZone="America/Denver"  date="${airfieldSurfaceStatus?.lastUpdated}"/></span>
 
             </li>
         </g:if>

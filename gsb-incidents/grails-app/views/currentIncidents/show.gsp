@@ -55,7 +55,7 @@
 			<li class="fieldcontain">
 				<span id="eventDate-label" class="property-label"><g:message code="currentIncidents.eventDate.label" default="Event Date" /></span>
 
-				<span class="property-value" aria-labelledby="eventDate-label"><g:formatDate timeZone="Asia/Seoul"  date="${currentIncidents?.eventDate}" /></span>
+				<span class="property-value" aria-labelledby="eventDate-label"><g:formatDate timeZone="America/Denver"  date="${currentIncidents?.eventDate}" /></span>
 
 			</li>
 		</g:if>
@@ -78,14 +78,6 @@
 			</li>
 		</g:if>
 
-		<g:if test="${currentIncidents?.eventDescHan}">
-			<li class="fieldcontain">
-				<span id="eventDescHan-label" class="property-label"><g:message code="currentIncidents.eventDescHan.label" default="서술" /></span>
-
-				<span class="property-value" aria-labelledby="eventDescHan-label"><g:fieldValue bean="${currentIncidents}" field="eventDescHan"/></span>
-
-			</li>
-		</g:if>
 
 		<g:if test="${currentIncidents?.mgrsCoord}">
 			<li class="fieldcontain">

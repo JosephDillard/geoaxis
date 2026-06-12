@@ -36,15 +36,6 @@
 
 </div>
 
-<div class="fieldcontain ${hasErrors(bean: incidents, field: 'eventDescHan', 'error')} ">
-	<label for="eventDescHan">
-		<g:message code="incidentsarchive.eventDescHan.label" default="Event Desc Han" />
-		
-	</label>
-	<g:textArea name="eventDescHan" value="${incidents?.eventDescHan}"/>
-
-</div>
-
 <div class="fieldcontain ${hasErrors(bean: incidents, field: 'mgrsCoord', 'error')} ">
 	<label for="mgrsCoord">
 		<g:message code="incidentsarchive.mgrsCoord.label" default="Mgrs Coordinates" />

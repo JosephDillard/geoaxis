@@ -31,40 +31,11 @@
     </g:if>
     <table>
         <thead>
-%{--        <tr>
 
-            <g:sortableColumn property="airfieldName" title="${message(code: 'currentSIT.airfieldName.label', default: 'Airport')}"/>
-
-            <g:sortableColumn property="korean" title="${message(code: 'currentSIT.korean.label', default: ' ')}"/>
-
-            <g:sortableColumn property="ceoverall" title="${message(code: 'currentSIT.ceoverall.label', default: '전체</br>CE Overall')}"/>
-
-            <g:sortableColumn property="runway" title="${message(code: 'currentSIT.runway.label', default: '주활주로</br> RW Pri')}"/>
-
-            <g:sortableColumn property="runwaytwo" title="${message(code: 'currentSIT.runwaytwo.label', default: '보조활주로</br> RW Sec')}"/>
-
-            <g:sortableColumn property="airfield" title="${message(code: 'currentSIT.airfield.label', default: ' 비행장</br>Airfield')}"/>
-
-            <g:sortableColumn property="facilities" title="${message(code: 'currentSIT.facilities.label', default: '시설</br>Facilities')}"/>
-
-            <g:sortableColumn property="utilities" title="${message(code: 'currentSIT.utilities.label', default: '기반시설</br>Utilities')}"/>
-
-            <g:sortableColumn property="emerresp" title="${message(code: 'currentSIT.emerresp.label', default: '긴급대응</br>Emergency Response')}"/>
-
-            <g:sortableColumn property="overpersonnel" title="${message(code: 'currentSIT.overpersonnel.label', default: '인원</br>Personnel')}"/>
-
-            <g:sortableColumn property="overassets" title="${message(code: 'currentSIT.overassets.label', default: '자원</br>Assets')}"/>
-
-            <g:sortableColumn property="lastUpdated" title="${message(code: 'currentSIT.lastUpdated.label', default: 'Updated (KST)')}"/>
-
-            <g:sortableColumn property="mapit" title="${message(code: 'currentSIT.mapit.label', default: 'Map')}"/>
-
-        </tr>--}%
         <tr>
 
             <g:sortableColumn property="airfieldName" title="${message(code: 'currentSIT.airfieldName.label', default: 'Airport')}"/>
 
-            <g:sortableColumn property="korean" title="${message(code: 'currentSIT.korean.label', default: ' ')}"/>
 
             <g:sortableColumn property="ceoverall" title="${message(code: 'currentSIT.ceoverall.label', default: 'CE Overall')}"/>
 
@@ -96,7 +67,6 @@
 
                 <td><g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">${fieldValue(bean: currentSIT, field: "airfieldName")}</g:link></td>
 
-                <td>${fieldValue(bean: currentSIT, field: "korean")}</td>
 
                 <td>
                     <g:if test="${currentSIT.ceoverall == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
@@ -352,7 +322,7 @@
                 </td>
 
 
-                <td><g:formatDate timeZone="Asia/Seoul"  format="dd MMM HH:mm" date="${currentSIT.lastUpdated}"/></td>
+                <td><g:formatDate timeZone="America/Denver"  format="dd MMM HH:mm" date="${currentSIT.lastUpdated}"/></td>
 
                 <td><g:link controller="map"
                             action="index"
@@ -375,24 +345,7 @@
 
     <table>
 
-%{--        <tr>
-            <td>Status Legend 상황 범례</td>
-            <td>
-                <g:img dir="images" file="green_legend.png" width="200px" height="40px"/>
-            </td>
-            <td>
-                <g:img dir="images" file="yellow_legend.png" width="200px" height="40px"/>
-            </td>
-            <td>
-                <g:img dir="images" file="red_legend.png" width="200px" height="40px"/>
-            </td>
-            <td>
-                <g:img dir="images" file="black_legend.png" width="200px" height="40px"/>
-            </td>
-            <td>
 
-            </td>
-        </tr>--}%
         <tr>
             <td>Status Legend</td>
             <td>

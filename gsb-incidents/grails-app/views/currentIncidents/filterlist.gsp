@@ -42,7 +42,6 @@
 
             <th>Description</th>
 
-            <th>서술</th>
 
             <th>MGRS</th>
 
@@ -76,13 +75,12 @@
 
                 <td>${fieldValue(bean: currentIncidents, field: "eventCat")}</td>
 
-                <td><g:formatDate timeZone="Asia/Seoul"  date="${currentIncidents.eventDate}"/></td>
+                <td><g:formatDate timeZone="America/Denver"  date="${currentIncidents.eventDate}"/></td>
 
                 <td>${fieldValue(bean: currentIncidents, field: "eventName")}</td>
 
                 <td>${fieldValue(bean: currentIncidents, field: "eventDesc")}</td>
 
-                <td>${fieldValue(bean: currentIncidents, field: "eventDescHan")}</td>
 
                 <td><g:link controller="map" action="index" params="[layer: 'currentIncidents', field: 'mgrs_coord', value: currentIncidents.mgrsCoord]">
                     ${fieldValue(bean: currentIncidents, field: "mgrsCoord")}</g:link> </td>
@@ -97,11 +95,11 @@
 
                 <td>${fieldValue(bean: currentIncidents, field: "createdBy")}</td>
 
-                <td><g:formatDate timeZone="Asia/Seoul"  date="${currentIncidents.createdDate}"/></td>
+                <td><g:formatDate timeZone="America/Denver"  date="${currentIncidents.createdDate}"/></td>
 
                 <td>${fieldValue(bean: currentIncidents, field: "updatedBy")}</td>
 
-                <td><g:formatDate timeZone="Asia/Seoul"  date="${currentIncidents.updatedDate}"/></td>
+                <td><g:formatDate timeZone="America/Denver"  date="${currentIncidents.updatedDate}"/></td>
 
                 <g:if test="${currentIncidents.updatedDate && currentIncidents.updatedBy}">
                     <td><g:link action="showArchive" id="${currentIncidents.id}">

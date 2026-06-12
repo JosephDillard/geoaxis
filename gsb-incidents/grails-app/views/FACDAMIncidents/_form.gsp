@@ -23,11 +23,6 @@
     <g:textArea name="eventDesc" value="${facdamIncidents?.eventDesc}"/>
 </div>
 
-<div class="fieldcontain ${hasErrors(bean: facdamIncidents, field: 'eventDescHan', 'error')}">
-    <label for="eventDescHan"><g:message code="FACDAMIncidents.eventDescHan.label" default="Event Desc Han"/></label>
-    <g:textArea name="eventDescHan" value="${facdamIncidents?.eventDescHan}"/>
-</div>
-
 <div class="fieldcontain ${hasErrors(bean: facdamIncidents, field: 'mgrsCoord', 'error')}">
     <label for="mgrsCoord"><g:message code="FACDAMIncidents.mgrsCoord.label" default="Mgrs Coord"/></label>
     <g:textField name="mgrsCoord" value="${facdamIncidents?.mgrsCoord}"/>

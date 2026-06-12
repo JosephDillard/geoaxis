@@ -482,7 +482,7 @@
                     </g:if>
                 </td>
 
-                <td class="tddate"><g:formatDate timeZone="Asia/Seoul"  format="dd MMM HH:mm" date="${airportStatus.lastUpdated}"/></td>
+                <td class="tddate"><g:formatDate timeZone="America/Denver"  format="dd MMM HH:mm" date="${airportStatus.lastUpdated}"/></td>
 
                 <td><g:link controller="map"
                             action="index"
