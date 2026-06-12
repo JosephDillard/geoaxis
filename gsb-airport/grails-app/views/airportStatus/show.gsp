@@ -645,11 +645,15 @@
             <span id="mapit-label" class="property-label"><g:message code="airportStatus.mapit.label"
                                                                      default="Map Link"/></span>
 
-            <span class="property-value" aria-labelledby="mapit-label"><a
-                    href="${fieldValue(bean: airportStatus, field: "mapit")}" target="new"><g:img dir="images"
-                                                                                                          file="map_icon.png"
-                                                                                                          width="28"
-                                                                                                          height="28"/></a>
+            <span class="property-value" aria-labelledby="mapit-label"><g:link controller="map"
+                                                                               action="index"
+                                                                               params="[layer: 'airportStatus', field: 'site_name', value: airportStatus.airfieldName]"
+                                                                               target="_blank"
+                                                                               rel="noopener"
+                                                                               title="Open map view"><g:img dir="images"
+                                                                                                             file="map_icon.png"
+                                                                                                             width="28"
+                                                                                                             height="28"/></g:link>
             </span>
 
         </li>

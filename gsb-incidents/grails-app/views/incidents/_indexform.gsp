@@ -51,7 +51,8 @@
 
             <td>${fieldValue(bean: incidents, field: "eventDescHan")}</td>
 
-            <td>${fieldValue(bean: incidents, field: "mgrsCoord")}</td>
+            <td><g:link controller="map" action="index" params="[layer: 'currentIncidents', field: 'mgrs_coord', value: incidents.mgrsCoord]">
+                ${fieldValue(bean: incidents, field: "mgrsCoord")}</g:link></td>
 
             <td>${fieldValue(bean: incidents, field: "base")}</td>
 

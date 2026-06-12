@@ -87,6 +87,85 @@ server:
     port: 8080
     servlet:
         context-path: /GeoStatusBoard
+geo:
+    geoserver:
+        wfsUrl: http://localhost:8081/geoserver/gsb/ows
+        workspace: gsb
+        defaultSrs: 'EPSG:4326'
+    viewer:
+        provider: maplibre
+        mapLibreJsUrl: https://unpkg.com/maplibre-gl/dist/maplibre-gl.js
+        mapLibreCssUrl: https://unpkg.com/maplibre-gl/dist/maplibre-gl.css
+        osmTilesUrl: https://tile.openstreetmap.org/{z}/{x}/{y}.png
+        center:
+            - -106.0
+            - 34.5
+        zoom: 6
+        maxFeatures: 500
+    layers:
+        airportStatus:
+            title: Airport Status
+            typeName: 'gsb:index_airfields'
+            idField: site_name
+            labelField: site_name
+            geometryType: Geometry
+            color: '#2563eb'
+        currentSIT:
+            title: Current Airfield Status
+            typeName: 'gsb:index_airfields'
+            idField: site_name
+            labelField: site_name
+            geometryType: Geometry
+            color: '#0f766e'
+        airfieldSurfaceStatus:
+            title: Airfield Surface Status
+            typeName: 'gsb:runwaydamagepolys'
+            idField: objectid
+            labelField: label
+            geometryType: Geometry
+            color: '#d97706'
+        navaid:
+            title: NAVAIDs
+            typeName: 'gsb:navigationalaid'
+            idField: installationid
+            labelField: sdsfeaturename
+            geometryType: Geometry
+            color: '#7c3aed'
+        engineerAssets:
+            title: Engineer Assets
+            typeName: 'gsb:engineer_assets'
+            idField: airfield_name
+            labelField: item_name
+            geometryType: Geometry
+            color: '#475569'
+        fireFightingAssets:
+            title: Fire Fighting Assets
+            typeName: 'gsb:fire_fighting_assets'
+            idField: airfield_name
+            labelField: item_name
+            geometryType: Geometry
+            color: '#dc2626'
+        utilityStatus:
+            title: Utility Status
+            typeName: 'gsb:utility_status'
+            idField: airfield_name
+            labelField: airfield_name
+            geometryType: Geometry
+            color: '#16a34a'
+        currentIncidents:
+            title: Current Incidents
+            typeName: 'gsb:afim_event_point_bm0914'
+            idField: mgrs_coord
+            labelField: incident_id
+            geometryType: Geometry
+            color: '#b91c1c'
+        incidentsArchive:
+            title: Incident Archive
+            typeName: 'gsb:afim_event_archive'
+            idField: mgrs_coord
+            labelField: incident_id
+            geometryType: Geometry
+            color: '#9333ea'
 environments:
     development:
         management:

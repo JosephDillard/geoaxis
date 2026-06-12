@@ -354,7 +354,12 @@
 
                 <td><g:formatDate timeZone="Asia/Seoul"  format="dd MMM HH:mm" date="${currentSIT.lastUpdated}"/></td>
 
-                <td><a href="${fieldValue(bean: currentSIT, field: "mapit")}" target="new"><g:img dir="images" file="map_icon.png" width="18" height="18"/></a></td>
+                <td><g:link controller="map"
+                            action="index"
+                            params="[layer: 'currentSIT', field: 'site_name', value: currentSIT.airfieldName]"
+                            target="_blank"
+                            rel="noopener"
+                            title="Open map view"><g:img dir="images" file="map_icon.png" width="18" height="18"/></g:link></td>
 
             </tr>
         </g:each>

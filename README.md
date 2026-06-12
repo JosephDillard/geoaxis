@@ -6,6 +6,7 @@ This repository contains a status app linkable to geospatial data for dashboard 
 
 - Airport and airfield status dashboards.
 - Geospatial links from status records for map-based airport and airfield views.
+- In-app MapLibre map view backed by GeoServer WFS/GeoJSON layers.
 - Editable lookup tables for dropdown text used by airport and incident workflows.
 - Incident and facility damage tracking.
 - Single deployable WAR with the application served from `/GeoStatusBoard`.
@@ -19,6 +20,7 @@ This repository contains a status app linkable to geospatial data for dashboard 
 - Java 18 runtime
 - Spring Security
 - H2 development and test databases
+- PostGIS and GeoServer for open source GIS deployment
 
 ## Project Layout
 
@@ -89,6 +91,33 @@ Useful admin routes include:
 ```
 
 Airport and incident lookup bootstrapping seeds New Mexico airfields and airbases for development data.
+
+## Geospatial View
+
+The app includes a MapLibre-based geospatial view at:
+
+```text
+/GeoStatusBoard/map
+```
+
+GSP links can open the map with a selected layer and feature filter, for example:
+
+```text
+/GeoStatusBoard/map?layer=airportStatus&field=site_name&value=Kirtland%20AFB
+```
+
+The recommended open source GIS stack is:
+
+- PostGIS for geospatial columns and spatial indexes in the operational database.
+- GeoServer for publishing those tables as WFS GeoJSON layers.
+- MapLibre GL JS for the browser map view.
+
+The Grails domains continue to read and write regular status fields through GORM. GeoServer reads geometry from PostGIS and supplies the map API.
+
+See:
+
+- `docs/postgis-spatialization.sql`
+- `docs/geospatial-architecture.md`
 
 ## Data Sources
 

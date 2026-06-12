@@ -101,7 +101,7 @@
 
 						<td>${fieldValue(bean: currentIncidents, field: "eventDescHan")}</td>
 
-						<td><g:link absolute="true" url="/map/app.jsp?site=geocmt&lod=17&mgrs=${fieldValue(bean: currentIncidents, field: "mgrsCoord")}">
+						<td><g:link controller="map" action="index" params="[layer: 'currentIncidents', field: 'mgrs_coord', value: currentIncidents.mgrsCoord]">
 							${fieldValue(bean: currentIncidents, field: "mgrsCoord")}</g:link> </td>
 
 						<td>${fieldValue(bean: currentIncidents, field: "base")}</td>

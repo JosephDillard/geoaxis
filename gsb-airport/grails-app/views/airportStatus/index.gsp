@@ -484,8 +484,14 @@
 
                 <td class="tddate"><g:formatDate timeZone="Asia/Seoul"  format="dd MMM HH:mm" date="${airportStatus.lastUpdated}"/></td>
 
-                <td><a href="${fieldValue(bean: airportStatus, field: "mapit")}" target="new">
-                    <g:img dir="images" file="map_icon.png" width="18" height="18"/></a>
+                <td><g:link controller="map"
+                            action="index"
+                            params="[layer: 'airportStatus', field: 'site_name', value: airportStatus.airfieldName]"
+                            target="_blank"
+                            rel="noopener"
+                            title="Open map view">
+                    <g:img dir="images" file="map_icon.png" width="18" height="18"/>
+                </g:link>
                 </td>
 
             </tr>

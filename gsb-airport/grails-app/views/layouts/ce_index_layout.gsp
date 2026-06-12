@@ -38,7 +38,7 @@
     <ul>
         <li><a class="list" href="http://192.169.0.217/GeoBaseMCKACC/airportStatus" target="_blank">Airport Status</a></li>
         <li><a class="home" href="http://192.169.0.196/GeoBaseMCKSec/" target="_blank">GeoBase Home</a></li>
-        <li><a class="map" href="http://192.169.0.217/acc/app.jsp?site=geocmt" target="_blank">GeoCMT Map</a></li>
+        <li><g:link class="map" controller="map" action="index" target="_blank">Map View</g:link></li>
     </ul>
 </div>
 <footer>
