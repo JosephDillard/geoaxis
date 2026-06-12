@@ -1,22 +1,22 @@
 package gsb.incidents
 
-import grails.test.mixin.TestFor
 import spock.lang.Specification
 
-/**
- * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
- */
-@TestFor(FACDAMIncidents)
 class FACDAMIncidentsSpec extends Specification {
 
-    def setup() {
-    }
+    void "FACDAM incident preserves assigned incident details"() {
+        when:
+        FACDAMIncidents incident = new FACDAMIncidents(
+            incidentId: 'FAC-1',
+            eventType: 'Damage',
+            base: 'Osan',
+            repairStatus: 'In Progress'
+        )
 
-    def cleanup() {
-    }
-
-    void "test something"() {
-        expect:"fix me"
-            true == false
+        then:
+        incident.incidentId == 'FAC-1'
+        incident.eventType == 'Damage'
+        incident.base == 'Osan'
+        incident.repairStatus == 'In Progress'
     }
 }
