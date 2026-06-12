@@ -1,7 +1,7 @@
 package gsb.incidents
 
 class Incidents {
-    String objectid_1
+    Long objectid_1
     String incidentId
     String eventType
     Date eventDate

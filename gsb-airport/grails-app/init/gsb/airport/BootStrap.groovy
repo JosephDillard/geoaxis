@@ -434,7 +434,7 @@ class BootStrap {
             ]
 
             records.eachWithIndex { Map record, int index ->
-                if (!AirportStatus.findByAirfieldName(record.name as String)) {
+                if (AirportStatus.countByAirfieldName(record.name as String) == 0) {
                     Date updated = daysAgo(now, index)
                     AirportStatus status = new AirportStatus(
                         objectId: "APT-${index + 1}".toString(),

@@ -103,7 +103,6 @@ class AirportStatus {
         objectId column: 'OBJECTID'
         airfieldName column: 'SITE_NAME'
         lastUpdated column: 'UPDATED_DATE'
-        sort sortBy: 'asc'
         table 'INDEX_AIRFIELDS'
         datasource 'geodbfour'
         version false

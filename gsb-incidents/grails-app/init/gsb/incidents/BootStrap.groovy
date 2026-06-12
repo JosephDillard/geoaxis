@@ -285,7 +285,7 @@ class BootStrap {
                 if (!Incidents.findByIncidentId(record.incidentId as String)) {
                     Date eventDate = daysAgo(now, index + 7)
                     new Incidents(
-                        objectid_1: "ARCH-${index + 1}".toString(),
+                        objectid_1: index + 1L,
                         incidentId: record.incidentId,
                         eventType: record.eventType,
                         eventDate: eventDate,
