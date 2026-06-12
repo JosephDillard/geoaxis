@@ -4,6 +4,9 @@
     <meta name="layout" content="main"/>
     <title>Map View</title>
     <link rel="stylesheet" href="${mapLibreCssUrl}"/>
+    <g:if test="${drawEnabled && mapDrawCssUrl}">
+        <link rel="stylesheet" href="${mapDrawCssUrl}"/>
+    </g:if>
 </head>
 <body>
 <main class="geo-map-page" role="main">
@@ -13,18 +16,16 @@
             <p>Geospatial view of airport, airfield, and incident status layers.</p>
         </div>
         <g:form controller="map" action="index" method="GET" class="geo-map-form">
-            <label for="layer">Layer</label>
-            <select id="layer" name="layer">
-                <g:each in="${layers}" var="entry">
-                    <option value="${entry.key}" <g:if test="${entry.key == selectedLayer}">selected="selected"</g:if>>${entry.value.title}</option>
-                </g:each>
-            </select>
+            <input type="hidden" name="layer" value="${selectedLayer}"/>
+            <div class="geo-map-field">
+                <label for="field">Filter field</label>
+                <input id="field" name="field" type="text" value="${selectedField}"/>
+            </div>
 
-            <label for="field">Filter field</label>
-            <input id="field" name="field" type="text" value="${selectedField}"/>
-
-            <label for="value">Filter value</label>
-            <input id="value" name="value" type="text" value="${selectedValue}"/>
+            <div class="geo-map-field">
+                <label for="value">Filter value</label>
+                <input id="value" name="value" type="text" value="${selectedValue}"/>
+            </div>
 
             <button type="submit" class="btn btn-primary">Load</button>
         </g:form>
@@ -32,42 +33,270 @@
 
     <section class="geo-map-shell" aria-label="Geospatial map">
         <div id="geo-map-status" class="geo-map-status">Loading map...</div>
+
+        <button id="geo-layer-toggle" type="button" class="geo-map-drawer-toggle" aria-expanded="true">
+            Layers
+        </button>
+        <aside id="geo-layer-drawer" class="geo-layer-drawer" aria-label="Map layers">
+            <div class="geo-layer-drawer-header">
+                <strong>Layers</strong>
+                <button id="geo-layer-close" type="button" class="geo-map-icon-button" aria-label="Hide layers">x</button>
+            </div>
+            <details open>
+                <summary>Internal</summary>
+                <div id="geo-internal-layer-list" class="geo-layer-list"></div>
+            </details>
+            <details open>
+                <summary>External</summary>
+                <div id="geo-external-layer-list" class="geo-layer-list"></div>
+            </details>
+        </aside>
+
+        <div id="geo-map-tools" class="geo-map-tools" aria-label="Map tools">
+            <div id="geo-view-tools" class="geo-map-tool-group">
+                <span class="geo-map-tool-title">View</span>
+                <div class="geo-map-tool-actions">
+                    <button id="geo-fit-layer" type="button" class="geo-map-tool-button">Fit Layers</button>
+                </div>
+            </div>
+            <div id="geo-measure-tools" class="geo-map-tool-group">
+                <span class="geo-map-tool-title">Measure</span>
+                <div class="geo-map-tool-actions">
+                    <button id="geo-measure-toggle" type="button" class="geo-map-tool-button">Distance</button>
+                    <button id="geo-measure-clear" type="button" class="geo-map-tool-button">Clear</button>
+                </div>
+                <output id="geo-measure-output" class="geo-map-tool-output">0 mi</output>
+            </div>
+            <div id="geo-draw-tools" class="geo-map-tool-group">
+                <span class="geo-map-tool-title">Draw</span>
+                <output id="geo-draw-output" class="geo-map-tool-output">Ready</output>
+            </div>
+        </div>
+
+        <div id="geo-basemap-picker" class="geo-basemap-picker" aria-label="Basemaps">
+            <button id="geo-basemap-toggle" type="button" class="geo-map-tool-button" aria-expanded="false">
+                Basemap
+            </button>
+            <div id="geo-basemap-menu" class="geo-basemap-menu" hidden>
+                <g:each in="${basemaps}" var="entry">
+                    <button type="button"
+                            class="geo-basemap-card"
+                            data-basemap-key="${entry.key}"
+                            style="--basemap-preview: ${entry.value.preview};">
+                        <span class="geo-basemap-preview"></span>
+                        <span>${entry.value.title}</span>
+                    </button>
+                </g:each>
+            </div>
+        </div>
+
+        <div id="geo-coordinate-panel" class="geo-coordinate-panel" aria-label="Coordinates">
+            <div>
+                <span>Lat/Lon</span>
+                <output id="geo-latlon-output">Move over map</output>
+            </div>
+            <div>
+                <span>DMS</span>
+                <output id="geo-dms-output">Move over map</output>
+            </div>
+            <div>
+                <span>MGRS</span>
+                <output id="geo-mgrs-output">Move over map</output>
+            </div>
+            <div class="geo-coordinate-copy">
+                <label for="geo-coordinate-format">Copy</label>
+                <select id="geo-coordinate-format">
+                    <option value="mgrs">MGRS</option>
+                    <option value="latLon">Lat/Lon</option>
+                    <option value="dms">DMS</option>
+                </select>
+                <button id="geo-coordinate-copy" type="button" class="geo-map-tool-button" disabled="disabled">Copy MGRS</button>
+            </div>
+        </div>
         <div id="geo-map" class="geo-map-canvas"></div>
     </section>
 </main>
 
 <script src="${mapLibreJsUrl}"></script>
+<g:if test="${drawEnabled && mapDrawJsUrl}">
+    <script>window.mapboxgl = window.maplibregl;</script>
+    <script src="${mapDrawJsUrl}"></script>
+</g:if>
+<g:if test="${mgrsEnabled && mgrsJsUrl}">
+    <script src="${mgrsJsUrl}"></script>
+</g:if>
 <script>
 (function () {
     var config = ${raw(mapConfigJson)};
     var statusEl = document.getElementById('geo-map-status');
-    var sourceId = 'status-features';
-    var layerIds = ['status-polygons', 'status-lines', 'status-points'];
+    var layerToggle = document.getElementById('geo-layer-toggle');
+    var layerDrawer = document.getElementById('geo-layer-drawer');
+    var layerClose = document.getElementById('geo-layer-close');
+    var internalLayerList = document.getElementById('geo-internal-layer-list');
+    var externalLayerList = document.getElementById('geo-external-layer-list');
+    var basemapPicker = document.getElementById('geo-basemap-picker');
+    var basemapToggle = document.getElementById('geo-basemap-toggle');
+    var basemapMenu = document.getElementById('geo-basemap-menu');
+    var coordinatePanel = document.getElementById('geo-coordinate-panel');
+    var latLonOutput = document.getElementById('geo-latlon-output');
+    var dmsOutput = document.getElementById('geo-dms-output');
+    var mgrsOutput = document.getElementById('geo-mgrs-output');
+    var coordinateFormat = document.getElementById('geo-coordinate-format');
+    var coordinateCopy = document.getElementById('geo-coordinate-copy');
+    var viewTools = document.getElementById('geo-view-tools');
+    var fitLayer = document.getElementById('geo-fit-layer');
+    var measureTools = document.getElementById('geo-measure-tools');
+    var measureToggle = document.getElementById('geo-measure-toggle');
+    var measureClear = document.getElementById('geo-measure-clear');
+    var measureOutput = document.getElementById('geo-measure-output');
+    var drawTools = document.getElementById('geo-draw-tools');
+    var drawOutput = document.getElementById('geo-draw-output');
+    var measureSourceId = 'measure-features';
+    var measureLayerIds = ['measure-line', 'measure-points'];
+    var basemapSourceId = 'geo-basemap-source';
+    var basemapLayerId = 'geo-basemap-raster';
+    var backgroundLayerId = 'geo-basemap-background';
+    var activeBasemapKey = config.selectedBasemap;
+    var internalLayerState = {};
+    var externalLayerState = {};
+    var renderLayerToLayerKey = {};
+    var measureMode = false;
+    var measurePoints = [];
+    var lastCoordinate = null;
+    var lastCoordinateFormats = null;
+    var draw = null;
 
     function setStatus(message, isError) {
         statusEl.textContent = message;
         statusEl.className = isError ? 'geo-map-status geo-map-status-error' : 'geo-map-status';
     }
 
+    function firstKey(object) {
+        var keys = Object.keys(object || {});
+        return keys.length ? keys[0] : null;
+    }
+
+    function safeId(value) {
+        return String(value).replace(/[^a-zA-Z0-9_-]/g, '-');
+    }
+
+    function sourceIdFor(key) {
+        return 'status-source-' + safeId(key);
+    }
+
+    function layerIdsFor(key) {
+        var suffix = safeId(key);
+        return ['status-fill-' + suffix, 'status-line-' + suffix, 'status-point-' + suffix];
+    }
+
+    function externalSourceIdFor(key) {
+        return 'external-source-' + safeId(key);
+    }
+
+    function externalLayerIdFor(key) {
+        return 'external-layer-' + safeId(key);
+    }
+
+    function selectedBasemap() {
+        return (config.basemaps || {})[activeBasemapKey] || (config.basemaps || {})[firstKey(config.basemaps)] || {};
+    }
+
     function rasterStyle() {
+        var basemap = selectedBasemap();
+        var layers = [
+            {
+                id: backgroundLayerId,
+                type: 'background',
+                paint: {
+                    'background-color': basemap.background || '#183d66'
+                }
+            }
+        ];
+        var sources = {};
+
+        if (basemap.tilesUrl) {
+            sources[basemapSourceId] = {
+                type: 'raster',
+                tiles: [basemap.tilesUrl],
+                tileSize: 256,
+                attribution: basemap.attribution || ''
+            };
+            layers.push({
+                id: basemapLayerId,
+                type: 'raster',
+                source: basemapSourceId,
+                paint: {
+                    'raster-opacity': Number(basemap.opacity == null ? 1 : basemap.opacity)
+                }
+            });
+        }
+
         return {
             version: 8,
-            sources: {
-                osm: {
-                    type: 'raster',
-                    tiles: [config.osmTilesUrl],
-                    tileSize: 256,
-                    attribution: '(c) OpenStreetMap contributors'
-                }
-            },
-            layers: [
-                {
-                    id: 'osm',
-                    type: 'raster',
-                    source: 'osm'
-                }
-            ]
+            sources: sources,
+            layers: layers
         };
+    }
+
+    function allInternalRenderLayerIds() {
+        return Object.keys(internalLayerState).reduce(function (ids, key) {
+            var state = internalLayerState[key];
+            if (state && state.loaded) {
+                return ids.concat(layerIdsFor(key).filter(function (id) { return map.getLayer(id); }));
+            }
+            return ids;
+        }, []);
+    }
+
+    function firstOperationalLayerId() {
+        var internalId = allInternalRenderLayerIds().find(function (id) { return map.getLayer(id); });
+        if (internalId) {
+            return internalId;
+        }
+        return measureLayerIds.find(function (id) { return map.getLayer(id); });
+    }
+
+    function firstMeasureLayerId() {
+        return measureLayerIds.find(function (id) { return map.getLayer(id); });
+    }
+
+    function applyBasemap(key) {
+        if (key && config.basemaps && config.basemaps[key]) {
+            activeBasemapKey = key;
+        }
+        var basemap = selectedBasemap();
+        if (map.getLayer(basemapLayerId)) {
+            map.removeLayer(basemapLayerId);
+        }
+        if (map.getSource(basemapSourceId)) {
+            map.removeSource(basemapSourceId);
+        }
+        if (map.getLayer(backgroundLayerId)) {
+            map.setPaintProperty(backgroundLayerId, 'background-color', basemap.background || '#183d66');
+        }
+        if (basemap.tilesUrl) {
+            map.addSource(basemapSourceId, {
+                type: 'raster',
+                tiles: [basemap.tilesUrl],
+                tileSize: 256,
+                attribution: basemap.attribution || ''
+            });
+            map.addLayer({
+                id: basemapLayerId,
+                type: 'raster',
+                source: basemapSourceId,
+                paint: {
+                    'raster-opacity': Number(basemap.opacity == null ? 1 : basemap.opacity)
+                }
+            }, firstOperationalLayerId());
+        }
+        updateBasemapCards();
+    }
+
+    function updateBasemapCards() {
+        Array.prototype.forEach.call(document.querySelectorAll('.geo-basemap-card'), function (card) {
+            card.classList.toggle('is-active', card.getAttribute('data-basemap-key') === activeBasemapKey);
+        });
     }
 
     function cqlEquals(field, value) {
@@ -103,7 +332,9 @@
     function popupHtml(feature, layer) {
         var properties = feature.properties || {};
         var title = properties[layer.labelField] || properties[layer.idField] || layer.title;
-        var rows = Object.keys(properties).slice(0, 12).map(function (key) {
+        var rows = Object.keys(properties).filter(function (key) {
+            return key.indexOf('__') !== 0;
+        }).slice(0, 12).map(function (key) {
             return '<dt>' + escapeHtml(key) + '</dt><dd>' + escapeHtml(properties[key]) + '</dd>';
         }).join('');
 
@@ -124,20 +355,783 @@
         return count;
     }
 
+    function toRadians(value) {
+        return value * Math.PI / 180;
+    }
+
+    function segmentMeters(a, b) {
+        var radius = 6371008.8;
+        var lat1 = toRadians(a[1]);
+        var lat2 = toRadians(b[1]);
+        var deltaLat = toRadians(b[1] - a[1]);
+        var deltaLng = toRadians(b[0] - a[0]);
+        var h = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+            Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2);
+        return radius * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+    }
+
+    function lineMeters(coordinates) {
+        var total = 0;
+        for (var index = 1; index < coordinates.length; index++) {
+            total += segmentMeters(coordinates[index - 1], coordinates[index]);
+        }
+        return total;
+    }
+
+    function polygonAreaSqMeters(ring) {
+        if (!ring || ring.length < 4) {
+            return 0;
+        }
+        var radius = 6378137;
+        var area = 0;
+        for (var index = 0; index < ring.length - 1; index++) {
+            var current = ring[index];
+            var next = ring[index + 1];
+            area += toRadians(next[0] - current[0]) *
+                (2 + Math.sin(toRadians(current[1])) + Math.sin(toRadians(next[1])));
+        }
+        return Math.abs(area * radius * radius / 2);
+    }
+
+    function featureLengthMeters(feature) {
+        var geometry = feature.geometry || {};
+        if (geometry.type === 'LineString') {
+            return lineMeters(geometry.coordinates || []);
+        }
+        if (geometry.type === 'MultiLineString') {
+            return (geometry.coordinates || []).reduce(function (sum, line) {
+                return sum + lineMeters(line);
+            }, 0);
+        }
+        if (geometry.type === 'Polygon') {
+            return lineMeters((geometry.coordinates || [[]])[0] || []);
+        }
+        if (geometry.type === 'MultiPolygon') {
+            return (geometry.coordinates || []).reduce(function (sum, polygon) {
+                return sum + lineMeters((polygon || [[]])[0] || []);
+            }, 0);
+        }
+        return 0;
+    }
+
+    function featureAreaSqMeters(feature) {
+        var geometry = feature.geometry || {};
+        if (geometry.type === 'Polygon') {
+            return polygonAreaSqMeters((geometry.coordinates || [[]])[0] || []);
+        }
+        if (geometry.type === 'MultiPolygon') {
+            return (geometry.coordinates || []).reduce(function (sum, polygon) {
+                return sum + polygonAreaSqMeters((polygon || [[]])[0] || []);
+            }, 0);
+        }
+        return 0;
+    }
+
+    function formatDistance(meters) {
+        if (!meters) {
+            return '0 mi';
+        }
+        var miles = meters / 1609.344;
+        var nauticalMiles = meters / 1852;
+        var kilometers = meters / 1000;
+        if (miles < 0.1) {
+            return Math.round(meters * 3.28084) + ' ft';
+        }
+        return miles.toFixed(2) + ' mi / ' + nauticalMiles.toFixed(2) + ' NM / ' + kilometers.toFixed(2) + ' km';
+    }
+
+    function formatArea(squareMeters) {
+        if (!squareMeters) {
+            return '0 ac';
+        }
+        var acres = squareMeters / 4046.8564224;
+        if (acres < 640) {
+            return acres.toFixed(1) + ' ac';
+        }
+        return (acres / 640).toFixed(2) + ' sq mi';
+    }
+
+    function emptyFeatureCollection() {
+        return {
+            type: 'FeatureCollection',
+            features: []
+        };
+    }
+
+    function ensureMeasureLayers() {
+        if (!map.getSource(measureSourceId)) {
+            map.addSource(measureSourceId, {
+                type: 'geojson',
+                data: emptyFeatureCollection()
+            });
+        }
+        if (!map.getLayer('measure-line')) {
+            map.addLayer({
+                id: 'measure-line',
+                type: 'line',
+                source: measureSourceId,
+                filter: ['==', '$type', 'LineString'],
+                paint: {
+                    'line-color': '#7dd3fc',
+                    'line-width': 3,
+                    'line-dasharray': ['literal', [2, 1]]
+                }
+            });
+        }
+        if (!map.getLayer('measure-points')) {
+            map.addLayer({
+                id: 'measure-points',
+                type: 'circle',
+                source: measureSourceId,
+                filter: ['==', '$type', 'Point'],
+                paint: {
+                    'circle-color': '#38bdf8',
+                    'circle-radius': 5,
+                    'circle-stroke-color': '#e0f2fe',
+                    'circle-stroke-width': 2
+                }
+            });
+        }
+    }
+
+    function updateMeasureGraphics() {
+        ensureMeasureLayers();
+        var features = measurePoints.map(function (point) {
+            return {
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: point
+                },
+                properties: {}
+            };
+        });
+        if (measurePoints.length > 1) {
+            features.push({
+                type: 'Feature',
+                geometry: {
+                    type: 'LineString',
+                    coordinates: measurePoints
+                },
+                properties: {}
+            });
+        }
+        map.getSource(measureSourceId).setData({
+            type: 'FeatureCollection',
+            features: features
+        });
+        measureOutput.textContent = formatDistance(lineMeters(measurePoints));
+    }
+
+    function clearMeasure() {
+        measurePoints = [];
+        updateMeasureGraphics();
+    }
+
+    function setMeasureMode(enabled) {
+        measureMode = enabled;
+        measureToggle.classList.toggle('is-active', measureMode);
+        measureToggle.textContent = measureMode ? 'Measuring' : 'Distance';
+        map.getCanvas().style.cursor = measureMode ? 'crosshair' : '';
+    }
+
+    function dmsPart(value, positiveSuffix, negativeSuffix) {
+        var suffix = value >= 0 ? positiveSuffix : negativeSuffix;
+        var absolute = Math.abs(value);
+        var degrees = Math.floor(absolute);
+        var minutesFloat = (absolute - degrees) * 60;
+        var minutes = Math.floor(minutesFloat);
+        var seconds = (minutesFloat - minutes) * 60;
+        return degrees + ' ' + minutes + ' ' + seconds.toFixed(2) + ' ' + suffix;
+    }
+
+    function formatCoordinate(lngLat) {
+        var digits = Number(config.coordinateDigits || 6);
+        var lat = lngLat.lat.toFixed(digits);
+        var lng = lngLat.lng.toFixed(digits);
+        var mgrsValue = 'Unavailable';
+        if (config.tools.mgrs && window.mgrs && typeof window.mgrs.forward === 'function') {
+            mgrsValue = window.mgrs.forward([lngLat.lng, lngLat.lat], Number(config.mgrsAccuracy || 5));
+        }
+        return {
+            latLon: lat + ', ' + lng,
+            dms: dmsPart(lngLat.lat, 'N', 'S') + ', ' + dmsPart(lngLat.lng, 'E', 'W'),
+            mgrs: mgrsValue
+        };
+    }
+
+    function updateCoordinateCopyLabel() {
+        if (!coordinateCopy || !coordinateFormat) {
+            return;
+        }
+        var label = coordinateFormat.options[coordinateFormat.selectedIndex].text;
+        coordinateCopy.textContent = 'Copy ' + label;
+    }
+
+    function updateCoordinateReadout(lngLat) {
+        lastCoordinate = lngLat;
+        lastCoordinateFormats = formatCoordinate(lngLat);
+        latLonOutput.textContent = lastCoordinateFormats.latLon;
+        dmsOutput.textContent = lastCoordinateFormats.dms;
+        mgrsOutput.textContent = lastCoordinateFormats.mgrs;
+        coordinateCopy.disabled = false;
+    }
+
+    function decorateGeoJson(key, geojson) {
+        return {
+            type: 'FeatureCollection',
+            features: (geojson.features || []).map(function (feature) {
+                var clone = {
+                    type: 'Feature',
+                    geometry: feature.geometry,
+                    properties: Object.assign({}, feature.properties || {})
+                };
+                clone.properties.__layerKey = key;
+                return clone;
+            })
+        };
+    }
+
+    function removeInternalLayer(key) {
+        layerIdsFor(key).forEach(function (id) {
+            if (map.getLayer(id)) {
+                map.removeLayer(id);
+            }
+            delete renderLayerToLayerKey[id];
+        });
+        if (map.getSource(sourceIdFor(key))) {
+            map.removeSource(sourceIdFor(key));
+        }
+        internalLayerState[key] = Object.assign({}, internalLayerState[key] || {}, {
+            loaded: false,
+            loading: false,
+            data: null
+        });
+        updateLayerStatus(key, 'internal', '');
+    }
+
+    function addInternalLayer(key, geojson) {
+        var layer = config.layers[key];
+        var sourceId = sourceIdFor(key);
+        var ids = layerIdsFor(key);
+        var data = decorateGeoJson(key, geojson);
+        removeInternalLayer(key);
+
+        map.addSource(sourceId, {
+            type: 'geojson',
+            data: data
+        });
+
+        map.addLayer({
+            id: ids[0],
+            type: 'fill',
+            source: sourceId,
+            filter: ['==', '$type', 'Polygon'],
+            paint: {
+                'fill-color': layer.color,
+                'fill-opacity': 0.42
+            }
+        }, firstMeasureLayerId());
+        map.addLayer({
+            id: ids[1],
+            type: 'line',
+            source: sourceId,
+            filter: ['==', '$type', 'LineString'],
+            paint: {
+                'line-color': layer.color,
+                'line-width': 4
+            }
+        }, firstMeasureLayerId());
+        map.addLayer({
+            id: ids[2],
+            type: 'circle',
+            source: sourceId,
+            filter: ['==', '$type', 'Point'],
+            paint: {
+                'circle-color': layer.color,
+                'circle-radius': 7,
+                'circle-stroke-color': '#dbeafe',
+                'circle-stroke-width': 2
+            }
+        }, firstMeasureLayerId());
+
+        ids.forEach(function (id) {
+            renderLayerToLayerKey[id] = key;
+        });
+        internalLayerState[key] = {
+            loaded: true,
+            loading: false,
+            data: data
+        };
+    }
+
+    function loadInternalLayer(key) {
+        var layer = config.layers[key];
+        if (!layer) {
+            return;
+        }
+        var state = internalLayerState[key] || {};
+        if (state.loading) {
+            return;
+        }
+        internalLayerState[key] = Object.assign({}, state, { loading: true });
+        updateLayerStatus(key, 'internal', 'Loading');
+        setStatus('Loading ' + layer.title + ' from GeoServer...');
+
+        fetch(buildWfsUrl(layer), { credentials: 'same-origin' })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('GeoServer returned HTTP ' + response.status);
+                }
+                return response.json();
+            })
+            .then(function (geojson) {
+                var checkbox = document.querySelector('[data-layer-kind="internal"][data-layer-key="' + key + '"]');
+                if (!checkbox || !checkbox.checked) {
+                    internalLayerState[key] = { loaded: false, loading: false, data: null };
+                    return;
+                }
+                addInternalLayer(key, geojson);
+                var count = (geojson.features || []).length;
+                updateLayerStatus(key, 'internal', count + ' feature' + (count === 1 ? '' : 's'));
+                setStatus(layer.title + ': ' + count + ' feature(s) loaded.');
+                fitAllLoadedFeatures();
+            })
+            .catch(function (error) {
+                internalLayerState[key] = { loaded: false, loading: false, data: null };
+                updateLayerStatus(key, 'internal', 'Error');
+                setStatus(layer.title + ': ' + error.message + '. Check GeoServer, CORS, layer names, and WFS outputFormat.', true);
+            });
+    }
+
+    function removeExternalLayer(key) {
+        var layerId = externalLayerIdFor(key);
+        var sourceId = externalSourceIdFor(key);
+        if (map.getLayer(layerId)) {
+            map.removeLayer(layerId);
+        }
+        if (map.getSource(sourceId)) {
+            map.removeSource(sourceId);
+        }
+        externalLayerState[key] = { loaded: false, loading: false, data: null };
+        updateLayerStatus(key, 'external', '');
+    }
+
+    function addRasterExternalLayer(key, layer) {
+        removeExternalLayer(key);
+        map.addSource(externalSourceIdFor(key), {
+            type: 'raster',
+            tiles: [layer.tilesUrl],
+            tileSize: 256,
+            attribution: layer.attribution || ''
+        });
+        map.addLayer({
+            id: externalLayerIdFor(key),
+            type: 'raster',
+            source: externalSourceIdFor(key),
+            paint: {
+                'raster-opacity': Number(layer.opacity == null ? 0.7 : layer.opacity)
+            }
+        }, firstOperationalLayerId());
+        externalLayerState[key] = { loaded: true, loading: false };
+        updateLayerStatus(key, 'external', 'On');
+    }
+
+    function openSkyUrl(layer) {
+        var bounds = map.getBounds();
+        var url = new URL(layer.endpoint);
+        url.searchParams.set('lamin', bounds.getSouth().toFixed(4));
+        url.searchParams.set('lomin', bounds.getWest().toFixed(4));
+        url.searchParams.set('lamax', bounds.getNorth().toFixed(4));
+        url.searchParams.set('lomax', bounds.getEast().toFixed(4));
+        return url.toString();
+    }
+
+    function openSkyGeoJson(data, key, layer) {
+        var states = data.states || [];
+        var maxFeatures = Number(layer.maxFeatures || 500);
+        return {
+            type: 'FeatureCollection',
+            features: states.filter(function (state) {
+                return state && typeof state[5] === 'number' && typeof state[6] === 'number';
+            }).slice(0, maxFeatures).map(function (state) {
+                return {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Point',
+                        coordinates: [state[5], state[6]]
+                    },
+                    properties: {
+                        __layerKey: key,
+                        callsign: String(state[1] || '').trim(),
+                        origin_country: state[2],
+                        altitude_ft: state[13] == null ? '' : Math.round(Number(state[13]) * 3.28084),
+                        velocity_kt: state[9] == null ? '' : Math.round(Number(state[9]) * 1.94384),
+                        heading: state[10] == null ? '' : Math.round(Number(state[10])),
+                        on_ground: state[8] ? 'Yes' : 'No'
+                    }
+                };
+            })
+        };
+    }
+
+    function addPointExternalLayer(key, layer, data) {
+        removeExternalLayer(key);
+        map.addSource(externalSourceIdFor(key), {
+            type: 'geojson',
+            data: data
+        });
+        map.addLayer({
+            id: externalLayerIdFor(key),
+            type: 'circle',
+            source: externalSourceIdFor(key),
+            paint: {
+                'circle-color': layer.color || '#facc15',
+                'circle-radius': 4.5,
+                'circle-opacity': 0.88,
+                'circle-stroke-color': '#0f172a',
+                'circle-stroke-width': 1.5
+            }
+        }, firstMeasureLayerId());
+        renderLayerToLayerKey[externalLayerIdFor(key)] = key;
+        externalLayerState[key] = { loaded: true, loading: false, data: data };
+        updateLayerStatus(key, 'external', data.features.length + ' aircraft');
+    }
+
+    function loadOpenSkyLayer(key, layer) {
+        externalLayerState[key] = { loaded: false, loading: true };
+        updateLayerStatus(key, 'external', 'Loading');
+        setStatus('Loading ' + layer.title + '...');
+        fetch(openSkyUrl(layer))
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('OpenSky returned HTTP ' + response.status);
+                }
+                return response.json();
+            })
+            .then(function (data) {
+                var checkbox = document.querySelector('[data-layer-kind="external"][data-layer-key="' + key + '"]');
+                if (!checkbox || !checkbox.checked) {
+                    externalLayerState[key] = { loaded: false, loading: false };
+                    return;
+                }
+                var geojson = openSkyGeoJson(data, key, layer);
+                addPointExternalLayer(key, layer, geojson);
+                setStatus(layer.title + ': ' + geojson.features.length + ' aircraft loaded for the current map extent.');
+            })
+            .catch(function (error) {
+                externalLayerState[key] = { loaded: false, loading: false };
+                updateLayerStatus(key, 'external', 'Error');
+                setStatus(layer.title + ': ' + error.message + '. OpenSky may rate-limit or block browser-origin requests.', true);
+            });
+    }
+
+    function toggleExternalLayer(key, enabled) {
+        var layer = config.externalLayers[key];
+        if (!layer) {
+            return;
+        }
+        if (!enabled) {
+            removeExternalLayer(key);
+            return;
+        }
+        if (layer.kind === 'raster' && layer.tilesUrl) {
+            addRasterExternalLayer(key, layer);
+            setStatus(layer.title + ' overlay enabled.');
+        } else if (layer.kind === 'opensky' && layer.endpoint) {
+            loadOpenSkyLayer(key, layer);
+        } else {
+            updateLayerStatus(key, 'external', 'Unavailable');
+            setStatus(layer.title + ': ' + (layer.note || 'No public layer endpoint is configured.'), true);
+        }
+    }
+
+    function fitToFeatures(features) {
+        var bounds = new maplibregl.LngLatBounds();
+        var coordinateCount = 0;
+        features.forEach(function (feature) {
+            if (feature.geometry) {
+                coordinateCount = extendBounds(bounds, feature.geometry.coordinates, coordinateCount);
+            }
+        });
+        if (coordinateCount > 0) {
+            map.fitBounds(bounds, { padding: 70, maxZoom: 15 });
+        }
+    }
+
+    function fitAllLoadedFeatures() {
+        var features = [];
+        Object.keys(internalLayerState).forEach(function (key) {
+            var state = internalLayerState[key];
+            if (state && state.loaded && state.data && state.data.features) {
+                features = features.concat(state.data.features);
+            }
+        });
+        Object.keys(externalLayerState).forEach(function (key) {
+            var state = externalLayerState[key];
+            if (state && state.loaded && state.data && state.data.features) {
+                features = features.concat(state.data.features);
+            }
+        });
+        if (features.length) {
+            fitToFeatures(features);
+        }
+    }
+
+    function updateDrawSummary() {
+        if (!draw) {
+            drawOutput.textContent = 'Unavailable';
+            return;
+        }
+        var data = draw.getAll();
+        var features = data.features || [];
+        var totalLength = features.reduce(function (sum, feature) {
+            return sum + featureLengthMeters(feature);
+        }, 0);
+        var totalArea = features.reduce(function (sum, feature) {
+            return sum + featureAreaSqMeters(feature);
+        }, 0);
+        var summary = features.length + ' shape' + (features.length === 1 ? '' : 's');
+        if (totalLength) {
+            summary += ' | ' + formatDistance(totalLength);
+        }
+        if (config.tools.drawArea && totalArea) {
+            summary += ' | ' + formatArea(totalArea);
+        }
+        drawOutput.textContent = summary;
+    }
+
+    function drawStyles() {
+        return [
+            {
+                id: 'gl-draw-polygon-fill-inactive',
+                type: 'fill',
+                filter: ['all', ['==', 'active', 'false'], ['==', '$type', 'Polygon'], ['!=', 'mode', 'static']],
+                paint: {
+                    'fill-color': '#38bdf8',
+                    'fill-outline-color': '#7dd3fc',
+                    'fill-opacity': 0.18
+                }
+            },
+            {
+                id: 'gl-draw-polygon-fill-active',
+                type: 'fill',
+                filter: ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon']],
+                paint: {
+                    'fill-color': '#facc15',
+                    'fill-outline-color': '#fde68a',
+                    'fill-opacity': 0.22
+                }
+            },
+            {
+                id: 'gl-draw-polygon-stroke-inactive',
+                type: 'line',
+                filter: ['all', ['==', 'active', 'false'], ['==', '$type', 'Polygon'], ['!=', 'mode', 'static']],
+                layout: {
+                    'line-cap': 'round',
+                    'line-join': 'round'
+                },
+                paint: {
+                    'line-color': '#7dd3fc',
+                    'line-width': 2
+                }
+            },
+            {
+                id: 'gl-draw-polygon-stroke-active',
+                type: 'line',
+                filter: ['all', ['==', 'active', 'true'], ['==', '$type', 'Polygon']],
+                layout: {
+                    'line-cap': 'round',
+                    'line-join': 'round'
+                },
+                paint: {
+                    'line-color': '#facc15',
+                    'line-width': 3
+                }
+            },
+            {
+                id: 'gl-draw-line-inactive',
+                type: 'line',
+                filter: ['all', ['==', 'active', 'false'], ['==', '$type', 'LineString'], ['!=', 'mode', 'static']],
+                layout: {
+                    'line-cap': 'round',
+                    'line-join': 'round'
+                },
+                paint: {
+                    'line-color': '#7dd3fc',
+                    'line-width': 3
+                }
+            },
+            {
+                id: 'gl-draw-line-active',
+                type: 'line',
+                filter: ['all', ['==', 'active', 'true'], ['==', '$type', 'LineString']],
+                layout: {
+                    'line-cap': 'round',
+                    'line-join': 'round'
+                },
+                paint: {
+                    'line-color': '#facc15',
+                    'line-width': 3
+                }
+            },
+            {
+                id: 'gl-draw-point-inactive',
+                type: 'circle',
+                filter: ['all', ['==', 'active', 'false'], ['==', '$type', 'Point'], ['==', 'meta', 'feature'], ['!=', 'mode', 'static']],
+                paint: {
+                    'circle-color': '#38bdf8',
+                    'circle-radius': 5,
+                    'circle-stroke-color': '#e0f2fe',
+                    'circle-stroke-width': 2
+                }
+            },
+            {
+                id: 'gl-draw-point-active',
+                type: 'circle',
+                filter: ['all', ['==', 'active', 'true'], ['==', '$type', 'Point'], ['==', 'meta', 'feature']],
+                paint: {
+                    'circle-color': '#facc15',
+                    'circle-radius': 6,
+                    'circle-stroke-color': '#fef3c7',
+                    'circle-stroke-width': 2
+                }
+            },
+            {
+                id: 'gl-draw-vertex',
+                type: 'circle',
+                filter: ['all', ['==', 'meta', 'vertex'], ['==', '$type', 'Point']],
+                paint: {
+                    'circle-color': '#f8fafc',
+                    'circle-radius': 4,
+                    'circle-stroke-color': '#38bdf8',
+                    'circle-stroke-width': 2
+                }
+            },
+            {
+                id: 'gl-draw-midpoint',
+                type: 'circle',
+                filter: ['all', ['==', 'meta', 'midpoint'], ['==', '$type', 'Point']],
+                paint: {
+                    'circle-color': '#0ea5e9',
+                    'circle-radius': 3
+                }
+            }
+        ];
+    }
+
+    function updateLayerStatus(key, kind, message) {
+        var output = document.querySelector('[data-layer-status="' + kind + ':' + key + '"]');
+        if (output) {
+            output.textContent = message || '';
+        }
+    }
+
+    function groupedEntries(object) {
+        var groups = {};
+        Object.keys(object || {}).forEach(function (key) {
+            var item = object[key];
+            var category = item.category || 'Other';
+            if (!groups[category]) {
+                groups[category] = [];
+            }
+            groups[category].push({ key: key, item: item });
+        });
+        return groups;
+    }
+
+    function appendLayerRows(container, layers, kind) {
+        container.innerHTML = '';
+        var groups = groupedEntries(layers);
+        Object.keys(groups).forEach(function (category) {
+            var group = document.createElement('div');
+            group.className = 'geo-layer-group';
+            var title = document.createElement('div');
+            title.className = 'geo-layer-group-title';
+            title.textContent = category;
+            group.appendChild(title);
+
+            groups[category].forEach(function (entry) {
+                var row = document.createElement('label');
+                row.className = 'geo-layer-row';
+                row.title = entry.item.note || '';
+
+                var checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = !!entry.item.enabled;
+                checkbox.disabled = entry.item.kind === 'unavailable';
+                checkbox.setAttribute('data-layer-kind', kind);
+                checkbox.setAttribute('data-layer-key', entry.key);
+
+                var swatch = document.createElement('span');
+                swatch.className = 'geo-layer-swatch';
+                swatch.style.background = entry.item.color || '#38bdf8';
+
+                var label = document.createElement('span');
+                label.className = 'geo-layer-label';
+                label.textContent = entry.item.title;
+
+                var status = document.createElement('output');
+                status.className = 'geo-layer-row-status';
+                status.setAttribute('data-layer-status', kind + ':' + entry.key);
+                if (entry.item.kind === 'unavailable') {
+                    status.textContent = 'Requires provider';
+                }
+
+                row.appendChild(checkbox);
+                row.appendChild(swatch);
+                row.appendChild(label);
+                row.appendChild(status);
+                group.appendChild(row);
+
+                checkbox.addEventListener('change', function () {
+                    if (kind === 'internal') {
+                        if (checkbox.checked) {
+                            loadInternalLayer(entry.key);
+                        } else {
+                            removeInternalLayer(entry.key);
+                        }
+                    } else {
+                        toggleExternalLayer(entry.key, checkbox.checked);
+                    }
+                });
+            });
+            container.appendChild(group);
+        });
+    }
+
+    function setLayerDrawerOpen(open) {
+        layerDrawer.hidden = !open;
+        layerToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        layerToggle.classList.toggle('is-active', open);
+    }
+
     if (!window.maplibregl) {
         setStatus('MapLibre GL JS could not be loaded. Check geo.viewer.mapLibreJsUrl.', true);
         return;
     }
 
-    var selectedLayer = config.layers[config.selectedLayer];
-    if (!selectedLayer) {
-        setStatus('No geospatial layer is configured.', true);
-        return;
-    }
     if (!config.wfsUrl) {
         setStatus('GeoServer WFS URL is not configured.', true);
-        return;
     }
+
+    viewTools.hidden = !config.tools.fitLayer;
+    measureTools.hidden = !config.tools.measureDistance;
+    drawTools.hidden = !config.tools.drawing;
+    coordinatePanel.hidden = !config.tools.coordinates;
+    layerDrawer.hidden = !config.tools.layerList;
+    layerToggle.hidden = !config.tools.layerList;
+    basemapPicker.hidden = !config.tools.basemapSelector;
+    dmsOutput.parentElement.hidden = !config.tools.dms;
+    mgrsOutput.parentElement.hidden = !config.tools.mgrs;
+    Array.prototype.forEach.call(coordinateFormat.options, function (option) {
+        if (option.value === 'dms') {
+            option.hidden = !config.tools.dms;
+        }
+        if (option.value === 'mgrs') {
+            option.hidden = !config.tools.mgrs;
+        }
+    });
 
     var map = new maplibregl.Map({
         container: 'geo-map',
@@ -147,105 +1141,170 @@
     });
 
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
+    if (config.tools.fullscreen && maplibregl.FullscreenControl) {
+        map.addControl(new maplibregl.FullscreenControl(), 'top-right');
+    }
+    map.addControl(new maplibregl.ScaleControl({ unit: 'imperial' }), 'bottom-right');
+
+    appendLayerRows(internalLayerList, config.layers || {}, 'internal');
+    appendLayerRows(externalLayerList, config.externalLayers || {}, 'external');
+    setLayerDrawerOpen(!!config.tools.layerList);
+    updateBasemapCards();
+    updateCoordinateCopyLabel();
 
     map.on('load', function () {
-        var wfsUrl = buildWfsUrl(selectedLayer);
-        setStatus('Loading ' + selectedLayer.title + ' from GeoServer...');
+        window.setTimeout(function () {
+            map.resize();
+        }, 0);
+        ensureMeasureLayers();
 
-        fetch(wfsUrl, { credentials: 'same-origin' })
-            .then(function (response) {
-                if (!response.ok) {
-                    throw new Error('GeoServer returned HTTP ' + response.status);
+        if (config.tools.drawing && window.MapboxDraw) {
+            try {
+                if (window.MapboxDraw.constants && window.MapboxDraw.constants.classes) {
+                    window.MapboxDraw.constants.classes.CANVAS = 'maplibregl-canvas';
+                    window.MapboxDraw.constants.classes.CONTROL_BASE = 'maplibregl-ctrl';
+                    window.MapboxDraw.constants.classes.CONTROL_PREFIX = 'maplibregl-ctrl-';
+                    window.MapboxDraw.constants.classes.CONTROL_GROUP = 'maplibregl-ctrl-group';
+                    window.MapboxDraw.constants.classes.ATTRIBUTION = 'maplibregl-ctrl-attrib';
                 }
-                return response.json();
-            })
-            .then(function (geojson) {
-                layerIds.forEach(function (id) {
-                    if (map.getLayer(id)) {
-                        map.removeLayer(id);
-                    }
+                draw = new window.MapboxDraw({
+                    displayControlsDefault: false,
+                    controls: {
+                        point: true,
+                        line_string: true,
+                        polygon: true,
+                        trash: true
+                    },
+                    styles: drawStyles()
                 });
-                if (map.getSource(sourceId)) {
-                    map.removeSource(sourceId);
-                }
+                map.addControl(draw, 'top-left');
+                map.on('draw.create', updateDrawSummary);
+                map.on('draw.update', updateDrawSummary);
+                map.on('draw.delete', updateDrawSummary);
+                map.on('draw.selectionchange', updateDrawSummary);
+                updateDrawSummary();
+            } catch (error) {
+                drawOutput.textContent = 'Unavailable';
+            }
+        } else if (config.tools.drawing) {
+            drawOutput.textContent = 'Unavailable';
+        }
 
-                map.addSource(sourceId, {
-                    type: 'geojson',
-                    data: geojson
-                });
+        Object.keys(config.layers || {}).forEach(function (key) {
+            var checkbox = document.querySelector('[data-layer-kind="internal"][data-layer-key="' + key + '"]');
+            if (checkbox && checkbox.checked) {
+                loadInternalLayer(key);
+            }
+        });
+        Object.keys(config.externalLayers || {}).forEach(function (key) {
+            var layer = config.externalLayers[key];
+            var checkbox = document.querySelector('[data-layer-kind="external"][data-layer-key="' + key + '"]');
+            if (checkbox && checkbox.checked && layer.kind !== 'unavailable') {
+                toggleExternalLayer(key, true);
+            }
+        });
+    });
 
-                map.addLayer({
-                    id: 'status-polygons',
-                    type: 'fill',
-                    source: sourceId,
-                    filter: ['==', '$type', 'Polygon'],
-                    paint: {
-                        'fill-color': selectedLayer.color,
-                        'fill-opacity': 0.35
-                    }
-                });
+    map.on('click', function (event) {
+        if (config.tools.coordinates) {
+            updateCoordinateReadout(event.lngLat);
+        }
+        if (measureMode) {
+            measurePoints.push([event.lngLat.lng, event.lngLat.lat]);
+            updateMeasureGraphics();
+            return;
+        }
+        var layerIds = allInternalRenderLayerIds().concat(Object.keys(externalLayerState).map(function (key) {
+            return externalLayerIdFor(key);
+        }).filter(function (id) { return map.getLayer(id); }));
+        if (!layerIds.length) {
+            return;
+        }
+        var features = map.queryRenderedFeatures(event.point, { layers: layerIds });
+        if (!features.length) {
+            return;
+        }
+        var feature = features[0];
+        var key = feature.properties && feature.properties.__layerKey;
+        var layer = (config.layers || {})[key] || (config.externalLayers || {})[key];
+        if (!layer) {
+            return;
+        }
+        new maplibregl.Popup()
+            .setLngLat(event.lngLat)
+            .setHTML(popupHtml(feature, layer))
+            .addTo(map);
+    });
 
-                map.addLayer({
-                    id: 'status-lines',
-                    type: 'line',
-                    source: sourceId,
-                    filter: ['==', '$type', 'LineString'],
-                    paint: {
-                        'line-color': selectedLayer.color,
-                        'line-width': 3
-                    }
-                });
+    map.on('mousemove', function (event) {
+        if (config.tools.coordinates) {
+            updateCoordinateReadout(event.lngLat);
+        }
+        if (measureMode) {
+            return;
+        }
+        var layerIds = allInternalRenderLayerIds().concat(Object.keys(externalLayerState).map(function (key) {
+            return externalLayerIdFor(key);
+        }).filter(function (id) { return map.getLayer(id); }));
+        if (!layerIds.length) {
+            map.getCanvas().style.cursor = '';
+            return;
+        }
+        var features = map.queryRenderedFeatures(event.point, { layers: layerIds });
+        map.getCanvas().style.cursor = features.length ? 'pointer' : '';
+    });
 
-                map.addLayer({
-                    id: 'status-points',
-                    type: 'circle',
-                    source: sourceId,
-                    filter: ['==', '$type', 'Point'],
-                    paint: {
-                        'circle-color': selectedLayer.color,
-                        'circle-radius': 7,
-                        'circle-stroke-color': '#ffffff',
-                        'circle-stroke-width': 2
-                    }
-                });
-
-                var features = geojson.features || [];
-                var bounds = new maplibregl.LngLatBounds();
-                var coordinateCount = 0;
-                features.forEach(function (feature) {
-                    if (feature.geometry) {
-                        coordinateCount = extendBounds(bounds, feature.geometry.coordinates, coordinateCount);
-                    }
-                });
-                if (coordinateCount > 0) {
-                    map.fitBounds(bounds, { padding: 60, maxZoom: 15 });
-                }
-
-                layerIds.forEach(function (id) {
-                    map.on('click', id, function (event) {
-                        var feature = event.features && event.features[0];
-                        if (!feature) {
-                            return;
-                        }
-                        new maplibregl.Popup()
-                            .setLngLat(event.lngLat)
-                            .setHTML(popupHtml(feature, selectedLayer))
-                            .addTo(map);
-                    });
-
-                    map.on('mouseenter', id, function () {
-                        map.getCanvas().style.cursor = 'pointer';
-                    });
-                    map.on('mouseleave', id, function () {
-                        map.getCanvas().style.cursor = '';
-                    });
-                });
-
-                setStatus(features.length + ' feature(s) loaded from ' + selectedLayer.typeName + '.');
-            })
-            .catch(function (error) {
-                setStatus(error.message + '. Check GeoServer, CORS, layer names, and WFS outputFormat.', true);
-            });
+    if (layerToggle) {
+        layerToggle.addEventListener('click', function () {
+            setLayerDrawerOpen(layerDrawer.hidden);
+        });
+    }
+    if (layerClose) {
+        layerClose.addEventListener('click', function () {
+            setLayerDrawerOpen(false);
+        });
+    }
+    if (basemapToggle) {
+        basemapToggle.addEventListener('click', function () {
+            var open = basemapMenu.hidden;
+            basemapMenu.hidden = !open;
+            basemapToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('.geo-basemap-card'), function (card) {
+        card.addEventListener('click', function () {
+            applyBasemap(card.getAttribute('data-basemap-key'));
+            basemapMenu.hidden = true;
+            basemapToggle.setAttribute('aria-expanded', 'false');
+        });
+    });
+    if (measureToggle) {
+        measureToggle.addEventListener('click', function () {
+            setMeasureMode(!measureMode);
+        });
+    }
+    if (measureClear) {
+        measureClear.addEventListener('click', clearMeasure);
+    }
+    if (fitLayer) {
+        fitLayer.addEventListener('click', fitAllLoadedFeatures);
+    }
+    if (coordinateFormat) {
+        coordinateFormat.addEventListener('change', updateCoordinateCopyLabel);
+    }
+    if (coordinateCopy) {
+        coordinateCopy.addEventListener('click', function () {
+            if (!lastCoordinateFormats) {
+                return;
+            }
+            var value = lastCoordinateFormats[coordinateFormat.value] || '';
+            if (value) {
+                navigator.clipboard.writeText(value);
+            }
+        });
+    }
+    window.addEventListener('resize', function () {
+        map.resize();
     });
 })();
 </script>

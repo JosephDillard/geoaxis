@@ -14,10 +14,17 @@ class MapController {
         Map viewerConfig = asMap(geoConfig.viewer)
         Map geoserverConfig = asMap(geoConfig.geoserver)
         Map layers = normalizeLayers(asMap(geoConfig.layers))
+        Map externalLayers = normalizeExternalLayers(asMap(geoConfig.externalLayers))
+        Map basemaps = normalizeBasemaps(asMap(viewerConfig.basemaps), viewerConfig)
+        Map tools = normalizeTools(asMap(viewerConfig.tools))
         String selectedLayer = params.layer?.toString()
+        String selectedBasemap = params.basemap?.toString() ?: viewerConfig.selectedBasemap?.toString()
 
         if (!selectedLayer || !layers.containsKey(selectedLayer)) {
-            selectedLayer = layers.keySet().find()
+            selectedLayer = layers.find { String key, Map layer -> layer.enabled }?.key ?: layers.keySet().find()
+        }
+        if (!selectedBasemap || !basemaps.containsKey(selectedBasemap)) {
+            selectedBasemap = basemaps.keySet().find()
         }
 
         Map selectedLayerConfig = selectedLayer ? layers[selectedLayer] as Map : [:]
@@ -25,28 +32,41 @@ class MapController {
         String selectedValue = params.value?.toString() ?: params.featureId?.toString()
 
         Map mapConfig = [
-            wfsUrl       : geoserverConfig.wfsUrl?.toString() ?: '',
-            defaultSrs   : geoserverConfig.defaultSrs?.toString() ?: 'EPSG:4326',
-            osmTilesUrl  : viewerConfig.osmTilesUrl?.toString() ?: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            center       : viewerConfig.center ?: [-106.0, 34.5],
-            zoom         : viewerConfig.zoom ?: 6,
-            maxFeatures  : viewerConfig.maxFeatures ?: 500,
-            selectedLayer: selectedLayer,
-            filter       : [
+            wfsUrl          : geoserverConfig.wfsUrl?.toString() ?: '',
+            defaultSrs      : geoserverConfig.defaultSrs?.toString() ?: 'EPSG:4326',
+            center          : viewerConfig.center ?: [-106.0, 34.5],
+            zoom            : viewerConfig.zoom ?: 6,
+            maxFeatures     : viewerConfig.maxFeatures ?: 500,
+            selectedLayer   : selectedLayer,
+            selectedBasemap : selectedBasemap,
+            filter          : [
                 field: selectedField ?: '',
                 value: selectedValue ?: ''
             ],
-            layers       : layers
+            layers          : layers,
+            externalLayers  : externalLayers,
+            basemaps        : basemaps,
+            tools           : tools,
+            coordinateDigits: viewerConfig.coordinateDigits ?: 6,
+            mgrsAccuracy    : viewerConfig.mgrsAccuracy ?: 5
         ]
 
         [
             mapConfigJson : JsonOutput.toJson(mapConfig),
             layers        : layers,
+            externalLayers: externalLayers,
+            basemaps      : basemaps,
             selectedLayer : selectedLayer,
+            selectedBasemap: selectedBasemap,
             selectedField : selectedField ?: '',
             selectedValue : selectedValue ?: '',
             mapLibreJsUrl : viewerConfig.mapLibreJsUrl?.toString() ?: 'https://unpkg.com/maplibre-gl/dist/maplibre-gl.js',
-            mapLibreCssUrl: viewerConfig.mapLibreCssUrl?.toString() ?: 'https://unpkg.com/maplibre-gl/dist/maplibre-gl.css'
+            mapLibreCssUrl: viewerConfig.mapLibreCssUrl?.toString() ?: 'https://unpkg.com/maplibre-gl/dist/maplibre-gl.css',
+            mapDrawJsUrl  : viewerConfig.mapDrawJsUrl?.toString() ?: '',
+            mapDrawCssUrl : viewerConfig.mapDrawCssUrl?.toString() ?: '',
+            mgrsJsUrl     : viewerConfig.mgrsJsUrl?.toString() ?: '',
+            drawEnabled   : tools.drawing,
+            mgrsEnabled   : tools.mgrs
         ]
     }
 
@@ -62,10 +82,83 @@ class MapController {
                     idField     : layer.idField?.toString() ?: 'id',
                     labelField  : layer.labelField?.toString() ?: layer.idField?.toString() ?: 'id',
                     geometryType: layer.geometryType?.toString() ?: 'Geometry',
-                    color       : layer.color?.toString() ?: '#2563eb'
+                    color       : layer.color?.toString() ?: '#2563eb',
+                    category    : layer.category?.toString() ?: 'Internal',
+                    enabled     : asBoolean(layer.enabled, false)
                 ]
             ]
         }
+    }
+
+    private Map normalizeExternalLayers(Map rawLayers) {
+        rawLayers.collectEntries { Object key, Object value ->
+            String layerKey = key.toString()
+            Map layer = asMap(value)
+            [
+                layerKey,
+                [
+                    title      : layer.title?.toString() ?: layerKey,
+                    category   : layer.category?.toString() ?: 'External',
+                    kind       : layer.kind?.toString() ?: 'raster',
+                    tilesUrl   : layer.tilesUrl?.toString() ?: '',
+                    endpoint   : layer.endpoint?.toString() ?: '',
+                    attribution: layer.attribution?.toString() ?: '',
+                    opacity    : layer.opacity ?: 0.7,
+                    color      : layer.color?.toString() ?: '#facc15',
+                    enabled    : asBoolean(layer.enabled, false),
+                    maxFeatures: layer.maxFeatures ?: 500,
+                    note       : layer.note?.toString() ?: ''
+                ]
+            ]
+        }
+    }
+
+    private Map normalizeBasemaps(Map rawBasemaps, Map viewerConfig) {
+        Map basemaps = rawBasemaps.collectEntries { Object key, Object value ->
+            String basemapKey = key.toString()
+            Map basemap = asMap(value)
+            [
+                basemapKey,
+                [
+                    title      : basemap.title?.toString() ?: basemapKey,
+                    tilesUrl   : basemap.tilesUrl?.toString() ?: '',
+                    attribution: basemap.attribution?.toString() ?: '',
+                    background : basemap.background?.toString() ?: '#06162f',
+                    opacity    : basemap.opacity ?: 1,
+                    preview    : basemap.preview?.toString() ?: basemap.background?.toString() ?: '#06162f'
+                ]
+            ]
+        }
+
+        if (basemaps) {
+            return basemaps
+        }
+
+        [
+            osmLight: [
+                title      : 'OpenStreetMap',
+                tilesUrl   : viewerConfig.osmTilesUrl?.toString() ?: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                attribution: '(c) OpenStreetMap contributors',
+                background : '#dce7f3',
+                opacity    : 1,
+                preview    : 'linear-gradient(135deg, #e8f1f5 0%, #cddfb8 50%, #8fb7d3 100%)'
+            ]
+        ]
+    }
+
+    private Map normalizeTools(Map rawTools) {
+        [
+            basemapSelector: asBoolean(rawTools.basemapSelector, true),
+            layerList      : asBoolean(rawTools.layerList, true),
+            coordinates    : asBoolean(rawTools.coordinates, true),
+            mgrs           : asBoolean(rawTools.mgrs, true),
+            dms            : asBoolean(rawTools.dms, true),
+            measureDistance: asBoolean(rawTools.measureDistance, true),
+            drawing        : asBoolean(rawTools.drawing, true),
+            drawArea       : asBoolean(rawTools.drawArea, true),
+            fullscreen     : asBoolean(rawTools.fullscreen, true),
+            fitLayer       : asBoolean(rawTools.fitLayer, true)
+        ]
     }
 
     private Map asMap(Object value) {
@@ -76,5 +169,13 @@ class MapController {
         }
 
         [:]
+    }
+
+    private boolean asBoolean(Object value, boolean defaultValue) {
+        if (value == null) {
+            return defaultValue
+        }
+
+        value instanceof Boolean ? value : value.toString().toBoolean()
     }
 }
