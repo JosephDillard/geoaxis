@@ -9,14 +9,14 @@ class FACDAMIncidentsSpec extends Specification {
         FACDAMIncidents incident = new FACDAMIncidents(
             incidentId: 'FAC-1',
             eventType: 'Damage',
-            base: 'Osan',
+            base: 'Kirtland AFB',
             repairStatus: 'In Progress'
         )
 
         then:
         incident.incidentId == 'FAC-1'
         incident.eventType == 'Damage'
-        incident.base == 'Osan'
+        incident.base == 'Kirtland AFB'
         incident.repairStatus == 'In Progress'
     }
 }
