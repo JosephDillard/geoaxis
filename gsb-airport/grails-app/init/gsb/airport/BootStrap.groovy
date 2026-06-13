@@ -11,6 +11,13 @@ class BootStrap {
     private static final String RED = 'RED - DEGRADED NO WORK-AROUND'
     private static final String BLACK = 'BLACK - INCAPACITATED'
     private static final String NA = 'NA'
+    private static final List<String> AIRPORT_OVERALL_STATUSES = [
+        GREEN,
+        YELLOW,
+        RED,
+        BLACK,
+        NA
+    ]
 
     private static final List<String> NEW_MEXICO_AIRFIELDS = [
         'Albuquerque International Sunport',
@@ -52,22 +59,8 @@ class BootStrap {
     ]
 
     def init = { servletContext ->
-        seedLookupCategory('airport.overallStatus', [
-            'ALARM BLUE AIR ATTACK',
-            'ALARM BLUE MISSILE ATTACK',
-            'ALARM BLUE INDIRECT FIRE ATTACK',
-            'ALARM BLUE GROUND ATTACK',
-            'ALARM BLACK INITIAL RELEASE',
-            'ALARM BLACK LIMITED RELEASE',
-            'ALARM BLACK PAR RELEASE',
-            'ALARM BLACK GENERAL RELEASE',
-            'ALARM YELLOW ATTACK PROBABLE IN LESS THAN 30 MINS',
-            GREEN,
-            YELLOW,
-            RED,
-            BLACK,
-            NA
-        ])
+        seedLookupCategory('airport.overallStatus', AIRPORT_OVERALL_STATUSES)
+        deactivateLookupValuesNotInList('airport.overallStatus', AIRPORT_OVERALL_STATUSES)
         seedLookupCategory('airport.operationalStatus', [
             GREEN,
             YELLOW,

@@ -69,257 +69,41 @@
 
 
                 <td>
-                    <g:if test="${currentSIT.ceoverall == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.ceoverall == 'RED - DEGRADED NO WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.ceoverall == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.ceoverall == 'BLACK - INCAPACITATED'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.ceoverall == 'BLUE'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                </td>
+                    <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}"><status:badge value="${currentSIT.ceoverall}" width="60px" height="20px"/></g:link>
+</td>
 
 
                 <td>
-                    <g:if test="${currentSIT.runway == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.runway == 'RED - DEGRADED NO WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.runway == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.runway == 'BLACK - INCAPACITATED'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.runway == 'BLUE'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                </td>
+                    <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}"><status:badge value="${currentSIT.runway}" width="60px" height="20px"/></g:link>
+</td>
 
                 <td>
-                    <g:if test="${currentSIT.runwaytwo == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.runwaytwo == 'RED - DEGRADED NO WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.runwaytwo == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.runwaytwo == 'BLACK - INCAPACITATED'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.runwaytwo == 'BLUE'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                </td>
+                    <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}"><status:badge value="${currentSIT.runwaytwo}" width="60px" height="20px"/></g:link>
+</td>
 
                 <td>
-                    <g:if test="${currentSIT.airfield == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.airfield == 'RED - DEGRADED NO WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.airfield == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.airfield == 'BLACK - INCAPACITATED'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.airfield == 'BLUE'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                </td>
+                    <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}"><status:badge value="${currentSIT.airfield}" width="60px" height="20px"/></g:link>
+</td>
 
                 <td>
-                    <g:if test="${currentSIT.facilities == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.facilities == 'RED - DEGRADED NO WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.facilities == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.facilities == 'BLACK - INCAPACITATED'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.facilities == 'BLUE'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                </td>
+                    <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}"><status:badge value="${currentSIT.facilities}" width="60px" height="20px"/></g:link>
+</td>
 
                 <td>
-                    <g:if test="${currentSIT.utilities == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.utilities == 'RED - DEGRADED NO WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.utilities == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.utilities == 'BLACK - INCAPACITATED'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.utilities == 'BLUE'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                </td>
+                    <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}"><status:badge value="${currentSIT.utilities}" width="60px" height="20px"/></g:link>
+</td>
 
                 <td>
-                    <g:if test="${currentSIT.emerresp == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.emerresp == 'RED - DEGRADED NO WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.emerresp == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.emerresp == 'BLACK - INCAPACITATED'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.emerresp == 'BLUE'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                </td>
+                    <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}"><status:badge value="${currentSIT.emerresp}" width="60px" height="20px"/></g:link>
+</td>
 
                 <td>
-                    <g:if test="${currentSIT.overpersonnel == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.overpersonnel == 'RED - DEGRADED NO WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.overpersonnel == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.overpersonnel == 'BLACK - INCAPACITATED'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.overpersonnel == 'BLUE'}">
-                        <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                </td>
+                    <g:link controller="CurrentSIT" action="show" id="${currentSIT.id}"><status:badge value="${currentSIT.overpersonnel}" width="60px" height="20px"/></g:link>
+</td>
 
                 <td>
-                    <g:if test="${currentSIT.overassets == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                        <g:link controller="FireFightingAssets" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.overassets == 'RED - DEGRADED NO WORK-AROUND'}">
-                        <g:link controller="FireFightingAssets" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.overassets == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                        <g:link controller="FireFightingAssets" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.overassets == 'BLACK - INCAPACITATED'}">
-                        <g:link controller="FireFightingAssets" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                    <g:if test="${currentSIT.overassets == 'BLUE'}">
-                        <g:link controller="FireFightingAssets" action="show" id="${currentSIT.id}">
-                            <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                        </g:link>
-                    </g:if>
-                </td>
+                    <g:link controller="FireFightingAssets" action="show" id="${currentSIT.id}"><status:badge value="${currentSIT.overassets}" width="60px" height="20px"/></g:link>
+</td>
 
 
                 <td><g:formatDate timeZone="America/Denver"  format="dd MMM HH:mm" date="${currentSIT.lastUpdated}"/></td>
@@ -346,23 +130,13 @@
     <table>
 
 
-        <tr>
+                <tr class="gsb-status-legend-row">
             <td>Status Legend</td>
-            <td>
-                <g:img dir="images" file="green_legend_noK.png" width="200px" height="40px"/>
-            </td>
-            <td>
-                <g:img dir="images" file="yellow_legend_noK.png" width="200px" height="40px"/>
-            </td>
-            <td>
-                <g:img dir="images" file="red_legend_noK.png" width="200px" height="40px"/>
-            </td>
-            <td>
-                <g:img dir="images" file="black_legend_noK.png" width="200px" height="40px"/>
-            </td>
-            <td>
-
-            </td>
+            <td><status:badge value="GREEN - NO SIGNIFICANT DEGRADATION" width="200px" height="40px" class="gsb-status-badge-large"/></td>
+            <td><status:badge value="YELLOW - DEGRADED WITH WORK-AROUND" width="200px" height="40px" class="gsb-status-badge-large"/></td>
+            <td><status:badge value="RED - DEGRADED NO WORK-AROUND" width="200px" height="40px" class="gsb-status-badge-large"/></td>
+            <td><status:badge value="BLACK - INCAPACITATED" width="200px" height="40px" class="gsb-status-badge-large"/></td>
+            <td></td>
         </tr>
 
     </table>

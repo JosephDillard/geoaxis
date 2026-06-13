@@ -63,6 +63,74 @@ img {
     border: 0;
 }
 
+.gsb-status-badge {
+    --gsb-status-width: 80px;
+    --gsb-status-height: 20px;
+    align-items: center;
+    background: #6b7280;
+    border: 1px solid rgba(17, 24, 39, 0.42);
+    border-radius: 3px;
+    box-sizing: border-box;
+    color: #ffffff;
+    display: inline-flex;
+    font-size: 10px;
+    font-weight: 700;
+    height: var(--gsb-status-height);
+    justify-content: center;
+    letter-spacing: 0;
+    line-height: 1;
+    max-width: var(--gsb-status-width);
+    min-width: 42px;
+    overflow: hidden;
+    padding: 0 5px;
+    text-align: center;
+    text-transform: uppercase;
+    vertical-align: middle;
+    width: var(--gsb-status-width);
+}
+
+.gsb-status-badge-text {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gsb-status-green {
+    background: #16803f;
+}
+
+.gsb-status-yellow {
+    background: #f4d03f;
+    color: #1f2933;
+}
+
+.gsb-status-red {
+    background: #c0392b;
+}
+
+.gsb-status-black {
+    background: #111827;
+}
+
+.gsb-status-blue {
+    background: #1d4ed8;
+}
+
+.gsb-status-na {
+    background: #d1d5db;
+    color: #1f2933;
+}
+
+.gsb-status-unknown {
+    background: #607d8b;
+}
+
+.gsb-status-badge-large {
+    font-size: 11px;
+}
+
 /* GENERAL */
 
 #grailsLogo a {

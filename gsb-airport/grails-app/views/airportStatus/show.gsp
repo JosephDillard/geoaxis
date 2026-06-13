@@ -41,72 +41,9 @@
             <span id="overall-label" class="property-label"><g:message code="airportStatus.overall.label"
                                                                        default="Overall"/></span>
 
-            <span class="property-value" aria-labelledby="overall-label"><g:if
-                    test="${airportStatus.overall == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                <a style="cursor:pointer">
-                    <g:img dir="images" file="green_j.png" width="80px" height="20px"/>
-                </a>
-            </g:if>
-                <g:if test="${airportStatus.overall == 'RED - DEGRADED NO WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="red_j.png" width="80px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.overall == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="yellow_j.png" width="80px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.overall == 'BLACK - INCAPACITATED'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_j.png" width="80px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.overall == 'ALARM BLUE AIR ATTACK'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blue_a.png" width="80px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.overall == 'ALARM BLUE MISSILE ATTACK'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blue_m.png" width="80px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.overall == 'ALARM BLUE INDIRECT FIRE ATTACK'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blue_i.png" width="80px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.overall == 'ALARM BLUE GROUND ATTACK'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blue_g.png" width="80px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.overall == 'ALARM BLACK INITIAL RELEASE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_i.png" width="80px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.overall == 'ALARM BLACK LIMITED RELEASE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_l.png" width="80px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.overall == 'ALARM BLACK PAR RELEASE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_p.png" width="80px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.overall == 'ALARM BLACK GENERAL RELEASE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_g.png" width="80px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.overall == 'ALARM YELLOW ATTACK PROBABLE IN LESS THAN 30 MINS'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="yellow_30.png" width="80px" height="20px"/>
-                    </a>
-                </g:if></span>
+            <span class="property-value" aria-labelledby="overall-label">
+                    <status:badge value="${airportStatus.overall}" width="80px" height="20px"/>
+</span>
 
         </li>
 
@@ -116,32 +53,9 @@
             <span id="ops-label" class="property-label"><g:message code="airportStatus.ops.label"
                                                                    default="Ops"/></span>
 
-            <span class="property-value" aria-labelledby="ops-label"><g:if
-                    test="${airportStatus.ops == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                <a style="cursor:pointer">
-                    <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                </a>
-            </g:if>
-                <g:if test="${airportStatus.ops == 'RED - DEGRADED NO WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.ops == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.ops == 'BLACK - INCAPACITATED'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.ops == 'BLUE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                    </a>
-                </g:if></span>
+            <span class="property-value" aria-labelledby="ops-label">
+                    <status:badge value="${airportStatus.ops}" width="60px" height="20px"/>
+</span>
 
         </li>
 
@@ -161,32 +75,9 @@
         <li class="fieldcontain">
             <span id="mx-label" class="property-label"><g:message code="airportStatus.mx.label" default="Mx"/></span>
 
-            <span class="property-value" aria-labelledby="mx-label"><g:if
-                    test="${airportStatus.mx == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                <a style="cursor:pointer">
-                    <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                </a>
-            </g:if>
-                <g:if test="${airportStatus.mx == 'RED - DEGRADED NO WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.mx == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.mx == 'BLACK - INCAPACITATED'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.mx == 'BLUE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                    </a>
-                </g:if></span>
+            <span class="property-value" aria-labelledby="mx-label">
+                    <status:badge value="${airportStatus.mx}" width="60px" height="20px"/>
+</span>
 
         </li>
 
@@ -203,32 +94,9 @@
             <span id="muns-label" class="property-label"><g:message code="airportStatus.muns.label"
                                                                     default="Muns"/></span>
 
-            <span class="property-value" aria-labelledby="muns-label"><g:if
-                    test="${airportStatus.muns == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                <a style="cursor:pointer">
-                    <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                </a>
-            </g:if>
-                <g:if test="${airportStatus.muns == 'RED - DEGRADED NO WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.muns == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.muns == 'BLACK - INCAPACITATED'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.muns == 'BLUE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                    </a>
-                </g:if></span>
+            <span class="property-value" aria-labelledby="muns-label">
+                    <status:badge value="${airportStatus.muns}" width="60px" height="20px"/>
+</span>
 
         </li>
 
@@ -245,32 +113,9 @@
             <span id="pol-label" class="property-label"><g:message code="airportStatus.pol.label"
                                                                    default="POL"/></span>
 
-            <span class="property-value" aria-labelledby="pol-label"><g:if
-                    test="${airportStatus.pol == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                <a style="cursor:pointer">
-                    <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                </a>
-            </g:if>
-                <g:if test="${airportStatus.pol == 'RED - DEGRADED NO WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.pol == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.pol == 'BLACK - INCAPACITATED'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.pol == 'BLUE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                    </a>
-                </g:if></span>
+            <span class="property-value" aria-labelledby="pol-label">
+                    <status:badge value="${airportStatus.pol}" width="60px" height="20px"/>
+</span>
 
         </li>
 
@@ -287,32 +132,9 @@
             <span id="rwPri-label" class="property-label"><g:message code="airportStatus.rwPri.label"
                                                                      default="RW Pri"/></span>
 
-            <span class="property-value" aria-labelledby="rwPri-label"><g:if
-                    test="${airportStatus.rwPri == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                <a style="cursor:pointer">
-                    <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                </a>
-            </g:if>
-                <g:if test="${airportStatus.rwPri == 'RED - DEGRADED NO WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.rwPri == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.rwPri == 'BLACK - INCAPACITATED'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.rwPri == 'BLUE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                    </a>
-                </g:if></span>
+            <span class="property-value" aria-labelledby="rwPri-label">
+                    <status:badge value="${airportStatus.rwPri}" width="60px" height="20px"/>
+</span>
 
         </li>
 
@@ -329,32 +151,9 @@
             <span id="rwSec-label" class="property-label"><g:message code="airportStatus.rwSec.label"
                                                                      default="RW Sec"/></span>
 
-            <span class="property-value" aria-labelledby="rwSec-label"><g:if
-                    test="${airportStatus.rwSec == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                <a style="cursor:pointer">
-                    <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                </a>
-            </g:if>
-                <g:if test="${airportStatus.rwSec == 'RED - DEGRADED NO WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.rwSec == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.rwSec == 'BLACK - INCAPACITATED'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.rwSec == 'BLUE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                    </a>
-                </g:if></span>
+            <span class="property-value" aria-labelledby="rwSec-label">
+                    <status:badge value="${airportStatus.rwSec}" width="60px" height="20px"/>
+</span>
 
         </li>
 
@@ -371,32 +170,9 @@
             <span id="airfield-label" class="property-label"><g:message code="airportStatus.airfield.label"
                                                                         default="Airfield"/></span>
 
-            <span class="property-value" aria-labelledby="airfield-label"><g:if
-                    test="${airportStatus.airfield == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                <a style="cursor:pointer">
-                    <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                </a>
-            </g:if>
-                <g:if test="${airportStatus.airfield == 'RED - DEGRADED NO WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.airfield == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.airfield == 'BLACK - INCAPACITATED'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.airfield == 'BLUE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                    </a>
-                </g:if></span>
+            <span class="property-value" aria-labelledby="airfield-label">
+                    <status:badge value="${airportStatus.airfield}" width="60px" height="20px"/>
+</span>
 
         </li>
 
@@ -413,32 +189,9 @@
             <span id="infrastructure-label" class="property-label"><g:message code="airportStatus.infrastructure.label"
                                                                               default="Infrastructure"/></span>
 
-            <span class="property-value" aria-labelledby="infrastructure-label"><g:if
-                    test="${airportStatus.infrastructure == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                <a style="cursor:pointer">
-                    <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                </a>
-            </g:if>
-                <g:if test="${airportStatus.infrastructure == 'RED - DEGRADED NO WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.infrastructure == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.infrastructure == 'BLACK - INCAPACITATED'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.infrastructure == 'BLUE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                    </a>
-                </g:if></span>
+            <span class="property-value" aria-labelledby="infrastructure-label">
+                    <status:badge value="${airportStatus.infrastructure}" width="60px" height="20px"/>
+</span>
 
         </li>
 
@@ -455,32 +208,9 @@
             <span id="atcalsNavaids-label" class="property-label"><g:message code="airportStatus.atcalsNavaids.label"
                                                                              default="ATCALS NAVAIDS"/></span>
 
-            <span class="property-value" aria-labelledby="atcalsNavaids-label"><g:if
-                    test="${airportStatus.atcalsNavaids == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                <a style="cursor:pointer">
-                    <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                </a>
-            </g:if>
-                <g:if test="${airportStatus.atcalsNavaids == 'RED - DEGRADED NO WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.atcalsNavaids == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.atcalsNavaids == 'BLACK - INCAPACITATED'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.atcalsNavaids == 'BLUE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                    </a>
-                </g:if></span>
+            <span class="property-value" aria-labelledby="atcalsNavaids-label">
+                    <status:badge value="${airportStatus.atcalsNavaids}" width="60px" height="20px"/>
+</span>
 
         </li>
 
@@ -497,32 +227,9 @@
             <span id="c4i-label" class="property-label"><g:message code="airportStatus.c4i.label"
                                                                    default="C4I/Cyber"/></span>
 
-            <span class="property-value" aria-labelledby="c4i-label"><g:if
-                    test="${airportStatus.c4i == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                <a style="cursor:pointer">
-                    <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                </a>
-            </g:if>
-                <g:if test="${airportStatus.c4i == 'RED - DEGRADED NO WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.c4i == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.c4i == 'BLACK - INCAPACITATED'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.c4i == 'BLUE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                    </a>
-                </g:if></span>
+            <span class="property-value" aria-labelledby="c4i-label">
+                    <status:badge value="${airportStatus.c4i}" width="60px" height="20px"/>
+</span>
 
         </li>
 
@@ -539,32 +246,9 @@
             <span id="cyber-label" class="property-label"><g:message code="airportStatus.cyber.label"
                                                                      default="Radio Phone "/></span>
 
-            <span class="property-value" aria-labelledby="cyber-label"><g:if
-                    test="${airportStatus.cyber == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                <a style="cursor:pointer">
-                    <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                </a>
-            </g:if>
-                <g:if test="${airportStatus.cyber == 'RED - DEGRADED NO WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.cyber == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.cyber == 'BLACK - INCAPACITATED'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.cyber == 'BLUE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                    </a>
-                </g:if></span>
+            <span class="property-value" aria-labelledby="cyber-label">
+                    <status:badge value="${airportStatus.cyber}" width="60px" height="20px"/>
+</span>
 
         </li>
 
@@ -583,31 +267,8 @@
                                                                            default="Base Defense"/></span>
 
             <span class="property-value" aria-labelledby="baseDefense-label">
-                <g:if test="${airportStatus.baseDefense == 'GREEN - NO SIGNIFICANT DEGRADATION'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="green_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.baseDefense == 'RED - DEGRADED NO WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="red_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.baseDefense == 'YELLOW - DEGRADED WITH WORK-AROUND'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="yellow_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.baseDefense == 'BLACK - INCAPACITATED'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="black_j.png" width="60px" height="20px"/>
-                    </a>
-                </g:if>
-                <g:if test="${airportStatus.baseDefense == 'BLUE'}">
-                    <a style="cursor:pointer">
-                        <g:img dir="images" file="blueua.png" width="60px" height="20px"/>
-                    </a>
-                </g:if></span>
+                    <status:badge value="${airportStatus.baseDefense}" width="60px" height="20px"/>
+</span>
 
         </li>
 
@@ -667,22 +328,13 @@
     </g:form>
     <table>
 
-        <tr>
+                <tr class="gsb-status-legend-row">
             <td>Status Legend</td>
-            <td>
-                <g:img dir="images" file="green_legend.png" width="200px" height="40px"/>
-            </td>
-            <td>
-                <g:img dir="images" file="yellow_legend.png" width="200px" height="40px"/>
-            </td>
-            <td>
-                <g:img dir="images" file="red_legend.png" width="200px" height="40px"/>
-            </td>
-            <td>
-                <g:img dir="images" file="black_legend.png" width="200px" height="40px"/>
-            </td>
-            <td>
-            </td>
+            <td><status:badge value="GREEN - NO SIGNIFICANT DEGRADATION" width="200px" height="40px" class="gsb-status-badge-large"/></td>
+            <td><status:badge value="YELLOW - DEGRADED WITH WORK-AROUND" width="200px" height="40px" class="gsb-status-badge-large"/></td>
+            <td><status:badge value="RED - DEGRADED NO WORK-AROUND" width="200px" height="40px" class="gsb-status-badge-large"/></td>
+            <td><status:badge value="BLACK - INCAPACITATED" width="200px" height="40px" class="gsb-status-badge-large"/></td>
+            <td></td>
         </tr>
 
     </table>
