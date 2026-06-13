@@ -552,16 +552,27 @@
             .replace(/'/g, '&#039;');
     }
 
+    function popupLabel(key) {
+        return String(key || '')
+            .replace(/_/g, ' ')
+            .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+            .toUpperCase();
+    }
+
+    function popupValue(value) {
+        return value == null || value === '' ? 'N/A' : value;
+    }
+
     function popupHtml(feature, layer) {
         var properties = feature.properties || {};
         var title = properties[layer.labelField] || properties[layer.idField] || layer.title;
         var rows = Object.keys(properties).filter(function (key) {
             return key.indexOf('__') !== 0;
         }).slice(0, 12).map(function (key) {
-            return '<dt>' + escapeHtml(key) + '</dt><dd>' + escapeHtml(properties[key]) + '</dd>';
+            return '<dt>' + escapeHtml(popupLabel(key)) + '</dt><dd>' + escapeHtml(popupValue(properties[key])) + '</dd>';
         }).join('');
 
-        return '<strong>' + escapeHtml(title) + '</strong><dl class="geo-map-popup">' + rows + '</dl>';
+        return '<div class="geo-map-popup-title">' + escapeHtml(title) + '</div><dl class="geo-map-popup">' + rows + '</dl>';
     }
 
     function extendBounds(bounds, coordinates, count) {
@@ -1613,7 +1624,10 @@
         if (!layer) {
             return;
         }
-        new maplibregl.Popup()
+        new maplibregl.Popup({
+            className: 'geo-map-feature-popup',
+            maxWidth: '360px'
+        })
             .setLngLat(event.lngLat)
             .setHTML(popupHtml(feature, layer))
             .addTo(map);
