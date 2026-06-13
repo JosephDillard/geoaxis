@@ -11,13 +11,19 @@
     <title><g:layoutTitle default="GeoDB Dashboard"/></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="${assetPath(src: 'faviconstat.ico')}" type="image/x-icon">
-    <asset:stylesheet src="mainceindexfeb16.css"/>
+    <asset:stylesheet src="application.css"/>
     <div align="right" class="bottomfoot">User: <sec:loggedInUserInfo field="username"/></div>
     <g:layoutHead/>
 </head>
 
 <body>
-<div id="grailsLogo" role="banner"><a href="${createLink(uri: '/')}"><asset:image src="cedashboardAug2015.png" alt="GSB Dashboard"/></a></div>
+<div id="grailsLogo" role="banner">
+    <a class="gsb-logo-link" href="${createLink(uri: '/')}">
+        <span class="gsb-logo-mark" aria-hidden="true">GSB</span>
+        <span class="gsb-logo-title"><gsb:bannerText slot="brandSubtitle" defaultText="Geospatial Status Board"/></span>
+    </a>
+</div>
+<gsb:quickLinks/>
 
 <g:layoutBody/>
 <div class="footer" role="contentinfo"></div>
@@ -38,6 +44,9 @@
     <ul>
         <li><a class="list" href="${createLink(uri: '/airportStatus/index')}" target="_blank">Airport Status</a></li>
         <li><a class="home" href="${createLink(uri: '/')}" target="_blank">GSB Home</a></li>
+        <sec:ifAnyGranted roles="ROLE_ADMIN">
+            <li><g:link controller="appAdmin">App Admin</g:link></li>
+        </sec:ifAnyGranted>
     </ul>
 </div>
 <footer>

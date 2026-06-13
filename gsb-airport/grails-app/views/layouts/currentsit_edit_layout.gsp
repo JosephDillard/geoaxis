@@ -17,7 +17,13 @@
 </head>
 
 <body>
-<div id="grailsLogo" role="banner"><a href="${createLink(uri: '/')}"><asset:image src="cedashboardAug2015.png" alt="GSB Dashboard"/></a></div>
+<div id="grailsLogo" role="banner">
+    <a class="gsb-logo-link" href="${createLink(uri: '/')}">
+        <span class="gsb-logo-mark" aria-hidden="true">GSB</span>
+        <span class="gsb-logo-title"><gsb:bannerText slot="brandSubtitle" defaultText="Geospatial Status Board"/></span>
+    </a>
+</div>
+<gsb:quickLinks/>
 
 
 
@@ -38,6 +44,9 @@
 <div class="nav" role="navigation">
     <ul>
         <li><a class="list" href="${createLink(uri: '/AirportStatus')}">Airport Status</a></li>
+        <sec:ifAnyGranted roles="ROLE_ADMIN">
+            <li><g:link controller="appAdmin">App Admin</g:link></li>
+        </sec:ifAnyGranted>
     </ul>
 </div>
 </body>

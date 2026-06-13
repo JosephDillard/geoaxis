@@ -58,7 +58,33 @@ class BootStrap {
         'Contractor / Mutual Aid'
     ]
 
+    private static final List<Map> DEFAULT_BANNER_TEXTS = [
+        [slot: 'brandTitle', label: 'Banner Title', textValue: 'Airport Status', sortOrder: 1],
+        [slot: 'brandSubtitle', label: 'Banner Subtitle', textValue: 'Geospatial Status Board', sortOrder: 2],
+        [slot: 'securityMessage', label: 'Top Center Banner', textValue: 'Status app linkable to geospatial data', sortOrder: 3],
+        [slot: 'useMessage', label: 'Top Right Banner', textValue: 'Dashboard and map view of airport and airfield status', sortOrder: 4],
+        [slot: 'versionMessage', label: 'Footer Banner', textValue: 'GSB', sortOrder: 5],
+        [slot: 'quickLinksTitle', label: 'Quick Links Title', textValue: 'Emergency Links', sortOrder: 6]
+    ]
+
+    private static final List<Map> DEFAULT_QUICK_LINKS = [
+        [category: 'Federal Emergency', label: 'FEMA', url: 'https://www.fema.gov/', description: 'Federal Emergency Management Agency', sortOrder: 10],
+        [category: 'Federal Emergency', label: 'Ready.gov', url: 'https://www.ready.gov/', description: 'Preparedness guidance and public emergency information', sortOrder: 20],
+        [category: 'Weather', label: 'National Weather Service', url: 'https://www.weather.gov/', description: 'Official watches, warnings, and forecasts', sortOrder: 30],
+        [category: 'Weather', label: 'NWS API', url: 'https://www.weather.gov/documentation/services-web-api', description: 'Open weather alert and forecast API documentation', sortOrder: 40],
+        [category: 'Weather', label: 'NOAA Radar Services', url: 'https://mapservices.weather.noaa.gov/eventdriven/rest/services/radar', description: 'NOAA radar map services', sortOrder: 50],
+        [category: 'Wildfire', label: 'NIFC Open Data', url: 'https://data-nifc.opendata.arcgis.com/', description: 'National Interagency Fire Center open GIS data', sortOrder: 60],
+        [category: 'Wildfire', label: 'USFS Fire Data', url: 'https://data.fs.usda.gov/geodata/', description: 'U.S. Forest Service geospatial data', sortOrder: 70],
+        [category: 'Seismic and Flood', label: 'USGS Earthquakes', url: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php', description: 'USGS GeoJSON earthquake feeds', sortOrder: 80],
+        [category: 'Seismic and Flood', label: 'USGS Water Data', url: 'https://waterdata.usgs.gov/', description: 'Stream gauge and water observation data', sortOrder: 90],
+        [category: 'New Mexico', label: 'NM DHSEM', url: 'https://www.dhsem.nm.gov/', description: 'New Mexico emergency management', sortOrder: 100],
+        [category: 'New Mexico', label: 'NM RGIS', url: 'https://rgis.unm.edu/', description: 'New Mexico geospatial data clearinghouse', sortOrder: 110],
+        [category: 'GIS', label: 'GeoPlatform', url: 'https://www.geoplatform.gov/', description: 'Federal geospatial platform', sortOrder: 120],
+        [category: 'GIS', label: 'Data.gov Geospatial', url: 'https://catalog.data.gov/dataset/?metadata_type=geospatial', description: 'Open geospatial datasets', sortOrder: 130]
+    ]
+
     def init = { servletContext ->
+        seedAppChromeContent()
         seedLookupCategory('airport.overallStatus', AIRPORT_OVERALL_STATUSES)
         deactivateLookupValuesNotInList('airport.overallStatus', AIRPORT_OVERALL_STATUSES)
         seedLookupCategory('airport.operationalStatus', [
@@ -104,6 +130,38 @@ class BootStrap {
     }
 
     def destroy = {
+    }
+
+    private void seedAppChromeContent() {
+        AppBannerText.withTransaction {
+            DEFAULT_BANNER_TEXTS.each { Map row ->
+                if (!AppBannerText.findBySlot(row.slot as String)) {
+                    new AppBannerText(
+                        slot: row.slot,
+                        label: row.label,
+                        textValue: row.textValue,
+                        sortOrder: row.sortOrder,
+                        active: true
+                    ).save(failOnError: true)
+                }
+            }
+        }
+
+        AppQuickLink.withTransaction {
+            DEFAULT_QUICK_LINKS.each { Map row ->
+                if (!AppQuickLink.findByLabelAndUrl(row.label as String, row.url as String)) {
+                    new AppQuickLink(
+                        label: row.label,
+                        url: row.url,
+                        category: row.category,
+                        description: row.description,
+                        sortOrder: row.sortOrder,
+                        active: true,
+                        openInNewWindow: true
+                    ).save(failOnError: true)
+                }
+            }
+        }
     }
 
     private void seedLookupCategory(String category, List<String> values) {

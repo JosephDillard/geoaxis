@@ -37,9 +37,8 @@
                 <span class="icon-bar"></span>
             </button>
             <a class="navbar-brand" href="${request.contextPath}/#">
-                <i class="fa grails-icon">
-                    <asset:image src="tri-logo83.png"/>
-                </i> Airport Status
+                <span class="gsb-logo-mark" aria-hidden="true">GSB</span>
+                <gsb:bannerText slot="brandTitle" defaultText="Airport Status"/>
             </a>
 
         </div>
@@ -47,12 +46,14 @@
             <ul class="nav navbar-nav navbar-right">
                 <sec:ifAnyGranted roles="ROLE_ADMIN">
                     <li><g:link controller="airportLookupOption">Lookup Options</g:link></li>
+                    <li><g:link controller="appAdmin">App Admin</g:link></li>
                 </sec:ifAnyGranted>
                 <g:pageProperty name="page.nav" />
             </ul>
         </div>
     </div>
 </div>
+<gsb:quickLinks/>
 
 <g:layoutBody/>
 

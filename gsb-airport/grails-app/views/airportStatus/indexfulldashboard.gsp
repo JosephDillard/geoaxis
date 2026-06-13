@@ -131,7 +131,7 @@
                             params="[layer: 'airportStatus', field: 'site_name', value: airportStatus.airfieldName]"
                             target="_blank"
                             rel="noopener"
-                            title="Open map view"><g:img dir="images" file="map_icon.png" width="18" height="18"/></g:link></td>
+                            title="Open map view"><gsb:mapIcon/></g:link></td>
 
             </tr>
         </g:each>

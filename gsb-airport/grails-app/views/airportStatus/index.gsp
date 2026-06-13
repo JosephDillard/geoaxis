@@ -137,7 +137,7 @@
                             target="_blank"
                             rel="noopener"
                             title="Open map view">
-                    <g:img dir="images" file="map_icon.png" width="18" height="18"/>
+                    <gsb:mapIcon/>
                 </g:link>
                 </td>
 

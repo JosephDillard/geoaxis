@@ -18,7 +18,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark navbar-static-top" role="navigation">
     <div class="container-fluid">
-        <g:link class="navbar-brand geospatial-status-board-brand" uri="/">Geospatial Status Board</g:link>
+        <g:link class="navbar-brand geospatial-status-board-brand" uri="/"><gsb:bannerText slot="brandSubtitle" defaultText="Geospatial Status Board"/></g:link>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -26,6 +26,11 @@
         <div class="collapse navbar-collapse" id="navbarContent">
             <ul class="nav navbar-nav ml-auto">
                 <g:pageProperty name="page.nav"/>
+                <sec:ifAnyGranted roles="ROLE_ADMIN">
+                    <li class="nav-item">
+                        <g:link controller="appAdmin" action="index" class="nav-link">App Admin</g:link>
+                    </li>
+                </sec:ifAnyGranted>
                 <sec:ifLoggedIn>
                     <li class="nav-item">
                         <span class="navbar-text geospatial-status-board-user"><sec:username/></span>
@@ -45,6 +50,7 @@
         </div>
     </div>
 </nav>
+<gsb:quickLinks/>
 
 <g:layoutBody/>
 

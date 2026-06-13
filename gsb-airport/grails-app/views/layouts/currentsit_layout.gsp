@@ -21,9 +21,13 @@
         field="username"/></sec:ifLoggedIn></div>
 <sec:ifNotLoggedIn><div align="right" class="buttonslogin"><g:link controller="login"
                                                                    action="auth">Login</g:link></div></sec:ifNotLoggedIn>
-<div id="grailsLogo" role="banner"><a
-        href="//GeoDBDashboard/"><asset:image
-            src="cedashboard.png" alt="GeoDB Dashboard"/></a></div>
+<div id="grailsLogo" role="banner">
+    <a class="gsb-logo-link" href="${createLink(uri: '/')}">
+        <span class="gsb-logo-mark" aria-hidden="true">GSB</span>
+        <span class="gsb-logo-title"><gsb:bannerText slot="brandSubtitle" defaultText="Geospatial Status Board"/></span>
+    </a>
+</div>
+<gsb:quickLinks/>
 
 
 <g:layoutBody/>

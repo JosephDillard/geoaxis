@@ -34,20 +34,23 @@
         <span class="icon-bar"></span>
       </button>
       <a class="navbar-brand" href="${request.contextPath}/#">
-        <i class="fa grails-icon">
-          <asset:image src="tri-logo83.png"/>
-        </i> Airport Status
-        <span>Version 2 Beta</span>
+        <span class="gsb-logo-mark" aria-hidden="true">GSB</span>
+        <gsb:bannerText slot="brandTitle" defaultText="Airport Status"/>
+        <span><gsb:bannerText slot="versionMessage" defaultText="GSB"/></span>
       </a>
 
     </div>
     <div class="navbar-collapse collapse" aria-expanded="false" style="height: 0.8px;">
       <ul class="nav navbar-nav navbar-right">
+        <sec:ifAnyGranted roles="ROLE_ADMIN">
+          <li><g:link controller="appAdmin">App Admin</g:link></li>
+        </sec:ifAnyGranted>
         <g:pageProperty name="page.nav" />
       </ul>
     </div>
   </div>
 </div>
+<gsb:quickLinks/>
 
 <g:layoutBody/>
 

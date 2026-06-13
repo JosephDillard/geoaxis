@@ -23,22 +23,23 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/#">
-                    <i class="fa grails-icon">
-                        <asset:image src="grails-cupsonly-logo-white.svg"/>
-                    </i> Grails
+                <a class="navbar-brand" href="${request.contextPath}/#">
+                    <span class="gsb-logo-mark" aria-hidden="true">GSB</span>
+                    <gsb:bannerText slot="brandSubtitle" defaultText="Geospatial Status Board"/>
                 </a>
             </div>
             <div class="navbar-collapse collapse" aria-expanded="false" style="height: 0.8px;">
                 <ul class="nav navbar-nav navbar-right">
                     <sec:ifAnyGranted roles="ROLE_ADMIN">
                         <li><g:link controller="incidentLookupOption">Lookup Options</g:link></li>
+                        <li><g:link controller="appAdmin">App Admin</g:link></li>
                     </sec:ifAnyGranted>
                     <g:pageProperty name="page.nav" />
                 </ul>
             </div>
         </div>
     </div>
+    <gsb:quickLinks/>
 
     <g:layoutBody/>
 
