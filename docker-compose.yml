@@ -1,0 +1,83 @@
+name: geospatial-status-board
+
+services:
+  postgis:
+    image: ${POSTGIS_IMAGE:-postgis/postgis:16-3.4}
+    container_name: gsb-postgis
+    environment:
+      POSTGRES_DB: ${POSTGIS_DB:-geostatusboard}
+      POSTGRES_USER: ${POSTGIS_USER:-gsb}
+      POSTGRES_PASSWORD: ${POSTGIS_PASSWORD:-gsb}
+    ports:
+      - "${POSTGIS_PORT:-5432}:5432"
+    volumes:
+      - gsb-postgis-data:/var/lib/postgresql/data
+      - ./docker/postgis/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  geoserver:
+    image: ${GEOSERVER_IMAGE:-docker.osgeo.org/geoserver:2.28.2}
+    container_name: gsb-geoserver
+    depends_on:
+      postgis:
+        condition: service_healthy
+    environment:
+      GEOSERVER_ADMIN_USER: ${GEOSERVER_ADMIN_USER:-admin}
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD:-geoserver}
+      GEOSERVER_DATA_DIR: /opt/geoserver_data
+      SKIP_DEMO_DATA: "true"
+      CORS_ENABLED: "true"
+      CORS_ALLOWED_ORIGINS: "${GEOSERVER_CORS_ALLOWED_ORIGINS:-*}"
+      CORS_ALLOWED_METHODS: "GET,POST,PUT,DELETE,HEAD,OPTIONS"
+      CORS_ALLOWED_HEADERS: "Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization"
+    ports:
+      - "${GEOSERVER_PORT:-8081}:8080"
+    volumes:
+      - gsb-geoserver-data:/opt/geoserver_data
+
+  geoserver-init:
+    image: ${CURL_IMAGE:-curlimages/curl:8.8.0}
+    profiles: ["tools"]
+    depends_on:
+      geoserver:
+        condition: service_started
+    environment:
+      GEOSERVER_REST_URL: http://geoserver:8080/geoserver/rest
+      GEOSERVER_ADMIN_USER: ${GEOSERVER_ADMIN_USER:-admin}
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD:-geoserver}
+      GEOSERVER_WORKSPACE: ${GEOSERVER_WORKSPACE:-gsb}
+      GEOSERVER_STORE: ${GEOSERVER_STORE:-postgis}
+      POSTGIS_HOST: postgis
+      POSTGIS_PORT: 5432
+      POSTGIS_DB: ${POSTGIS_DB:-geostatusboard}
+      POSTGIS_USER: ${POSTGIS_USER:-gsb}
+      POSTGIS_PASSWORD: ${POSTGIS_PASSWORD:-gsb}
+      POSTGIS_SCHEMA: ${POSTGIS_SCHEMA:-public}
+    volumes:
+      - ./docker/geoserver/bootstrap:/bootstrap:ro
+    entrypoint: ["/bin/sh", "/bootstrap/configure-geoserver.sh"]
+
+  postgis-spatialize:
+    image: ${POSTGRES_CLIENT_IMAGE:-postgres:16}
+    profiles: ["tools"]
+    depends_on:
+      postgis:
+        condition: service_healthy
+    environment:
+      POSTGIS_HOST: postgis
+      POSTGIS_PORT: 5432
+      POSTGIS_DB: ${POSTGIS_DB:-geostatusboard}
+      POSTGIS_USER: ${POSTGIS_USER:-gsb}
+      POSTGIS_PASSWORD: ${POSTGIS_PASSWORD:-gsb}
+    volumes:
+      - ./docs/postgis-spatialization.sql:/sql/postgis-spatialization.sql:ro
+      - ./docker/postgis/spatialize.sh:/spatialize.sh:ro
+    entrypoint: ["/bin/sh", "/spatialize.sh"]
+
+volumes:
+  gsb-postgis-data:
+  gsb-geoserver-data:

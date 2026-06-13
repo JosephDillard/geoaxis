@@ -46,8 +46,8 @@ class CurrentIncidents {
     }
     static mapping = {
         id column: 'OBJECTID_1'
-        eventDesc type: 'text', sqlType: 'clob'
-        eventDescHan type: 'text', sqlType: 'clob'
+        eventDesc type: 'text', sqlType: 'text'
+        eventDescHan type: 'text', sqlType: 'text'
         //incidentId column: 'OBJECTID_1'
         version false
         table 'AFIM_EVENT_POINT_BM0914'

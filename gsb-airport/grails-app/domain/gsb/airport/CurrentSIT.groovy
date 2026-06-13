@@ -63,7 +63,7 @@ class CurrentSIT {
         lastUpdated nullable: true, blank: true
     }
     static mapping = {
-        remarks type: 'text', sqlType: 'clob'
+        remarks type: 'text', sqlType: 'text'
         table 'INDEX_AIRFIELDS'
         datasource 'geodbfour'
         runway column: 'RW_PRI'

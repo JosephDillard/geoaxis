@@ -11,6 +11,7 @@ This repository contains a status app linkable to geospatial data for dashboard 
 - Editable lookup tables for dropdown text used by airport and incident workflows.
 - Development bootstrap data for New Mexico airports and airfields, current status, runway surface condition, support assets, utilities, current incidents, and archived incidents.
 - Single deployable WAR with the application served from `/GeoStatusBoard`.
+- Optional Docker Compose GIS stack for local PostGIS and GeoServer development.
 
 ## Screenshots
 
@@ -29,6 +30,7 @@ The screenshot above shows the geospatial status map with a New Mexico airfield 
 - H2 development and test databases
 - PostGIS and GeoServer for open source GIS deployment
 - MapLibre GL JS for the browser map
+- Docker Compose for optional local GIS infrastructure
 
 ## Project Layout
 
@@ -36,10 +38,16 @@ The screenshot above shows the geospatial status map with a New Mexico airfield 
 - `gsb-airport/` - Airport, airfield, utility, and support asset status module.
 - `gsb-incidents/` - Incident, current incident, archived incident, and facility damage module.
 - `docs/` - Geospatial architecture notes, PostGIS spatialization SQL, and README images.
+- `docker/` - Local PostGIS initialization and GeoServer bootstrap scripts.
+- `docker-compose.yml` - Optional local PostGIS and GeoServer services.
+- `.env.example` - Local Docker and GIS configuration defaults.
+- `dev.ps1` - Convenience commands for the local Docker GIS stack.
 - `build.gradle` - Root build, WAR packaging, Java compatibility, and module dependencies.
 - `settings.gradle` - Includes the airport and incident modules under the `geospatial-status-board` Gradle root project.
 
 ## Run Locally
+
+Docker is not required for the normal development path. If no PostGIS profile is enabled, the app uses H2 for the root datasource and the named airport/incident datasources.
 
 Use the Gradle wrapper from the repository root:
 
@@ -71,6 +79,97 @@ The default seeded admin account is:
 username: admin
 password: admin123
 ```
+
+## Optional Docker GIS Stack
+
+Use Docker when you want local PostGIS and GeoServer for map/WFS integration testing. The Grails app can still run from IntelliJ or `bootRun`.
+
+Start the infrastructure:
+
+```powershell
+.\dev.ps1 up
+```
+
+Equivalent raw Docker command:
+
+```powershell
+docker compose up -d postgis geoserver
+```
+
+Default local endpoints:
+
+```text
+PostGIS:   localhost:5432/geostatusboard
+GeoServer: http://localhost:8081/geoserver
+WFS:       http://localhost:8081/geoserver/gsb/ows
+```
+
+Default local credentials:
+
+```text
+PostGIS user/password: gsb / gsb
+GeoServer user/password: admin / geoserver
+```
+
+To customize ports, image tags, credentials, or the WFS URL:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Then edit `.env`. The `.env` file is intentionally ignored by Git.
+
+### Keep Grails on H2
+
+Run the app normally:
+
+```powershell
+.\gradlew.bat :bootRun
+```
+
+This path uses H2. If GeoServer is not running, the map page remains usable for basemaps and tools and reports GeoServer layer failures in the map status panel.
+
+### Run Grails Against PostGIS
+
+Start the Docker infrastructure, then run the app with the `postgis` Spring profile:
+
+```powershell
+.\dev.ps1 up
+$env:SPRING_PROFILES_ACTIVE = 'postgis'
+.\gradlew.bat :bootRun
+Remove-Item Env:SPRING_PROFILES_ACTIVE
+```
+
+For IntelliJ, set either the VM option:
+
+```text
+-Dspring.profiles.active=postgis
+```
+
+or the environment variable:
+
+```text
+SPRING_PROFILES_ACTIVE=postgis
+```
+
+After the app has created the tables in PostGIS, apply the spatial columns/indexes and rerun the GeoServer bootstrap:
+
+```powershell
+.\dev.ps1 spatialize
+```
+
+The spatialization script adds `geom geometry(Geometry, 4326)` columns and GiST indexes. For the built-in development sample data, it also seeds approximate New Mexico point and polygon geometries so the map draws immediately. Replace those sample geometries with authoritative source geometry for production data.
+
+Useful Docker helper commands:
+
+```powershell
+.\dev.ps1 logs
+.\dev.ps1 geoserver-init
+.\dev.ps1 down
+.\dev.ps1 reset
+```
+
+`reset` removes the local Docker volumes and recreates empty PostGIS and GeoServer state.
 
 ## Build
 
@@ -155,6 +254,15 @@ See:
 - `docs/postgis-spatialization.sql`
 - `docs/geospatial-architecture.md`
 
+## Recent Local Changes
+
+- Added an optional Docker Compose GIS stack for local PostGIS and GeoServer testing.
+- Added a `postgis` Spring profile while keeping H2 as the default development and test database.
+- Added GeoServer WFS timeout handling so missing local GeoServer services fail gracefully in the map status panel.
+- Added PostgreSQL-safe table/formula mappings for the local PostGIS development profile.
+- Added development sample geometries for the bootstrapped New Mexico records.
+- Added editable lookup tables, richer New Mexico bootstrap data, and MapLibre map tools for basemaps, layers, feature filtering, measurement, drawing, fullscreen, MGRS, and coordinate readout.
+
 ## Data Sources
 
 The root app configures the default datasource plus named datasources used by the included modules:
@@ -164,3 +272,11 @@ The root app configures the default datasource plus named datasources used by th
 - `geodbthree` - Incident data.
 
 Development and test environments use H2 databases by default.
+
+The optional `postgis` Spring profile points all three datasources at the same local PostGIS database so GeoServer can publish airport, asset, utility, and incident tables from one datastore.
+
+The PostGIS profile override lives in:
+
+```text
+grails-app/conf/application-postgis.yml
+```

@@ -34,6 +34,7 @@ class MapController {
         Map mapConfig = [
             wfsUrl          : geoserverConfig.wfsUrl?.toString() ?: '',
             defaultSrs      : geoserverConfig.defaultSrs?.toString() ?: 'EPSG:4326',
+            requestTimeoutMs: asInteger(geoserverConfig.requestTimeoutMs, 5000),
             center          : viewerConfig.center ?: [-106.0, 34.5],
             zoom            : viewerConfig.zoom ?: 6,
             zoomLevels      : normalizeZoomLevels(viewerConfig.zoomLevels),
@@ -194,5 +195,17 @@ class MapController {
         }
 
         value instanceof Boolean ? value : value.toString().toBoolean()
+    }
+
+    private int asInteger(Object value, int defaultValue) {
+        if (value == null) {
+            return defaultValue
+        }
+
+        if (value instanceof Number) {
+            return value as int
+        }
+
+        value.toString().isInteger() ? value.toString() as int : defaultValue
     }
 }

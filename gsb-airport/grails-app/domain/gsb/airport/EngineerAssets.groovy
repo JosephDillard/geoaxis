@@ -26,8 +26,8 @@ class EngineerAssets {
     static mapping = {
         numShort formula: 'auth - avai'
         numExcess formula: 'avai - auth'
-        percentage formula: 'DECODE(auth,0,0, avai / auth)'
-        remarks type: 'text', sqlType: 'clob'
+        percentage formula: 'case when auth = 0 then 0 else avai / auth end'
+        remarks type: 'text', sqlType: 'text'
         datasource 'geodbfour'
     }
     static constraints = {

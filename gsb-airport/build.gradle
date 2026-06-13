@@ -79,7 +79,10 @@ bootRun {
         '-Xmx1024m')
     sourceResources sourceSets.main
     String springProfilesActive = 'spring.profiles.active'
-    systemProperty springProfilesActive, System.getProperty(springProfilesActive)
+    String activeProfiles = System.getProperty(springProfilesActive) ?: System.getenv('SPRING_PROFILES_ACTIVE')
+    if (activeProfiles) {
+        systemProperty springProfilesActive, activeProfiles
+    }
 }
 
 tasks.named('bootRun') {
@@ -95,6 +98,10 @@ tasks.withType(GroovyCompile) {
 
 tasks.withType(Test) {
     useJUnitPlatform()
+}
+
+tasks.named('processResources') {
+    exclude 'application.yml'
 }
 
 assets {

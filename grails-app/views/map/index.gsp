@@ -507,6 +507,42 @@
         return url.toString();
     }
 
+    function fetchWfsJson(layer) {
+        var timeoutMs = Number(config.requestTimeoutMs || 5000);
+        var requestOptions = { credentials: 'same-origin' };
+        var timeoutId = null;
+
+        if (window.AbortController && timeoutMs > 0) {
+            var controller = new AbortController();
+            requestOptions.signal = controller.signal;
+            timeoutId = window.setTimeout(function () {
+                controller.abort();
+            }, timeoutMs);
+        }
+
+        return fetch(buildWfsUrl(layer), requestOptions)
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('GeoServer returned HTTP ' + response.status);
+                }
+                return response.json();
+            })
+            .catch(function (error) {
+                if (error && error.name === 'AbortError') {
+                    throw new Error('GeoServer did not respond within ' + timeoutMs + ' ms');
+                }
+                if (error instanceof TypeError) {
+                    throw new Error('GeoServer is unavailable or blocked by CORS');
+                }
+                throw error;
+            })
+            .finally(function () {
+                if (timeoutId) {
+                    window.clearTimeout(timeoutId);
+                }
+            });
+    }
+
     function escapeHtml(value) {
         return String(value == null ? '' : value)
             .replace(/&/g, '&amp;')
@@ -881,6 +917,12 @@
         if (!layer) {
             return;
         }
+        if (!config.wfsUrl) {
+            internalLayerState[key] = { loaded: false, loading: false, data: null };
+            updateLayerStatus(key, 'internal', 'Unavailable');
+            setStatus(layer.title + ': GeoServer WFS URL is not configured.', true);
+            return;
+        }
         var state = internalLayerState[key] || {};
         if (state.loading) {
             return;
@@ -889,13 +931,7 @@
         updateLayerStatus(key, 'internal', 'Loading');
         setStatus('Loading ' + layer.title + ' from GeoServer...');
 
-        fetch(buildWfsUrl(layer), { credentials: 'same-origin' })
-            .then(function (response) {
-                if (!response.ok) {
-                    throw new Error('GeoServer returned HTTP ' + response.status);
-                }
-                return response.json();
-            })
+        fetchWfsJson(layer)
             .then(function (geojson) {
                 var checkbox = document.querySelector('[data-layer-kind="internal"][data-layer-key="' + key + '"]');
                 if (!checkbox || !checkbox.checked) {
@@ -911,7 +947,7 @@
             .catch(function (error) {
                 internalLayerState[key] = { loaded: false, loading: false, data: null };
                 updateLayerStatus(key, 'internal', 'Error');
-                setStatus(layer.title + ': ' + error.message + '. Check GeoServer, CORS, layer names, and WFS outputFormat.', true);
+                setStatus(layer.title + ': ' + error.message + '. Start the local GIS stack or check GeoServer, CORS, layer names, and WFS outputFormat.', true);
             });
     }
 

@@ -29,7 +29,7 @@ class NavaidAdmin {
         lastUpdated nullable: true, blank: true
     }
     static mapping = {
-        statusNote type: 'text', sqlType: 'clob'
+        statusNote type: 'text', sqlType: 'text'
         airfieldName column: 'SITE_NAME'
         datasource 'geodbfour'
         table 'NAVIGATIONALAID'

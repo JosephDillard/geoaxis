@@ -27,6 +27,8 @@ psql -d GeoStatusBoard -f docs/postgis-spatialization.sql
 
 The SQL adds a `geom geometry(Geometry, 4326)` column and a GiST spatial index to the operational airport, airfield, asset, utility, and incident tables when those tables exist.
 
+For the bundled development sample records, the SQL also fills approximate New Mexico point and polygon geometries so GeoServer and the map view work immediately in local Docker-based testing. Replace those sample locations with authoritative geometry before using production data.
+
 Geometry population is data-source specific. Examples:
 
 ```sql
