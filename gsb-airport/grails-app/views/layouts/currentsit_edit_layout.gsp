@@ -17,7 +17,7 @@
 </head>
 
 <body>
-<div id="grailsLogo" role="banner"><a href="http://192.169.0.196/GeoBaseMCKSec/"><asset:image src="cedashboardAug2015.png" alt="GeoDB Dashboard"/></a></div>
+<div id="grailsLogo" role="banner"><a href="${createLink(uri: '/')}"><asset:image src="cedashboardAug2015.png" alt="GSB Dashboard"/></a></div>
 
 
 
@@ -31,7 +31,7 @@
         <li><a class="list" href="${createLink(uri: '/CurrentSIT/index?sort=airfieldName&max=100&order=asc')}">CE Status</a></li>
         <li><a class="list" href="${createLink(uri: '/EngineerAssets/index?sort=itemName&max=100&order=asc')}">Engineer Assets</a></li>
         <li><a class="list" href="${createLink(uri: '/FireFightingAssets/index?sort=itemName&max=100&order=asc')}">Fire Fighting Assets</a></li>
-        <li><a class="list" href="http://192.169.0.196/GeoBaseMCKBOSI/BOSI/">BOS-I Status</a></li>
+        <li><g:link class="map" controller="map" action="index" target="_blank">Map View</g:link></li>
     </ul>
 </div>
 

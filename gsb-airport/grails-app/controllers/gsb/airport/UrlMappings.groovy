@@ -1,5 +1,5 @@
 /*
- * 2017 8 14 $today.time GeoBase Mission Command
+ * 2017 8 14 $today.time GSB
  *
  */
 package gsb.airport

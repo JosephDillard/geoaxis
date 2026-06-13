@@ -57,7 +57,7 @@
 
 <div class="fieldcontain ${hasErrors(bean: airportStatus, field: 'muns', 'error')} ">
     <label for="muns">
-        <g:message code="airportStatus.muns.label" default="Muns"/>
+        <g:message code="airportStatus.muns.label" default="Supply"/>
 
     </label>
     <airportLookup:select name="muns" category="airport.operationalStatus" value="${airportStatus?.muns}" valueMessagePrefix="airportStatus.muns" noSelection="['': '']"/>
@@ -66,7 +66,7 @@
 
 <div class="fieldcontain ${hasErrors(bean: airportStatus, field: 'munsRemarks', 'error')} ">
     <label for="munsRemarks">
-        <g:message code="airportStatus.munsRemarks.label" default="Muns Remarks"/>
+        <g:message code="airportStatus.munsRemarks.label" default="Supply Remarks"/>
 
     </label>
     <g:textArea name="munsRemarks" value="${airportStatus?.munsRemarks}"/>
@@ -237,7 +237,7 @@
 
 <div class="fieldcontain ${hasErrors(bean: airportStatus, field: 'baseDefense', 'error')} ">
     <label for="baseDefense">
-        <g:message code="airportStatus.baseDefense.label" default="Base Defense"/>
+        <g:message code="airportStatus.baseDefense.label" default="Security"/>
 
     </label>
     <airportLookup:select name="baseDefense" category="airport.operationalStatus" value="${airportStatus?.baseDefense}" valueMessagePrefix="airportStatus.baseDefense" noSelection="['': '']"/>
@@ -246,7 +246,7 @@
 
 <div class="fieldcontain ${hasErrors(bean: airportStatus, field: 'baseDefenseRemarks', 'error')} ">
     <label for="baseDefenseRemarks">
-        <g:message code="airportStatus.baseDefenseRemarks.label" default="Base Defense Remarks"/>
+        <g:message code="airportStatus.baseDefenseRemarks.label" default="Security Remarks"/>
 
     </label>
     <g:textArea name="baseDefenseRemarks" value="${airportStatus?.baseDefenseRemarks}"/>

@@ -43,7 +43,7 @@
 
             <th>Mx</th>
 
-            <th>Muns</th>
+            <th>Supply</th>
 
             <th>POL</th>
 
@@ -61,7 +61,7 @@
 
             <th>Cyber</th>
 
-            <th class="tdl">Base Defense</th>
+            <th class="tdl">Security</th>
 
             <th>Updated </th>
 

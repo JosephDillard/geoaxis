@@ -365,6 +365,11 @@
         return 'external-layer-' + safeId(key);
     }
 
+    function externalLayerIdsFor(key) {
+        var base = externalLayerIdFor(key);
+        return [base, base + '-fill', base + '-line', base + '-point'];
+    }
+
     function selectedBasemap() {
         return (config.basemaps || {})[activeBasemapKey] || (config.basemaps || {})[firstKey(config.basemaps)] || {};
     }
@@ -411,6 +416,16 @@
             var state = internalLayerState[key];
             if (state && state.loaded) {
                 return ids.concat(layerIdsFor(key).filter(function (id) { return map.getLayer(id); }));
+            }
+            return ids;
+        }, []);
+    }
+
+    function allExternalRenderLayerIds() {
+        return Object.keys(externalLayerState).reduce(function (ids, key) {
+            var state = externalLayerState[key];
+            if (state && state.loaded) {
+                return ids.concat(externalLayerIdsFor(key).filter(function (id) { return map.getLayer(id); }));
             }
             return ids;
         }, []);
@@ -779,6 +794,9 @@
                     geometry: feature.geometry,
                     properties: Object.assign({}, feature.properties || {})
                 };
+                if (feature.id != null && clone.properties.id == null) {
+                    clone.properties.id = feature.id;
+                }
                 clone.properties.__layerKey = key;
                 return clone;
             })
@@ -898,11 +916,13 @@
     }
 
     function removeExternalLayer(key) {
-        var layerId = externalLayerIdFor(key);
         var sourceId = externalSourceIdFor(key);
-        if (map.getLayer(layerId)) {
-            map.removeLayer(layerId);
-        }
+        externalLayerIdsFor(key).forEach(function (layerId) {
+            if (map.getLayer(layerId)) {
+                map.removeLayer(layerId);
+            }
+            delete renderLayerToLayerKey[layerId];
+        });
         if (map.getSource(sourceId)) {
             map.removeSource(sourceId);
         }
@@ -928,6 +948,100 @@
         }, firstOperationalLayerId());
         externalLayerState[key] = { loaded: true, loading: false };
         updateLayerStatus(key, 'external', 'On');
+    }
+
+    function currentBoundsTokens() {
+        var bounds = map.getBounds();
+        var west = bounds.getWest().toFixed(5);
+        var south = bounds.getSouth().toFixed(5);
+        var east = bounds.getEast().toFixed(5);
+        var north = bounds.getNorth().toFixed(5);
+        return {
+            west: west,
+            south: south,
+            east: east,
+            north: north,
+            bbox: west + ',' + south + ',' + east + ',' + north,
+            bboxLatLon: south + ',' + west + ',' + north + ',' + east
+        };
+    }
+
+    function externalGeoJsonUrl(layer) {
+        var tokens = currentBoundsTokens();
+        return String(layer.endpoint || '')
+            .replace(/\{west\}/g, tokens.west)
+            .replace(/\{south\}/g, tokens.south)
+            .replace(/\{east\}/g, tokens.east)
+            .replace(/\{north\}/g, tokens.north)
+            .replace(/\{bbox\}/g, tokens.bbox)
+            .replace(/\{bbox-epsg-4326\}/g, tokens.bbox)
+            .replace(/\{bbox-lat-lon\}/g, tokens.bboxLatLon);
+    }
+
+    function limitGeoJsonFeatures(geojson, maxFeatures) {
+        var limit = Number(maxFeatures || 500);
+        var features = Array.isArray(geojson.features) ? geojson.features : [];
+        return {
+            type: 'FeatureCollection',
+            features: features.filter(function (feature) {
+                return feature && feature.geometry;
+            }).slice(0, limit)
+        };
+    }
+
+    function addGeoJsonExternalLayer(key, layer, geojson) {
+        var sourceId = externalSourceIdFor(key);
+        var baseId = externalLayerIdFor(key);
+        var ids = [baseId + '-fill', baseId + '-line', baseId + '-point'];
+        var data = decorateGeoJson(key, limitGeoJsonFeatures(geojson, layer.maxFeatures));
+        var color = layer.color || '#38bdf8';
+        removeExternalLayer(key);
+
+        map.addSource(sourceId, {
+            type: 'geojson',
+            data: data,
+            attribution: layer.attribution || ''
+        });
+
+        map.addLayer({
+            id: ids[0],
+            type: 'fill',
+            source: sourceId,
+            filter: ['==', '$type', 'Polygon'],
+            paint: {
+                'fill-color': color,
+                'fill-opacity': Number(layer.fillOpacity == null ? 0.24 : layer.fillOpacity)
+            }
+        }, firstMeasureLayerId());
+        map.addLayer({
+            id: ids[1],
+            type: 'line',
+            source: sourceId,
+            filter: ['==', '$type', 'LineString'],
+            paint: {
+                'line-color': color,
+                'line-width': Number(layer.lineWidth == null ? 2 : layer.lineWidth)
+            }
+        }, firstMeasureLayerId());
+        map.addLayer({
+            id: ids[2],
+            type: 'circle',
+            source: sourceId,
+            filter: ['==', '$type', 'Point'],
+            paint: {
+                'circle-color': color,
+                'circle-radius': Number(layer.circleRadius == null ? 5 : layer.circleRadius),
+                'circle-opacity': 0.88,
+                'circle-stroke-color': '#0f172a',
+                'circle-stroke-width': 1.5
+            }
+        }, firstMeasureLayerId());
+
+        ids.forEach(function (id) {
+            renderLayerToLayerKey[id] = key;
+        });
+        externalLayerState[key] = { loaded: true, loading: false, data: data };
+        updateLayerStatus(key, 'external', data.features.length + ' feature' + (data.features.length === 1 ? '' : 's'));
     }
 
     function openSkyUrl(layer) {
@@ -1019,6 +1133,34 @@
             });
     }
 
+    function loadGeoJsonExternalLayer(key, layer) {
+        externalLayerState[key] = { loaded: false, loading: true };
+        updateLayerStatus(key, 'external', 'Loading');
+        setStatus('Loading ' + layer.title + '...');
+        fetch(externalGeoJsonUrl(layer))
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('Feed returned HTTP ' + response.status);
+                }
+                return response.json();
+            })
+            .then(function (geojson) {
+                var checkbox = document.querySelector('[data-layer-kind="external"][data-layer-key="' + key + '"]');
+                if (!checkbox || !checkbox.checked) {
+                    externalLayerState[key] = { loaded: false, loading: false };
+                    return;
+                }
+                addGeoJsonExternalLayer(key, layer, geojson);
+                var count = externalLayerState[key].data.features.length;
+                setStatus(layer.title + ': ' + count + ' feature(s) loaded.');
+            })
+            .catch(function (error) {
+                externalLayerState[key] = { loaded: false, loading: false };
+                updateLayerStatus(key, 'external', 'Error');
+                setStatus(layer.title + ': ' + error.message + '. Check the public feed, CORS, rate limits, and layer configuration.', true);
+            });
+    }
+
     function toggleExternalLayer(key, enabled) {
         var layer = config.externalLayers[key];
         if (!layer) {
@@ -1031,6 +1173,8 @@
         if (layer.kind === 'raster' && layer.tilesUrl) {
             addRasterExternalLayer(key, layer);
             setStatus(layer.title + ' overlay enabled.');
+        } else if (layer.kind === 'geojson' && layer.endpoint) {
+            loadGeoJsonExternalLayer(key, layer);
         } else if (layer.kind === 'opensky' && layer.endpoint) {
             loadOpenSkyLayer(key, layer);
         } else {
@@ -1419,9 +1563,7 @@
             copyCoordinateAt(event.lngLat);
             return;
         }
-        var layerIds = allInternalRenderLayerIds().concat(Object.keys(externalLayerState).map(function (key) {
-            return externalLayerIdFor(key);
-        }).filter(function (id) { return map.getLayer(id); }));
+        var layerIds = allInternalRenderLayerIds().concat(allExternalRenderLayerIds());
         if (!layerIds.length) {
             return;
         }
@@ -1448,9 +1590,7 @@
         if (measureMode) {
             return;
         }
-        var layerIds = allInternalRenderLayerIds().concat(Object.keys(externalLayerState).map(function (key) {
-            return externalLayerIdFor(key);
-        }).filter(function (id) { return map.getLayer(id); }));
+        var layerIds = allInternalRenderLayerIds().concat(allExternalRenderLayerIds());
         if (!layerIds.length) {
             map.getCanvas().style.cursor = '';
             return;

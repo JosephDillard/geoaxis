@@ -39,7 +39,7 @@
 
             <th>Mx</th>
 
-            <th>Muns</th>
+            <th>Supply</th>
 
             <th>POL</th>
 
@@ -164,7 +164,7 @@
 <div class="nav" role="navigation">
     <ul>
         <ul>
-            <li><a href="${createLink(uri: 'http://192.169.0.203/GeoBaseMCKSec/')}" target="_blank">GeoBase Home</a></li>
+            <li><a href="${createLink(uri: '/')}" target="_blank">GSB Home</a></li>
             <li><a class="map" href="${createLink(uri: 'http://192.169.0.217/acc/app.jsp?site=geodb')}" target="_blank">COP</a></li>
         </ul>
     </ul>

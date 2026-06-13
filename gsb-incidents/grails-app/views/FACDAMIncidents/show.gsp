@@ -14,7 +14,7 @@
 <div class="nav" role="navigation">
     <ul>
         <li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
-        <li><a class="list" href="${createLink(url: '../../../GeoBaseMC/#/facdamIncidents')}">FACDAM Incident List</a></li>
+        <li><a class="list" href="${createLink(controller: 'FACDAMIncidents', action: 'index')}">FACDAM Incident List</a></li>
     </ul>
 </div>
 <div id="show-FACDAMIncidents" class="content scaffold-show" role="main">

@@ -5,7 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <title>
     %{--
-- 2018 4 21 $today.time GeoBase Mission Command
+- 2018 4 21 $today.time GSB
 -
 --}%
     <g:layoutTitle default="Grails"/>

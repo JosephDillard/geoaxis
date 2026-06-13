@@ -16,7 +16,7 @@
     <ul>
         <ul>
             <li><a class="list" href="${createLink(uri: '/airportStatus/index')}">Airport Status</a></li>
-            <li><a href="${createLink(uri: '/')}" target="_blank">GeoBase Home</a></li>
+            <li><a href="${createLink(uri: '/')}" target="_blank">GSB Home</a></li>
         </ul>
     </ul>
 </div>
@@ -92,7 +92,7 @@
 
         <li class="fieldcontain">
             <span id="muns-label" class="property-label"><g:message code="airportStatus.muns.label"
-                                                                    default="Muns"/></span>
+                                                                    default="Supply"/></span>
 
             <span class="property-value" aria-labelledby="muns-label">
                     <status:badge value="${airportStatus.muns}" width="60px" height="20px"/>
@@ -102,7 +102,7 @@
 
         <li class="fieldcontain">
             <span id="munsRemarks-label" class="property-label"><g:message code="airportStatus.munsRemarks.label"
-                                                                           default="Muns Remarks"/></span>
+                                                                           default="Supply Remarks"/></span>
 
             <span class="property-value" aria-labelledby="munsRemarks-label"><g:fieldValue
                     bean="${airportStatus}" field="munsRemarks"/></span>
@@ -264,7 +264,7 @@
 
         <li class="fieldcontain">
             <span id="baseDefense-label" class="property-label"><g:message code="airportStatus.baseDefense.label"
-                                                                           default="Base Defense"/></span>
+                                                                           default="Security"/></span>
 
             <span class="property-value" aria-labelledby="baseDefense-label">
                     <status:badge value="${airportStatus.baseDefense}" width="60px" height="20px"/>
@@ -274,7 +274,7 @@
 
         <li class="fieldcontain">
             <span id="baseDefenseRemarks-label" class="property-label"><g:message
-                    code="airportStatus.baseDefenseRemarks.label" default="Base Defense Remarks"/></span>
+                    code="airportStatus.baseDefenseRemarks.label" default="Security Remarks"/></span>
 
             <span class="property-value" aria-labelledby="baseDefenseRemarks-label"><g:fieldValue
                     bean="${airportStatus}" field="baseDefenseRemarks"/></span>
