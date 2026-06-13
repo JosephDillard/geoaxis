@@ -953,7 +953,6 @@
                 var count = (geojson.features || []).length;
                 updateLayerStatus(key, 'internal', count + ' feature' + (count === 1 ? '' : 's'));
                 setStatus(layer.title + ': ' + count + ' feature(s) loaded.');
-                fitAllLoadedFeatures();
             })
             .catch(function (error) {
                 internalLayerState[key] = { loaded: false, loading: false, data: null };

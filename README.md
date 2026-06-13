@@ -15,9 +15,9 @@ This repository contains a status app linkable to geospatial data for dashboard 
 
 ## Screenshots
 
-![Status app map with weather overlay](docs/images/map-view-weather-overlay.png)
+![Status app map with incidents, weather, feature popup, and layers panel](docs/images/map-view-incidents-weather-popup-layers.png)
 
-The screenshot above shows the geospatial status map with a New Mexico airfield operating area and weather overlay.
+The screenshot above shows the geospatial status map with feature popups, readable status details, weather overlays, incident layers, and the layers panel.
 
 ## Technology
 
