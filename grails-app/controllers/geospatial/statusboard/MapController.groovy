@@ -2,6 +2,7 @@ package geospatial.statusboard
 
 import grails.core.GrailsApplication
 import grails.plugin.springsecurity.annotation.Secured
+import gsb.incidents.IncidentLookupOption
 import groovy.json.JsonOutput
 
 @Secured(['ROLE_USER'])
@@ -55,6 +56,7 @@ class MapController {
 
         [
             mapConfigJson : JsonOutput.toJson(mapConfig),
+            incidentLookupOptionsJson: JsonOutput.toJson(incidentLookupOptions()),
             layers        : layers,
             externalLayers: externalLayers,
             basemaps      : basemaps,
@@ -85,6 +87,8 @@ class MapController {
                     labelField  : layer.labelField?.toString() ?: layer.idField?.toString() ?: 'id',
                     geometryType: layer.geometryType?.toString() ?: 'Geometry',
                     color       : layer.color?.toString() ?: '#2563eb',
+                    iconSet     : layer.iconSet?.toString() ?: '',
+                    iconField   : layer.iconField?.toString() ?: '',
                     category    : layer.category?.toString() ?: 'Internal',
                     enabled     : asBoolean(layer.enabled, false)
                 ]
@@ -165,7 +169,18 @@ class MapController {
             drawing        : asBoolean(rawTools.drawing, true),
             drawArea       : asBoolean(rawTools.drawArea, true),
             fullscreen     : asBoolean(rawTools.fullscreen, true),
-            fitLayer       : asBoolean(rawTools.fitLayer, true)
+            fitLayer       : asBoolean(rawTools.fitLayer, true),
+            createIncidents: asBoolean(rawTools.createIncidents, true)
+        ]
+    }
+
+    private Map incidentLookupOptions() {
+        [
+            eventTypes     : IncidentLookupOption.valuesFor('incident.eventType'),
+            eventCategories: IncidentLookupOption.valuesFor('incident.eventCategory'),
+            bases          : IncidentLookupOption.valuesFor('incident.base'),
+            yesNoNa        : IncidentLookupOption.valuesFor('incident.yesNoNa'),
+            sources        : IncidentLookupOption.valuesFor('incident.source')
         ]
     }
 

@@ -1510,6 +1510,142 @@ img.grails-logo {
     right: 2px;
 }
 
+.geo-incident-create-toggle span {
+    border: 2px solid currentColor;
+    border-radius: 999px;
+    height: 18px;
+    position: relative;
+    width: 18px;
+}
+
+.geo-incident-create-toggle span::before,
+.geo-incident-create-toggle span::after {
+    background: currentColor;
+    content: '';
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.geo-incident-create-toggle span::before {
+    height: 2px;
+    width: 14px;
+}
+
+.geo-incident-create-toggle span::after {
+    height: 14px;
+    width: 2px;
+}
+
+.geo-map-canvas.is-placing-incident,
+.geo-map-shell .maplibregl-canvas.is-placing-incident,
+.geo-map-shell .mapboxgl-canvas.is-placing-incident {
+    cursor: crosshair;
+}
+
+.geo-incident-create-panel {
+    backdrop-filter: blur(14px);
+    background: var(--geo-map-panel-strong);
+    border: 1px solid var(--geo-map-border);
+    border-radius: 8px;
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.34);
+    color: #eef6ff;
+    left: 86px;
+    max-height: min(620px, calc(100% - 132px));
+    overflow: auto;
+    padding: 0.75rem;
+    position: absolute;
+    top: 110px;
+    width: min(380px, calc(100% - 124px));
+    z-index: 7;
+}
+
+.geo-incident-create-panel[hidden] {
+    display: none;
+}
+
+.geo-incident-create-header {
+    align-items: center;
+    border-bottom: 1px solid rgba(147, 197, 253, 0.28);
+    display: flex;
+    justify-content: space-between;
+    margin: -0.1rem 0 0.65rem;
+    padding-bottom: 0.5rem;
+}
+
+.geo-incident-create-header strong {
+    color: #ffffff;
+    font-size: 0.98rem;
+}
+
+.geo-incident-create-form {
+    display: grid;
+    gap: 0.58rem;
+}
+
+.geo-incident-field-pair {
+    display: grid;
+    gap: 0.55rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.geo-incident-field {
+    display: grid;
+    gap: 0.24rem;
+    min-width: 0;
+}
+
+.geo-incident-field label {
+    color: #bfdbfe;
+    font-size: 0.68rem;
+    font-weight: 800;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.geo-incident-field input,
+.geo-incident-field textarea {
+    background: rgba(7, 28, 55, 0.84);
+    border: 1px solid rgba(147, 197, 253, 0.42);
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 0.82rem;
+    line-height: 1.25;
+    min-height: 34px;
+    min-width: 0;
+    padding: 0.42rem 0.48rem;
+    width: 100%;
+}
+
+.geo-incident-field textarea {
+    min-height: 76px;
+    resize: vertical;
+}
+
+.geo-incident-field input:focus,
+.geo-incident-field textarea:focus {
+    border-color: #7dd3fc;
+    outline: 2px solid rgba(56, 189, 248, 0.28);
+}
+
+.geo-incident-field input[readonly] {
+    background: rgba(15, 53, 96, 0.62);
+    color: #dbeafe;
+}
+
+.geo-incident-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    padding-top: 0.15rem;
+}
+
+.geo-incident-actions .btn,
+.geo-incident-actions .geo-map-tool-button {
+    min-height: 34px;
+}
+
 .geo-measure-panel {
     align-items: center;
     backdrop-filter: blur(12px);
@@ -1871,6 +2007,17 @@ img.grails-logo {
     .geo-left-map-controls {
         left: 8px;
         top: 120px;
+    }
+
+    .geo-incident-create-panel {
+        left: 58px;
+        max-height: calc(100% - 148px);
+        top: 120px;
+        width: calc(100% - 74px);
+    }
+
+    .geo-incident-field-pair {
+        grid-template-columns: 1fr;
     }
 
     .geo-basemap-menu {

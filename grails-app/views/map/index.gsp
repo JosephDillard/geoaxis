@@ -116,6 +116,16 @@
                     <span aria-hidden="true"></span>
                 </button>
             </div>
+            <div id="geo-incident-tools" class="geo-incident-control">
+                <button id="geo-incident-create-toggle"
+                        type="button"
+                        class="geo-map-square-button geo-incident-create-toggle"
+                        aria-label="Create incident"
+                        aria-pressed="false"
+                        title="Create incident">
+                    <span aria-hidden="true"></span>
+                </button>
+            </div>
             <div id="geo-measure-tools" class="geo-measure-control">
                 <button id="geo-measure-toggle"
                         type="button"
@@ -158,6 +168,79 @@
             </label>
             <output id="geo-coordinate-output">Move over map</output>
         </div>
+        <aside id="geo-incident-create-panel" class="geo-incident-create-panel" aria-label="Create incident" hidden>
+            <div class="geo-incident-create-header">
+                <strong>New Incident</strong>
+                <button id="geo-incident-create-close" type="button" class="geo-map-icon-button" aria-label="Close incident form">x</button>
+            </div>
+            <form id="geo-incident-create-form" class="geo-incident-create-form">
+                <div class="geo-incident-field">
+                    <label for="geo-incident-event-name">Name</label>
+                    <input id="geo-incident-event-name" name="eventName" type="text" required/>
+                </div>
+                <div class="geo-incident-field-pair">
+                    <div class="geo-incident-field">
+                        <label for="geo-incident-event-type">Type</label>
+                        <input id="geo-incident-event-type" name="eventType" type="text" list="geo-incident-event-type-options" required/>
+                    </div>
+                    <div class="geo-incident-field">
+                        <label for="geo-incident-event-cat">Category</label>
+                        <input id="geo-incident-event-cat" name="eventCat" type="text" list="geo-incident-event-cat-options"/>
+                    </div>
+                </div>
+                <div class="geo-incident-field">
+                    <label for="geo-incident-event-desc">Description</label>
+                    <textarea id="geo-incident-event-desc" name="eventDesc" rows="3"></textarea>
+                </div>
+                <div class="geo-incident-field-pair">
+                    <div class="geo-incident-field">
+                        <label for="geo-incident-base">Base</label>
+                        <input id="geo-incident-base" name="base" type="text" list="geo-incident-base-options"/>
+                    </div>
+                    <div class="geo-incident-field">
+                        <label for="geo-incident-source">Source</label>
+                        <input id="geo-incident-source" name="source" type="text" list="geo-incident-source-options"/>
+                    </div>
+                </div>
+                <div class="geo-incident-field-pair">
+                    <div class="geo-incident-field">
+                        <label for="geo-incident-sig-event">Significant</label>
+                        <input id="geo-incident-sig-event" name="sigEvent" type="text" list="geo-incident-yes-no-options" value="No"/>
+                    </div>
+                    <div class="geo-incident-field">
+                        <label for="geo-incident-air-ops">Air Ops</label>
+                        <input id="geo-incident-air-ops" name="airOpsAffected" type="text" list="geo-incident-yes-no-options" value="No"/>
+                    </div>
+                </div>
+                <div class="geo-incident-field">
+                    <label for="geo-incident-id">Incident ID</label>
+                    <input id="geo-incident-id" name="incidentId" type="text" placeholder="Auto"/>
+                </div>
+                <div class="geo-incident-field-pair">
+                    <div class="geo-incident-field">
+                        <label for="geo-incident-lat">Latitude</label>
+                        <input id="geo-incident-lat" name="latitude" type="text" readonly/>
+                    </div>
+                    <div class="geo-incident-field">
+                        <label for="geo-incident-lon">Longitude</label>
+                        <input id="geo-incident-lon" name="longitude" type="text" readonly/>
+                    </div>
+                </div>
+                <div class="geo-incident-field">
+                    <label for="geo-incident-mgrs">MGRS</label>
+                    <input id="geo-incident-mgrs" name="mgrsCoord" type="text" readonly/>
+                </div>
+                <div class="geo-incident-actions">
+                    <button id="geo-incident-save" type="submit" class="btn btn-primary">Save</button>
+                    <button id="geo-incident-cancel" type="button" class="geo-map-tool-button">Cancel</button>
+                </div>
+            </form>
+            <datalist id="geo-incident-event-type-options"></datalist>
+            <datalist id="geo-incident-event-cat-options"></datalist>
+            <datalist id="geo-incident-base-options"></datalist>
+            <datalist id="geo-incident-source-options"></datalist>
+            <datalist id="geo-incident-yes-no-options"></datalist>
+        </aside>
         <div id="geo-map" class="geo-map-canvas"></div>
     </section>
 </main>
@@ -173,6 +256,8 @@
 <script>
 (function () {
     var config = ${raw(mapConfigJson)};
+    var incidentLookupOptions = ${raw(incidentLookupOptionsJson)};
+    var incidentCreateUrl = '${createLink(controller: 'currentIncidents', action: 'mapCreate')}';
     var statusEl = document.getElementById('geo-map-status');
     var statusMessage = document.getElementById('geo-map-status-message');
     var statusToggle = document.getElementById('geo-map-status-toggle');
@@ -198,6 +283,13 @@
     var zoomControl = document.getElementById('geo-zoom-control');
     var viewTools = document.getElementById('geo-view-tools');
     var fitLayer = document.getElementById('geo-fit-layer');
+    var incidentTools = document.getElementById('geo-incident-tools');
+    var incidentCreateToggle = document.getElementById('geo-incident-create-toggle');
+    var incidentCreatePanel = document.getElementById('geo-incident-create-panel');
+    var incidentCreateClose = document.getElementById('geo-incident-create-close');
+    var incidentCreateForm = document.getElementById('geo-incident-create-form');
+    var incidentCancel = document.getElementById('geo-incident-cancel');
+    var incidentSave = document.getElementById('geo-incident-save');
     var measureTools = document.getElementById('geo-measure-tools');
     var measureToggle = document.getElementById('geo-measure-toggle');
     var measurePanel = document.getElementById('geo-measure-panel');
@@ -209,6 +301,10 @@
     var drawOutput = document.getElementById('geo-draw-output');
     var measureSourceId = 'measure-features';
     var measureLayerIds = ['measure-line', 'measure-points'];
+    var incidentDraftSourceId = 'incident-draft-source';
+    var incidentDraftLayerId = 'incident-draft-layer';
+    var localIncidentSourceId = 'incident-created-source';
+    var localIncidentLayerId = 'incident-created-layer';
     var basemapSourceId = 'geo-basemap-source';
     var basemapLayerId = 'geo-basemap-raster';
     var backgroundLayerId = 'geo-basemap-background';
@@ -219,6 +315,9 @@
     var layerIssueState = {};
     var measureMode = false;
     var measurePoints = [];
+    var incidentCreateMode = false;
+    var incidentDraft = null;
+    var localIncidentFeatures = [];
     var hoverCoordinate = null;
     var draw = null;
 
@@ -764,6 +863,15 @@
 
     function setMeasureMode(enabled) {
         measureMode = enabled;
+        if (measureMode && incidentCreateMode) {
+            incidentCreateMode = false;
+            if (incidentCreateToggle) {
+                incidentCreateToggle.classList.remove('is-active');
+                incidentCreateToggle.setAttribute('aria-pressed', 'false');
+            }
+            setIncidentPanelOpen(false);
+            clearIncidentDraft();
+        }
         measureToggle.classList.toggle('is-active', measureMode);
         measureToggle.setAttribute('aria-pressed', measureMode ? 'true' : 'false');
         measureToggle.setAttribute('aria-expanded', measureMode ? 'true' : 'false');
@@ -832,6 +940,446 @@
         coordinatePanel.classList.toggle('is-copy-enabled', enabled);
     }
 
+    function populateIncidentDatalist(id, values) {
+        var list = document.getElementById(id);
+        if (!list) {
+            return;
+        }
+        list.innerHTML = '';
+        (values || []).forEach(function (value) {
+            var option = document.createElement('option');
+            option.value = value;
+            list.appendChild(option);
+        });
+    }
+
+    function populateIncidentLookups() {
+        populateIncidentDatalist('geo-incident-event-type-options', incidentLookupOptions.eventTypes);
+        populateIncidentDatalist('geo-incident-event-cat-options', incidentLookupOptions.eventCategories);
+        populateIncidentDatalist('geo-incident-base-options', incidentLookupOptions.bases);
+        populateIncidentDatalist('geo-incident-source-options', incidentLookupOptions.sources);
+        populateIncidentDatalist('geo-incident-yes-no-options', incidentLookupOptions.yesNoNa);
+    }
+
+    function incidentIconIdFor(eventType) {
+        var value = String(eventType || '').toLowerCase();
+        if (value.indexOf('weather') !== -1) {
+            return 'incident-weather';
+        }
+        if (value.indexOf('aircraft') !== -1 || value.indexOf('mishap') !== -1) {
+            return 'incident-aircraft';
+        }
+        if (value.indexOf('airfield') !== -1 || value.indexOf('runway') !== -1) {
+            return 'incident-airfield';
+        }
+        if (value.indexOf('facility') !== -1 || value.indexOf('damage') !== -1) {
+            return 'incident-facility';
+        }
+        if (value.indexOf('utility') !== -1 || value.indexOf('power') !== -1 || value.indexOf('energy') !== -1) {
+            return 'incident-utility';
+        }
+        if (value.indexOf('security') !== -1 || value.indexOf('force') !== -1) {
+            return 'incident-security';
+        }
+        return 'incident-default';
+    }
+
+    function propertyValue(properties, names) {
+        for (var i = 0; i < names.length; i += 1) {
+            if (properties[names[i]] != null && properties[names[i]] !== '') {
+                return properties[names[i]];
+            }
+        }
+        return '';
+    }
+
+    function incidentEventTypeForFeature(feature, layer) {
+        var properties = feature.properties || {};
+        var iconField = layer && layer.iconField ? layer.iconField : '';
+        return propertyValue(properties, [
+            iconField,
+            'event_type',
+            'eventType',
+            'EVENT_TYPE',
+            'eventtype'
+        ]);
+    }
+
+    function drawIncidentGlyph(ctx, id, color) {
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = '#ffffff';
+        ctx.fillStyle = '#ffffff';
+        ctx.lineWidth = 4;
+
+        if (id === 'incident-weather') {
+            ctx.beginPath();
+            ctx.arc(28, 33, 8, Math.PI, Math.PI * 2);
+            ctx.arc(38, 30, 10, Math.PI, Math.PI * 2);
+            ctx.arc(48, 34, 7, Math.PI, Math.PI * 2);
+            ctx.lineTo(49, 42);
+            ctx.lineTo(24, 42);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(39, 42);
+            ctx.lineTo(33, 54);
+            ctx.lineTo(42, 50);
+            ctx.lineTo(37, 60);
+            ctx.lineTo(51, 45);
+            ctx.closePath();
+            ctx.fill();
+        } else if (id === 'incident-aircraft') {
+            ctx.beginPath();
+            ctx.moveTo(36, 17);
+            ctx.lineTo(42, 35);
+            ctx.lineTo(57, 42);
+            ctx.lineTo(57, 48);
+            ctx.lineTo(42, 45);
+            ctx.lineTo(38, 57);
+            ctx.lineTo(34, 57);
+            ctx.lineTo(30, 45);
+            ctx.lineTo(15, 48);
+            ctx.lineTo(15, 42);
+            ctx.lineTo(30, 35);
+            ctx.closePath();
+            ctx.fill();
+        } else if (id === 'incident-airfield') {
+            ctx.fillRect(33, 17, 6, 42);
+            ctx.fillRect(20, 34, 32, 5);
+            ctx.fillRect(24, 48, 24, 4);
+        } else if (id === 'incident-facility') {
+            ctx.beginPath();
+            ctx.moveTo(18, 34);
+            ctx.lineTo(36, 20);
+            ctx.lineTo(54, 34);
+            ctx.lineTo(50, 39);
+            ctx.lineTo(50, 56);
+            ctx.lineTo(22, 56);
+            ctx.lineTo(22, 39);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = color;
+            ctx.fillRect(32, 42, 8, 14);
+        } else if (id === 'incident-utility') {
+            ctx.beginPath();
+            ctx.moveTo(40, 15);
+            ctx.lineTo(24, 39);
+            ctx.lineTo(36, 39);
+            ctx.lineTo(30, 58);
+            ctx.lineTo(50, 30);
+            ctx.lineTo(38, 30);
+            ctx.closePath();
+            ctx.fill();
+        } else if (id === 'incident-security') {
+            ctx.beginPath();
+            ctx.moveTo(36, 15);
+            ctx.lineTo(54, 23);
+            ctx.lineTo(51, 44);
+            ctx.quadraticCurveTo(47, 55, 36, 60);
+            ctx.quadraticCurveTo(25, 55, 21, 44);
+            ctx.lineTo(18, 23);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = color;
+            ctx.fillRect(34, 28, 4, 20);
+            ctx.fillRect(27, 35, 18, 4);
+        } else {
+            ctx.beginPath();
+            ctx.moveTo(36, 17);
+            ctx.lineTo(55, 55);
+            ctx.lineTo(17, 55);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = color;
+            ctx.fillRect(34, 30, 4, 15);
+            ctx.fillRect(34, 49, 4, 4);
+        }
+        ctx.restore();
+    }
+
+    function createIncidentIconImage(id, color, shape) {
+        var canvas = document.createElement('canvas');
+        var size = 72;
+        canvas.width = size;
+        canvas.height = size;
+        var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, size, size);
+        ctx.shadowColor = 'rgba(15, 23, 42, 0.36)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 4;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 4;
+
+        ctx.beginPath();
+        if (shape === 'diamond') {
+            ctx.moveTo(36, 4);
+            ctx.lineTo(68, 36);
+            ctx.lineTo(36, 68);
+            ctx.lineTo(4, 36);
+            ctx.closePath();
+        } else {
+            ctx.arc(36, 36, 30, 0, Math.PI * 2);
+        }
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+        ctx.stroke();
+        drawIncidentGlyph(ctx, id, color);
+        return ctx.getImageData(0, 0, size, size);
+    }
+
+    function addIncidentImage(id, color, shape) {
+        if (map.hasImage && map.hasImage(id)) {
+            return;
+        }
+        map.addImage(id, createIncidentIconImage(id, color, shape), { pixelRatio: 2 });
+    }
+
+    function registerIncidentIcons() {
+        addIncidentImage('incident-default', '#b91c1c', 'diamond');
+        addIncidentImage('incident-weather', '#2563eb', 'diamond');
+        addIncidentImage('incident-airfield', '#d97706', 'diamond');
+        addIncidentImage('incident-facility', '#9333ea', 'diamond');
+        addIncidentImage('incident-utility', '#16a34a', 'diamond');
+        addIncidentImage('incident-security', '#475569', 'diamond');
+        addIncidentImage('incident-aircraft', '#dc2626', 'diamond');
+        addIncidentImage('incident-draft', '#38bdf8', 'circle');
+    }
+
+    function emptyFeatureCollection() {
+        return {
+            type: 'FeatureCollection',
+            features: []
+        };
+    }
+
+    function ensureIncidentOverlayLayers() {
+        if (!map.getSource(incidentDraftSourceId)) {
+            map.addSource(incidentDraftSourceId, {
+                type: 'geojson',
+                data: emptyFeatureCollection()
+            });
+        }
+        if (!map.getLayer(incidentDraftLayerId)) {
+            map.addLayer({
+                id: incidentDraftLayerId,
+                type: 'symbol',
+                source: incidentDraftSourceId,
+                layout: {
+                    'icon-image': 'incident-draft',
+                    'icon-size': 0.54,
+                    'icon-allow-overlap': true,
+                    'icon-ignore-placement': true
+                }
+            }, firstMeasureLayerId());
+        }
+        if (!map.getSource(localIncidentSourceId)) {
+            map.addSource(localIncidentSourceId, {
+                type: 'geojson',
+                data: emptyFeatureCollection()
+            });
+        }
+        if (!map.getLayer(localIncidentLayerId)) {
+            map.addLayer({
+                id: localIncidentLayerId,
+                type: 'symbol',
+                source: localIncidentSourceId,
+                layout: {
+                    'icon-image': ['get', '__incidentIcon'],
+                    'icon-size': 0.54,
+                    'icon-allow-overlap': true,
+                    'icon-ignore-placement': true
+                }
+            }, firstMeasureLayerId());
+        }
+    }
+
+    function updateIncidentSource(sourceId, features) {
+        var source = map.getSource(sourceId);
+        if (source) {
+            source.setData({
+                type: 'FeatureCollection',
+                features: features || []
+            });
+        }
+    }
+
+    function clearLocalCreatedIncidents() {
+        localIncidentFeatures = [];
+        updateIncidentSource(localIncidentSourceId, localIncidentFeatures);
+    }
+
+    function clearIncidentDraft() {
+        incidentDraft = null;
+        updateIncidentSource(incidentDraftSourceId, []);
+    }
+
+    function incidentFormElements() {
+        return incidentCreateForm ? incidentCreateForm.elements : {};
+    }
+
+    function setIncidentFormValue(name, value) {
+        var elements = incidentFormElements();
+        if (elements[name]) {
+            elements[name].value = value == null ? '' : value;
+        }
+    }
+
+    function setIncidentCreateMode(enabled) {
+        incidentCreateMode = !!enabled;
+        if (incidentCreateToggle) {
+            incidentCreateToggle.classList.toggle('is-active', incidentCreateMode);
+            incidentCreateToggle.setAttribute('aria-pressed', incidentCreateMode ? 'true' : 'false');
+        }
+        if (map && map.getCanvas()) {
+            map.getCanvas().classList.toggle('is-placing-incident', incidentCreateMode);
+        }
+        if (incidentCreateMode) {
+            setMeasureMode(false);
+            setCoordinateCopyMode(false);
+            setStatus('Click the map to place an incident.');
+        }
+    }
+
+    function setIncidentPanelOpen(open) {
+        if (incidentCreatePanel) {
+            incidentCreatePanel.hidden = !open;
+        }
+    }
+
+    function resetIncidentForm() {
+        if (incidentCreateForm) {
+            incidentCreateForm.reset();
+        }
+        setIncidentFormValue('sigEvent', 'No');
+        setIncidentFormValue('airOpsAffected', 'No');
+    }
+
+    function incidentFeatureFromDraft(draft) {
+        return {
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: [draft.longitude, draft.latitude]
+            },
+            properties: {
+                __layerKey: 'currentIncidents',
+                __incidentIcon: 'incident-draft'
+            }
+        };
+    }
+
+    function placeIncidentDraft(lngLat) {
+        var digits = Number(config.coordinateDigits || 6);
+        var formatted = formatCoordinate(lngLat);
+        incidentDraft = {
+            longitude: Number(lngLat.lng.toFixed(digits)),
+            latitude: Number(lngLat.lat.toFixed(digits)),
+            mgrsCoord: formatted.mgrs === 'Unavailable' ? '' : formatted.mgrs
+        };
+        resetIncidentForm();
+        setIncidentFormValue('longitude', incidentDraft.longitude);
+        setIncidentFormValue('latitude', incidentDraft.latitude);
+        setIncidentFormValue('mgrsCoord', incidentDraft.mgrsCoord);
+        updateIncidentSource(incidentDraftSourceId, [incidentFeatureFromDraft(incidentDraft)]);
+        setIncidentPanelOpen(true);
+        setIncidentCreateMode(false);
+        setStatus('Incident location placed.');
+    }
+
+    function incidentPayloadFromForm() {
+        var elements = incidentFormElements();
+        return {
+            incidentId: elements.incidentId ? elements.incidentId.value.trim() : '',
+            eventType: elements.eventType ? elements.eventType.value.trim() : '',
+            eventCat: elements.eventCat ? elements.eventCat.value.trim() : '',
+            eventName: elements.eventName ? elements.eventName.value.trim() : '',
+            eventDesc: elements.eventDesc ? elements.eventDesc.value.trim() : '',
+            base: elements.base ? elements.base.value.trim() : '',
+            sigEvent: elements.sigEvent ? elements.sigEvent.value.trim() : '',
+            airOpsAffected: elements.airOpsAffected ? elements.airOpsAffected.value.trim() : '',
+            source: elements.source ? elements.source.value.trim() : '',
+            mgrsCoord: elements.mgrsCoord ? elements.mgrsCoord.value.trim() : '',
+            longitude: elements.longitude ? elements.longitude.value.trim() : '',
+            latitude: elements.latitude ? elements.latitude.value.trim() : ''
+        };
+    }
+
+    function normalizeCreatedIncidentFeature(feature) {
+        var properties = Object.assign({}, feature.properties || {});
+        properties.__layerKey = 'currentIncidents';
+        properties.__incidentIcon = incidentIconIdFor(propertyValue(properties, ['event_type', 'eventType']));
+        return {
+            type: 'Feature',
+            geometry: feature.geometry,
+            properties: properties
+        };
+    }
+
+    function addLocalCreatedIncident(feature) {
+        localIncidentFeatures.push(normalizeCreatedIncidentFeature(feature));
+        updateIncidentSource(localIncidentSourceId, localIncidentFeatures);
+    }
+
+    function ensureCurrentIncidentsLayerRefresh() {
+        var key = 'currentIncidents';
+        var checkbox = document.querySelector('[data-layer-kind="internal"][data-layer-key="' + key + '"]');
+        if (checkbox) {
+            checkbox.checked = true;
+        }
+        if (config.layers && config.layers[key]) {
+            if (internalLayerState[key] && internalLayerState[key].loaded) {
+                removeInternalLayer(key);
+            }
+            loadInternalLayer(key);
+        }
+    }
+
+    function saveIncidentDraft() {
+        if (!incidentDraft || !incidentCreateForm) {
+            setStatus('Place an incident on the map before saving.', true);
+            return;
+        }
+        if (!incidentCreateForm.checkValidity()) {
+            incidentCreateForm.reportValidity();
+            return;
+        }
+
+        var payload = incidentPayloadFromForm();
+        incidentSave.disabled = true;
+        setStatus('Saving incident...');
+
+        fetch(incidentCreateUrl, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        }).then(function (response) {
+            return response.json().then(function (body) {
+                if (!response.ok) {
+                    throw new Error(body.error || 'Incident could not be saved.');
+                }
+                return body;
+            });
+        }).then(function (body) {
+            addLocalCreatedIncident(body.feature);
+            clearIncidentDraft();
+            setIncidentPanelOpen(false);
+            setStatus('Incident ' + body.incident.incidentId + ' created.');
+            ensureCurrentIncidentsLayerRefresh();
+        }).catch(function (error) {
+            setStatus(error.message, true);
+        }).finally(function () {
+            incidentSave.disabled = false;
+        });
+    }
+
     function decorateGeoJson(key, geojson) {
         return {
             type: 'FeatureCollection',
@@ -845,6 +1393,9 @@
                     clone.properties.id = feature.id;
                 }
                 clone.properties.__layerKey = key;
+                if ((config.layers[key] || {}).iconSet === 'femaIncident') {
+                    clone.properties.__incidentIcon = incidentIconIdFor(incidentEventTypeForFeature(clone, config.layers[key]));
+                }
                 return clone;
             })
         };
@@ -900,18 +1451,33 @@
                 'line-width': 4
             }
         }, firstMeasureLayerId());
-        map.addLayer({
-            id: ids[2],
-            type: 'circle',
-            source: sourceId,
-            filter: ['==', '$type', 'Point'],
-            paint: {
-                'circle-color': layer.color,
-                'circle-radius': 7,
-                'circle-stroke-color': '#dbeafe',
-                'circle-stroke-width': 2
-            }
-        }, firstMeasureLayerId());
+        if (layer.iconSet === 'femaIncident') {
+            map.addLayer({
+                id: ids[2],
+                type: 'symbol',
+                source: sourceId,
+                filter: ['==', '$type', 'Point'],
+                layout: {
+                    'icon-image': ['get', '__incidentIcon'],
+                    'icon-size': 0.54,
+                    'icon-allow-overlap': true,
+                    'icon-ignore-placement': true
+                }
+            }, firstMeasureLayerId());
+        } else {
+            map.addLayer({
+                id: ids[2],
+                type: 'circle',
+                source: sourceId,
+                filter: ['==', '$type', 'Point'],
+                paint: {
+                    'circle-color': layer.color,
+                    'circle-radius': 7,
+                    'circle-stroke-color': '#dbeafe',
+                    'circle-stroke-width': 2
+                }
+            }, firstMeasureLayerId());
+        }
 
         ids.forEach(function (id) {
             renderLayerToLayerKey[id] = key;
@@ -921,6 +1487,9 @@
             loading: false,
             data: data
         };
+        if (key === 'currentIncidents') {
+            clearLocalCreatedIncidents();
+        }
     }
 
     function loadInternalLayer(key) {
@@ -1505,6 +2074,7 @@
     setFilterOpen(!!(filterFields && !filterFields.hidden));
     populateZoomLevels();
     viewTools.hidden = !config.tools.fitLayer;
+    incidentTools.hidden = !config.tools.createIncidents;
     measureTools.hidden = !config.tools.measureDistance;
     drawTools.hidden = true;
     coordinatePanel.hidden = !config.tools.coordinates;
@@ -1520,6 +2090,7 @@
         }
     });
     setCoordinateCopyMode(false);
+    populateIncidentLookups();
 
     var map = new maplibregl.Map({
         container: 'geo-map',
@@ -1548,6 +2119,8 @@
             map.resize();
         }, 0);
         ensureMeasureLayers();
+        registerIncidentIcons();
+        ensureIncidentOverlayLayers();
 
         if (config.tools.drawing && window.MapboxDraw) {
             try {
@@ -1597,6 +2170,10 @@
     });
 
     map.on('click', function (event) {
+        if (incidentCreateMode) {
+            placeIncidentDraft(event.lngLat);
+            return;
+        }
         if (config.tools.coordinates) {
             updateCoordinateReadout(event.lngLat);
         }
@@ -1637,6 +2214,10 @@
             updateCoordinateReadout(event.lngLat);
         }
         if (measureMode) {
+            return;
+        }
+        if (incidentCreateMode) {
+            map.getCanvas().style.cursor = 'crosshair';
             return;
         }
         var layerIds = allInternalRenderLayerIds().concat(allExternalRenderLayerIds());
@@ -1704,6 +2285,33 @@
     }
     if (measureClear) {
         measureClear.addEventListener('click', clearMeasure);
+    }
+    if (incidentCreateToggle) {
+        incidentCreateToggle.addEventListener('click', function () {
+            setIncidentPanelOpen(false);
+            clearIncidentDraft();
+            setIncidentCreateMode(!incidentCreateMode);
+        });
+    }
+    if (incidentCreateClose) {
+        incidentCreateClose.addEventListener('click', function () {
+            setIncidentPanelOpen(false);
+            clearIncidentDraft();
+            setIncidentCreateMode(false);
+        });
+    }
+    if (incidentCancel) {
+        incidentCancel.addEventListener('click', function () {
+            setIncidentPanelOpen(false);
+            clearIncidentDraft();
+            setIncidentCreateMode(false);
+        });
+    }
+    if (incidentCreateForm) {
+        incidentCreateForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            saveIncidentDraft();
+        });
     }
     if (fitLayer) {
         fitLayer.addEventListener('click', fitAllLoadedFeatures);

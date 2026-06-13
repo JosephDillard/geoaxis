@@ -2,13 +2,22 @@ package gsb.incidents
 
 import org.springframework.security.access.annotation.Secured
 import static org.springframework.http.HttpStatus.*
+import grails.gorm.transactions.NotTransactional
 import grails.gorm.transactions.Transactional
+import groovy.json.JsonOutput
+import groovy.sql.Sql
+import java.text.SimpleDateFormat
+import java.sql.Connection
+import java.sql.Timestamp
+
 @Secured(['is_authenticated_anonymously','ROLE_USER'])
 @Transactional(readOnly = true, connection = 'geodbthree')
 class CurrentIncidentsController {
     def filterPaneService
+    def springSecurityService
+    def dataSource_geodbthree
 
-    static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
+    static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE", mapCreate: "POST"]
 
     def index(Integer max) {
         params.max = Math.min(max ?: 50, 300)
@@ -72,6 +81,69 @@ class CurrentIncidentsController {
 
     def create() {
         respond new CurrentIncidents(params)
+    }
+
+    @Secured(['ROLE_USER'])
+    @NotTransactional
+    def mapCreate() {
+        Object payload = request.JSON ?: params
+        BigDecimal longitude = decimalValue(payload, 'longitude')
+        BigDecimal latitude = decimalValue(payload, 'latitude')
+
+        if (longitude == null || latitude == null) {
+            render status: BAD_REQUEST, contentType: 'application/json', text: JsonOutput.toJson([
+                error: 'A longitude and latitude are required.'
+            ])
+            return
+        }
+
+        Date now = new Date()
+        String eventName = stringValue(payload, 'eventName')
+        String eventType = stringValue(payload, 'eventType')
+        if (!eventName || !eventType) {
+            render status: BAD_REQUEST, contentType: 'application/json', text: JsonOutput.toJson([
+                error: 'An event name and event type are required.'
+            ])
+            return
+        }
+
+        String username = currentUsername()
+        Map currentIncidents = [
+            incidentId     : stringValue(payload, 'incidentId') ?: generatedIncidentId(now),
+            eventType      : eventType,
+            eventCat       : stringValue(payload, 'eventCat'),
+            eventName      : eventName,
+            eventDesc      : stringValue(payload, 'eventDesc'),
+            eventDescHan   : '',
+            mgrsCoord      : stringValue(payload, 'mgrsCoord'),
+            base           : stringValue(payload, 'base'),
+            sigEvent       : stringValue(payload, 'sigEvent') ?: 'No',
+            airOpsAffected : stringValue(payload, 'airOpsAffected') ?: 'No',
+            source         : stringValue(payload, 'source') ?: 'Map',
+            entered        : now,
+            updatedBy      : username,
+            hiddenBy       : '',
+            hidden         : 'No',
+            updatedDate    : now,
+            createdBy      : username,
+            createdDate    : now,
+            eventSourceHan : 'Status App Map'
+        ]
+
+        Map geometryResult = insertIncidentRecord(currentIncidents, longitude, latitude)
+        if (!geometryResult.inserted) {
+            render status: INTERNAL_SERVER_ERROR, contentType: 'application/json', text: JsonOutput.toJson([
+                error : 'Incident could not be created.',
+                reason: geometryResult.reason
+            ])
+            return
+        }
+
+        render status: CREATED, contentType: 'application/json', text: JsonOutput.toJson([
+            incident: incidentPayload(currentIncidents, longitude, latitude),
+            feature : incidentFeature(currentIncidents, longitude, latitude),
+            geometry: geometryResult
+        ])
     }
 
     @Transactional(connection = 'geodbthree')
@@ -147,5 +219,165 @@ class CurrentIncidentsController {
             }
             '*'{ render status: NOT_FOUND }
         }
+    }
+
+    private Map incidentPayload(def incident, BigDecimal longitude, BigDecimal latitude) {
+        [
+            id            : incident.id,
+            incidentId    : incident.incidentId,
+            eventType     : incident.eventType,
+            eventCat      : incident.eventCat,
+            eventName     : incident.eventName,
+            eventDesc     : incident.eventDesc,
+            mgrsCoord     : incident.mgrsCoord,
+            base          : incident.base,
+            sigEvent      : incident.sigEvent,
+            airOpsAffected: incident.airOpsAffected,
+            source        : incident.source,
+            createdBy     : incident.createdBy,
+            createdDate   : formatUtc(incident.createdDate, "yyyy-MM-dd'T'HH:mm:ss'Z'"),
+            longitude     : longitude,
+            latitude      : latitude
+        ]
+    }
+
+    private Map incidentFeature(def incident, BigDecimal longitude, BigDecimal latitude) {
+        [
+            type      : 'Feature',
+            geometry  : [
+                type       : 'Point',
+                coordinates: [longitude, latitude]
+            ],
+            properties: [
+                __layerKey      : 'currentIncidents',
+                id              : incident.id,
+                incident_id     : incident.incidentId,
+                event_type      : incident.eventType,
+                event_cat       : incident.eventCat,
+                event_name      : incident.eventName,
+                event_desc      : incident.eventDesc,
+                mgrs_coord      : incident.mgrsCoord,
+                base            : incident.base,
+                sig_event       : incident.sigEvent,
+                air_ops_affected: incident.airOpsAffected,
+                source          : incident.source,
+                created_by      : incident.createdBy,
+                created_date    : formatUtc(incident.createdDate, "yyyy-MM-dd'T'HH:mm:ss'Z'")
+            ]
+        ]
+    }
+
+    private Map insertIncidentRecord(Map incident, BigDecimal longitude, BigDecimal latitude) {
+        Map result = [inserted: false, updated: false, skipped: true]
+        Connection connection = null
+        Sql sql = null
+        try {
+            connection = dataSource_geodbthree.connection
+            sql = new Sql(connection)
+            String productName = connection.metaData.databaseProductName ?: ''
+            boolean postgres = productName.toLowerCase().contains('postgresql')
+            Long objectId = sql.firstRow('SELECT COALESCE(MAX(OBJECTID_1), 0) + 1 AS next_id FROM AFIM_EVENT_POINT_BM0914').next_id as Long
+            incident.id = objectId
+
+            String geometryColumn = postgres ? ', GEOM' : ''
+            String geometryValue = postgres ? ', ST_SetSRID(ST_MakePoint(?, ?), 4326)' : ''
+            List values = [
+                objectId,
+                incident.incidentId,
+                incident.eventType,
+                incident.eventCat,
+                incident.eventName,
+                incident.eventDesc,
+                incident.eventDescHan,
+                incident.mgrsCoord,
+                incident.base,
+                incident.sigEvent,
+                incident.airOpsAffected,
+                incident.source,
+                timestampValue(incident.entered),
+                incident.updatedBy,
+                incident.hiddenBy,
+                incident.hidden,
+                timestampValue(incident.updatedDate),
+                incident.createdBy,
+                timestampValue(incident.createdDate),
+                incident.eventSourceHan
+            ]
+            if (postgres) {
+                values.add(longitude)
+                values.add(latitude)
+            }
+
+            int inserted = sql.executeUpdate(
+                """INSERT INTO AFIM_EVENT_POINT_BM0914 (
+                    OBJECTID_1, INCIDENT_ID, EVENT_TYPE, EVENT_CAT, EVENT_NAME, EVENT_DESC, EVENT_DESC_HAN,
+                    MGRS_COORD, BASE, SIG_EVENT, AIR_OPS_AFFECTED, SOURCE, ENTERED, UPDATED_BY,
+                    HIDDEN_BY, HIDDEN, UPDATED_DATE, CREATED_BY, CREATED_DATE, EVENT_SOURCE_HAN${geometryColumn}
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?${geometryValue})""",
+                values
+            )
+            result.inserted = inserted > 0
+            result.updated = postgres && inserted > 0
+            result.skipped = !postgres
+            if (!postgres) {
+                result.reason = 'non-postgresql-datasource'
+            }
+        } catch (Exception ignored) {
+            log.warn('Map incident insert failed', ignored)
+            incident.id = null
+            result.inserted = false
+            result.updated = false
+            result.skipped = true
+            result.reason = 'incident-insert-failed'
+        } finally {
+            sql?.close()
+            if (connection && !connection.closed) {
+                connection.close()
+            }
+        }
+        result
+    }
+
+    private Timestamp timestampValue(Date date) {
+        date ? new Timestamp(date.time) : null
+    }
+
+    private BigDecimal decimalValue(Object payload, String name) {
+        String value = stringValue(payload, name)
+        value?.isBigDecimal() ? value as BigDecimal : null
+    }
+
+    private String stringValue(Object payload, String name) {
+        Object value = null
+        try {
+            value = payload[name]
+        } catch (Exception ignored) {
+            value = params[name]
+        }
+
+        String text = value?.toString()?.trim()
+        text ?: null
+    }
+
+    private String generatedIncidentId(Date now) {
+        "INC-MAP-${formatUtc(now, 'yyyyMMddHHmmss')}"
+    }
+
+    private String currentUsername() {
+        try {
+            return springSecurityService?.currentUser?.username?.toString() ?: request.userPrincipal?.name ?: 'map'
+        } catch (Exception ignored) {
+            request.userPrincipal?.name ?: 'map'
+        }
+    }
+
+    private String formatUtc(Date date, String pattern) {
+        if (!date) {
+            return null
+        }
+
+        SimpleDateFormat formatter = new SimpleDateFormat(pattern)
+        formatter.timeZone = TimeZone.getTimeZone('UTC')
+        formatter.format(date)
     }
 }
