@@ -12,3 +12,4 @@ out/
 .classpath
 .assetcache
 .env
+grails*.log
