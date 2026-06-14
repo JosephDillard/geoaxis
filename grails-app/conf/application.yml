@@ -334,6 +334,7 @@ geo:
             filterField: job_id
             filterLabel: Job
             filterAllLabel: All Jobs
+            maxFeatures: 5000
         currentIncidents:
             title: Current Incidents
             category: Incidents

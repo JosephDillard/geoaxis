@@ -52,6 +52,7 @@ class MapController {
             basemaps        : basemaps,
             geoai           : [
                 optionsUrl      : createLink(uri: '/geoAi/options'),
+                jobsUrl         : createLink(uri: '/geoAi/jobs'),
                 runsUrl         : createLink(uri: '/geoAi/runs'),
                 runStatusUrlBase: createLink(uri: '/geoAi/runs') + '/',
                 apiUrl          : geoaiConfig.apiUrl?.toString() ?: '',
@@ -100,6 +101,7 @@ class MapController {
                     filterField : layer.filterField?.toString() ?: '',
                     filterLabel : layer.filterLabel?.toString() ?: '',
                     filterAllLabel: layer.filterAllLabel?.toString() ?: '',
+                    maxFeatures : layer.maxFeatures ?: null,
                     category    : layer.category?.toString() ?: 'Internal',
                     enabled     : asBoolean(layer.enabled, false)
                 ]

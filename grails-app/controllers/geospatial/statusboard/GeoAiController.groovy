@@ -2,15 +2,92 @@ package geospatial.statusboard
 
 import grails.core.GrailsApplication
 import grails.plugin.springsecurity.annotation.Secured
+import groovy.sql.GroovyRowResult
+import groovy.sql.Sql
 import groovy.json.JsonOutput
+
+import javax.sql.DataSource
 
 @Secured(['ROLE_USER'])
 class GeoAiController {
 
     GrailsApplication grailsApplication
+    DataSource dataSource
+
+    private static final String PERSISTED_JOBS_SQL = '''
+        WITH feature_counts AS (
+            SELECT job_id,
+                   COUNT(*) AS feature_count,
+                   MAX(loaded_at::timestamptz) AS feature_loaded_at,
+                   MAX(workflow_id) AS workflow_id
+            FROM public.detected_roads
+            WHERE job_id IS NOT NULL
+              AND btrim(job_id) <> ''
+            GROUP BY job_id
+        )
+        SELECT COALESCE(j.job_id, f.job_id) AS job_id,
+               COALESCE(j.workflow_id, f.workflow_id, '') AS workflow_id,
+               COALESCE(f.feature_count, j.feature_count, 0) AS feature_count,
+               COALESCE(j.loaded_at, f.feature_loaded_at) AS loaded_at,
+               COALESCE(j.status, 'loaded') AS status
+        FROM public.geoai_jobs j
+        FULL OUTER JOIN feature_counts f ON f.job_id = j.job_id
+        WHERE COALESCE(j.job_id, f.job_id) IS NOT NULL
+          AND btrim(COALESCE(j.job_id, f.job_id)) <> ''
+        ORDER BY COALESCE(j.loaded_at, f.feature_loaded_at) DESC NULLS LAST,
+                 COALESCE(j.job_id, f.job_id) DESC
+        LIMIT ?
+    '''
+
+    private static final String FEATURE_JOBS_SQL = '''
+        SELECT job_id,
+               COALESCE(MAX(workflow_id), '') AS workflow_id,
+               COUNT(*) AS feature_count,
+               MAX(loaded_at::timestamptz) AS loaded_at,
+               'loaded' AS status
+        FROM public.detected_roads
+        WHERE job_id IS NOT NULL
+          AND btrim(job_id) <> ''
+        GROUP BY job_id
+        ORDER BY MAX(loaded_at::timestamptz) DESC NULLS LAST, job_id DESC
+        LIMIT ?
+    '''
+
+    private static final String JOBS_ONLY_SQL = '''
+        SELECT job_id,
+               COALESCE(workflow_id, '') AS workflow_id,
+               COALESCE(feature_count, 0) AS feature_count,
+               loaded_at,
+               COALESCE(status, 'loaded') AS status
+        FROM public.geoai_jobs
+        WHERE job_id IS NOT NULL
+          AND btrim(job_id) <> ''
+        ORDER BY loaded_at DESC NULLS LAST, job_id DESC
+        LIMIT ?
+    '''
+
+    private static final String BASIC_FEATURE_JOBS_SQL = '''
+        SELECT job_id,
+               '' AS workflow_id,
+               COUNT(*) AS feature_count,
+               NULL AS loaded_at,
+               'loaded' AS status
+        FROM public.detected_roads
+        WHERE job_id IS NOT NULL
+          AND btrim(job_id) <> ''
+        GROUP BY job_id
+        ORDER BY job_id DESC
+        LIMIT ?
+    '''
 
     def options() {
         proxyJson('GET', '/run-options')
+    }
+
+    def jobs() {
+        int limit = asInteger(params.limit, 100)
+        limit = Math.max(1, Math.min(limit, 500))
+        renderJson([jobs: queryJobs(limit)])
     }
 
     def createRun() {
@@ -67,6 +144,39 @@ class GeoAiController {
             ])
         } finally {
             connection?.disconnect()
+        }
+    }
+
+    private List<Map> queryJobs(int limit) {
+        Sql sql = new Sql(dataSource)
+        try {
+            return rowsFor(sql, PERSISTED_JOBS_SQL, limit) ?:
+                rowsFor(sql, JOBS_ONLY_SQL, limit) ?:
+                rowsFor(sql, FEATURE_JOBS_SQL, limit) ?:
+                rowsFor(sql, BASIC_FEATURE_JOBS_SQL, limit)
+        } catch (Exception ignored) {
+            []
+        } finally {
+            sql.close()
+        }
+    }
+
+    private List<Map> rowsFor(Sql sql, String query, int limit) {
+        try {
+            sql.rows(query, [limit]).collect { GroovyRowResult row ->
+                [
+                    id           : row.job_id?.toString() ?: '',
+                    job_id       : row.job_id?.toString() ?: '',
+                    workflow_id  : row.workflow_id?.toString() ?: '',
+                    feature_count: row.feature_count instanceof Number ? row.feature_count as Long : 0L,
+                    loaded_at    : row.loaded_at?.toString() ?: '',
+                    status       : row.status?.toString() ?: 'loaded'
+                ]
+            }.findAll { Map job ->
+                job.job_id
+            }
+        } catch (Exception ignored) {
+            []
         }
     }
 

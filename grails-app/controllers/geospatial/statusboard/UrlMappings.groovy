@@ -4,6 +4,7 @@ class UrlMappings {
 
     static mappings = {
         "/geoAi/options"(controller: 'geoAi', action: 'options', method: 'GET')
+        "/geoAi/jobs"(controller: 'geoAi', action: 'jobs', method: 'GET')
         "/geoAi/runs"(controller: 'geoAi', action: 'createRun', method: 'POST')
         "/geoAi/runs/$id"(controller: 'geoAi', action: 'runStatus', method: 'GET')
 

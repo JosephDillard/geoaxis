@@ -361,6 +361,7 @@
     var renderLayerToLayerKey = {};
     var layerIssueState = {};
     var layerFilters = {};
+    var persistedLayerFilterOptions = {};
     var measureMode = false;
     var measurePoints = [];
     var incidentCreateMode = false;
@@ -428,6 +429,80 @@
 
     function geoAiConfig() {
         return config.geoai || {};
+    }
+
+    function formatGeoAiJobTime(value) {
+        if (!value) {
+            return '';
+        }
+        var date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+            return String(value);
+        }
+        return date.toLocaleString([], {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function geoAiJobOption(job) {
+        var id = String(job.job_id || job.id || '');
+        var count = Number(job.feature_count || 0);
+        var parts = ['Job ' + shortRunId(id)];
+        if (job.workflow_id) {
+            parts.push(job.workflow_id);
+        }
+        parts.push(count + ' feature' + (count === 1 ? '' : 's'));
+        var loadedAt = formatGeoAiJobTime(job.loaded_at);
+        if (loadedAt) {
+            parts.push(loadedAt);
+        }
+        return {
+            value: id,
+            label: parts.join(' - '),
+            title: id
+        };
+    }
+
+    function rememberPersistedLayerFilterOption(key, option) {
+        if (!option || !option.value) {
+            return;
+        }
+        var options = persistedLayerFilterOptions[key] || [];
+        persistedLayerFilterOptions[key] = [option].concat(options.filter(function (existing) {
+            return existing.value !== option.value;
+        }));
+        refreshLayerFilterOptions(key);
+    }
+
+    function rememberGeoAiJobFromRun(run) {
+        if (!run || !run.id) {
+            return;
+        }
+        rememberPersistedLayerFilterOption('detectedRoads', {
+            value: run.id,
+            label: 'Job ' + shortRunId(run.id) + ' - ' + postgisLoadCount(run) + ' feature' +
+                (postgisLoadCount(run) === 1 ? '' : 's'),
+            title: run.id
+        });
+    }
+
+    function loadGeoAiJobs() {
+        var jobsUrl = geoAiConfig().jobsUrl;
+        if (!jobsUrl || !window.fetch) {
+            return Promise.resolve();
+        }
+        var url = jobsUrl + (jobsUrl.indexOf('?') >= 0 ? '&' : '?') + 'limit=200';
+        return geoAiFetch(url)
+            .then(function (payload) {
+                persistedLayerFilterOptions.detectedRoads = (payload.jobs || []).map(geoAiJobOption);
+                refreshLayerFilterOptions('detectedRoads');
+            })
+            .catch(function () {
+                refreshLayerFilterOptions('detectedRoads');
+            });
     }
 
     function setGeoAiPanelOpen(open) {
@@ -781,6 +856,8 @@
             return false;
         }
         layerFilters[key] = run.id || '';
+        rememberGeoAiJobFromRun(run);
+        loadGeoAiJobs();
 
         var filter = layerFilterSelect(key);
         if (filter) {
@@ -1106,7 +1183,7 @@
         return field + "='" + String(value).replace(/'/g, "''") + "'";
     }
 
-    function buildWfsUrl(layer) {
+    function buildWfsUrl(key, layer) {
         var url = new URL(config.wfsUrl, window.location.origin);
         url.searchParams.set('service', 'WFS');
         url.searchParams.set('version', '1.0.0');
@@ -1114,16 +1191,18 @@
         url.searchParams.set('typeName', layer.typeName);
         url.searchParams.set('outputFormat', 'application/json');
         url.searchParams.set('srsName', config.defaultSrs || 'EPSG:4326');
-        url.searchParams.set('maxFeatures', config.maxFeatures || 500);
+        url.searchParams.set('maxFeatures', layer.maxFeatures || config.maxFeatures || 500);
 
-        if (config.filter && config.filter.field && config.filter.value) {
+        if (layer.filterField && layerFilterValue(key)) {
+            url.searchParams.set('CQL_FILTER', cqlEquals(layer.filterField, layerFilterValue(key)));
+        } else if (config.filter && config.filter.field && config.filter.value) {
             url.searchParams.set('CQL_FILTER', cqlEquals(config.filter.field, config.filter.value));
         }
 
         return url.toString();
     }
 
-    function fetchWfsJson(layer) {
+    function fetchWfsJson(key, layer) {
         var timeoutMs = Number(config.requestTimeoutMs || 5000);
         var requestOptions = { credentials: 'same-origin' };
         var timeoutId = null;
@@ -1136,7 +1215,7 @@
             }, timeoutMs);
         }
 
-        return fetch(buildWfsUrl(layer), requestOptions)
+        return fetch(buildWfsUrl(key, layer), requestOptions)
             .then(function (response) {
                 if (!response.ok) {
                     throw new Error('GeoServer returned HTTP ' + response.status);
@@ -1952,15 +2031,24 @@
         return count + ' feature' + (count === 1 ? '' : 's');
     }
 
-    function populateLayerFilterOptions(key, rawData) {
+    function normalizeLayerFilterOption(option) {
+        if (typeof option === 'string') {
+            return {
+                value: option,
+                label: option,
+                title: option
+            };
+        }
+        return {
+            value: String(option.value || ''),
+            label: String(option.label || option.value || ''),
+            title: String(option.title || option.value || '')
+        };
+    }
+
+    function rawLayerFilterOptions(key, rawData) {
         var layer = config.layers[key] || {};
         var field = layer.filterField;
-        var select = layerFilterSelect(key);
-        if (!field || !select) {
-            return;
-        }
-
-        var selected = layerFilters[key] || select.value || '';
         var values = [];
         (rawData.features || []).forEach(function (feature) {
             var rawValue = feature.properties ? feature.properties[field] : null;
@@ -1969,7 +2057,25 @@
                 values.push(value);
             }
         });
-        values.sort();
+        return values.sort().map(normalizeLayerFilterOption);
+    }
+
+    function setLayerFilterOptions(key, options) {
+        var layer = config.layers[key] || {};
+        var select = layerFilterSelect(key);
+        if (!layer.filterField || !select) {
+            return;
+        }
+
+        var selected = layerFilters[key] || select.value || '';
+        var seen = {};
+        var normalized = (options || []).map(normalizeLayerFilterOption).filter(function (option) {
+            if (!option.value || seen[option.value]) {
+                return false;
+            }
+            seen[option.value] = true;
+            return true;
+        });
 
         select.innerHTML = '';
         var allOption = document.createElement('option');
@@ -1977,16 +2083,27 @@
         allOption.textContent = layer.filterAllLabel || 'All';
         select.appendChild(allOption);
 
-        values.forEach(function (value) {
+        normalized.forEach(function (optionValue) {
             var option = document.createElement('option');
-            option.value = value;
-            option.textContent = value;
+            option.value = optionValue.value;
+            option.textContent = optionValue.label;
+            option.title = optionValue.title;
             select.appendChild(option);
         });
 
-        select.disabled = values.length === 0;
-        select.value = selected && values.indexOf(selected) >= 0 ? selected : '';
+        select.disabled = normalized.length === 0;
+        select.value = selected && seen[selected] ? selected : '';
         layerFilters[key] = select.value;
+    }
+
+    function populateLayerFilterOptions(key, rawData) {
+        var options = (persistedLayerFilterOptions[key] || []).concat(rawLayerFilterOptions(key, rawData || { features: [] }));
+        setLayerFilterOptions(key, options);
+    }
+
+    function refreshLayerFilterOptions(key) {
+        var state = internalLayerState[key] || {};
+        populateLayerFilterOptions(key, state.rawData || { features: [] });
     }
 
     function applyInternalLayerFilter(key) {
@@ -2001,6 +2118,18 @@
             source.setData(data);
         }
         updateLayerStatus(key, 'internal', layerFeatureStatus(data, state.rawData));
+    }
+
+    function reloadInternalLayerForFilter(key) {
+        var checkbox = document.querySelector('[data-layer-kind="internal"][data-layer-key="' + key + '"]');
+        if (checkbox && checkbox.checked) {
+            if (internalLayerState[key] && internalLayerState[key].loaded) {
+                removeInternalLayer(key);
+            }
+            loadInternalLayer(key);
+            return;
+        }
+        applyInternalLayerFilter(key);
     }
 
     function removeInternalLayer(key) {
@@ -2117,7 +2246,7 @@
         updateLayerStatus(key, 'internal', 'Loading');
         setStatus('Loading ' + layer.title + ' from GeoServer...');
 
-        fetchWfsJson(layer)
+        fetchWfsJson(key, layer)
             .then(function (geojson) {
                 var checkbox = document.querySelector('[data-layer-kind="internal"][data-layer-key="' + key + '"]');
                 if (!checkbox || !checkbox.checked) {
@@ -2673,7 +2802,7 @@
 
                     filterSelect.addEventListener('change', function () {
                         layerFilters[entry.key] = filterSelect.value;
-                        applyInternalLayerFilter(entry.key);
+                        reloadInternalLayerForFilter(entry.key);
                     });
                 }
 
@@ -2751,6 +2880,7 @@
 
     appendLayerRows(internalLayerList, config.layers || {}, 'internal');
     appendLayerRows(externalLayerList, config.externalLayers || {}, 'external');
+    loadGeoAiJobs();
     setLayerDrawerOpen(false);
     updateBasemapCards();
 
