@@ -98,6 +98,7 @@ geo:
     geoai:
         apiUrl: "${GEOAI_API_URL:http://localhost:8000}"
         healthUrl: "${GEOAI_HEALTH_URL:http://localhost:8000/health}"
+        requestTimeoutMs: "${GEOAI_REQUEST_TIMEOUT_MS:10000}"
     viewer:
         provider: maplibre
         mapLibreJsUrl: https://unpkg.com/maplibre-gl/dist/maplibre-gl.js
@@ -147,6 +148,7 @@ geo:
             fullscreen: true
             fitLayer: true
             createIncidents: true
+            geoaiRequests: true
         center:
             - -106.0
             - 34.5

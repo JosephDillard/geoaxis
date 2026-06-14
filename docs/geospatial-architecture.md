@@ -110,3 +110,16 @@ The map page shows compact health boxes for GeoServer, PostGIS, and the GeoAI AP
 The browser calls the same-origin Grails health endpoint, and the server checks the
 configured dependencies. If GeoAI is unavailable, the map still loads normally and
 only the GeoAI indicator is marked down.
+
+## GeoAI Map Requests
+
+The map submits GeoAI jobs through same-origin proxy routes so the browser does not
+need to call the GeoAI API host directly:
+
+- `GET /GeoStatusBoard/geoAi/options` forwards to `GET /run-options`.
+- `POST /GeoStatusBoard/geoAi/runs` forwards to `POST /runs`.
+- `GET /GeoStatusBoard/geoAi/runs/{run_id}` forwards to `GET /runs/{run_id}`.
+
+Each map-submitted job includes `request_source: external_app`, `submitted_by:
+geospatial-status-board`, the selected `model_id`, the current bounding box, map
+center, zoom, selected layer, and any drawn AOI GeoJSON.

@@ -14,6 +14,7 @@ class MapController {
         Map geoConfig = asMap(grailsApplication.config.geo)
         Map viewerConfig = asMap(geoConfig.viewer)
         Map geoserverConfig = asMap(geoConfig.geoserver)
+        Map geoaiConfig = asMap(geoConfig.geoai)
         Map layers = normalizeLayers(asMap(geoConfig.layers))
         Map externalLayers = normalizeExternalLayers(asMap(geoConfig.externalLayers))
         Map basemaps = normalizeBasemaps(asMap(viewerConfig.basemaps), viewerConfig)
@@ -49,6 +50,13 @@ class MapController {
             layers          : layers,
             externalLayers  : externalLayers,
             basemaps        : basemaps,
+            geoai           : [
+                optionsUrl      : createLink(uri: '/geoAi/options'),
+                runsUrl         : createLink(uri: '/geoAi/runs'),
+                runStatusUrlBase: createLink(uri: '/geoAi/runs') + '/',
+                apiUrl          : geoaiConfig.apiUrl?.toString() ?: '',
+                requestTimeoutMs: asInteger(geoaiConfig.requestTimeoutMs, 5000)
+            ],
             tools           : tools,
             coordinateDigits: viewerConfig.coordinateDigits ?: 6,
             mgrsAccuracy    : viewerConfig.mgrsAccuracy ?: 5
@@ -170,7 +178,8 @@ class MapController {
             drawArea       : asBoolean(rawTools.drawArea, true),
             fullscreen     : asBoolean(rawTools.fullscreen, true),
             fitLayer       : asBoolean(rawTools.fitLayer, true),
-            createIncidents: asBoolean(rawTools.createIncidents, true)
+            createIncidents: asBoolean(rawTools.createIncidents, true),
+            geoaiRequests  : asBoolean(rawTools.geoaiRequests, true)
         ]
     }
 

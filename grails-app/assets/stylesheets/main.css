@@ -1420,6 +1420,7 @@ img.grails-logo {
 .geo-zoom-control,
 .geo-measure-control,
 .geo-view-control,
+.geo-ai-control,
 .geo-north-control {
     position: relative;
     width: 42px;
@@ -1483,6 +1484,7 @@ img.grails-logo {
 .geo-map-square-button:hover,
 .geo-map-square-button:focus,
 .geo-map-square-button.is-active,
+.geo-ai-toggle.is-active,
 .geo-measure-toggle.is-active {
     background: #38bdf8;
     border-color: #7dd3fc;
@@ -1598,6 +1600,120 @@ img.grails-logo {
 .geo-incident-create-toggle span::after {
     height: 14px;
     width: 2px;
+}
+
+.geo-ai-toggle {
+    font-size: 0.78rem;
+    letter-spacing: 0;
+}
+
+.geo-ai-panel {
+    backdrop-filter: blur(14px);
+    background: var(--geo-map-panel-strong);
+    border: 1px solid var(--geo-map-border);
+    border-radius: 8px;
+    bottom: 0;
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.34);
+    color: #eef6ff;
+    display: grid;
+    gap: 0.65rem;
+    left: 50px;
+    max-height: min(360px, calc(100vh - 180px));
+    overflow: auto;
+    padding: 0.75rem;
+    position: absolute;
+    width: min(340px, calc(100vw - 88px));
+    z-index: 8;
+}
+
+.geo-ai-panel[hidden] {
+    display: none;
+}
+
+.geo-ai-panel-header {
+    align-items: center;
+    border-bottom: 1px solid rgba(147, 197, 253, 0.28);
+    display: flex;
+    justify-content: space-between;
+    margin-top: -0.1rem;
+    padding-bottom: 0.5rem;
+}
+
+.geo-ai-panel-header strong {
+    color: #ffffff;
+    font-size: 0.98rem;
+}
+
+.geo-ai-form {
+    display: grid;
+    gap: 0.58rem;
+}
+
+.geo-ai-field {
+    display: grid;
+    gap: 0.24rem;
+    min-width: 0;
+}
+
+.geo-ai-field label {
+    color: #bfdbfe;
+    font-size: 0.68rem;
+    font-weight: 800;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.geo-ai-field select,
+.geo-ai-field output {
+    background: rgba(7, 28, 55, 0.84);
+    border: 1px solid rgba(147, 197, 253, 0.42);
+    border-radius: 4px;
+    color: #ffffff;
+    font-size: 0.82rem;
+    line-height: 1.25;
+    min-height: 34px;
+    min-width: 0;
+    padding: 0.42rem 0.48rem;
+    width: 100%;
+}
+
+.geo-ai-field output {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.geo-ai-field select:focus {
+    border-color: #7dd3fc;
+    outline: 2px solid rgba(56, 189, 248, 0.28);
+}
+
+.geo-ai-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 0.15rem;
+}
+
+.geo-ai-actions .btn {
+    min-height: 34px;
+}
+
+.geo-ai-status {
+    background: rgba(15, 53, 96, 0.62);
+    border: 1px solid rgba(147, 197, 253, 0.28);
+    border-radius: 4px;
+    color: #dbeafe;
+    font-size: 0.78rem;
+    line-height: 1.3;
+    min-height: 32px;
+    overflow-wrap: anywhere;
+    padding: 0.42rem 0.48rem;
+}
+
+.geo-ai-status.is-error {
+    border-color: #fb7185;
+    color: #fecdd3;
 }
 
 .geo-map-canvas.is-placing-incident,

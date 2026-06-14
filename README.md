@@ -250,6 +250,18 @@ GSP links can open the map with a selected layer and feature filter, for example
 
 The map configuration lives under `geo.viewer`, `geo.geoserver`, and `geo.layers` in `grails-app/conf/application.yml`. The current default basemaps are CARTO Dark Blue and OpenStreetMap, and configured layers include airport status, current airfield status, airfield surface status, NAVAIDs, engineer assets, fire fighting assets, utility status, current incidents, and incident archive.
 
+The map also includes a compact GeoAI request panel. It loads model choices from the
+GeoAI API through same-origin Grails proxy routes, submits the current MapLibre extent
+and optional drawn AOI, then polls the returned run id:
+
+- `GET /GeoStatusBoard/geoAi/options`
+- `POST /GeoStatusBoard/geoAi/runs`
+- `GET /GeoStatusBoard/geoAi/runs/{run_id}`
+
+Configure the target API with `geo.geoai.apiUrl` or the `GEOAI_API_URL` environment
+variable. If GeoAI is unavailable, the map remains usable and the panel shows the
+request failure instead of blocking map tools.
+
 The recommended open source GIS stack is:
 
 - PostGIS for geospatial columns and spatial indexes in the operational database.
@@ -271,6 +283,7 @@ See:
 - Added PostgreSQL-safe table/formula mappings for the local PostGIS development profile.
 - Added development sample geometries for the bootstrapped New Mexico records.
 - Added editable lookup tables, richer New Mexico bootstrap data, and MapLibre map tools for basemaps, layers, feature filtering, measurement, drawing, fullscreen, MGRS, and coordinate readout.
+- Added top-nav health indicators and a MapLibre GeoAI request panel for submitting map-context jobs to the GeoAI workflow API.
 
 ## Data Sources
 

@@ -125,6 +125,38 @@
                     <span aria-hidden="true"></span>
                 </button>
             </div>
+            <div id="geo-ai-tools" class="geo-ai-control">
+                <button id="geo-ai-toggle"
+                        type="button"
+                        class="geo-map-square-button geo-ai-toggle"
+                        aria-label="GeoAI request"
+                        aria-expanded="false"
+                        title="GeoAI request">
+                    AI
+                </button>
+                <aside id="geo-ai-panel" class="geo-ai-panel" aria-label="GeoAI request" hidden>
+                    <div class="geo-ai-panel-header">
+                        <strong>GeoAI Request</strong>
+                        <button id="geo-ai-close" type="button" class="geo-map-icon-button" aria-label="Close GeoAI request">x</button>
+                    </div>
+                    <form id="geo-ai-form" class="geo-ai-form">
+                        <div class="geo-ai-field">
+                            <label for="geo-ai-model">Model</label>
+                            <select id="geo-ai-model" name="modelId" disabled>
+                                <option value="">Loading...</option>
+                            </select>
+                        </div>
+                        <div class="geo-ai-field">
+                            <label for="geo-ai-extent">Extent</label>
+                            <output id="geo-ai-extent">Current map view</output>
+                        </div>
+                        <div class="geo-ai-actions">
+                            <button id="geo-ai-submit" type="submit" class="btn btn-primary" disabled>Submit</button>
+                        </div>
+                    </form>
+                    <output id="geo-ai-status" class="geo-ai-status" aria-live="polite">Checking GeoAI...</output>
+                </aside>
+            </div>
             <div id="geo-measure-tools" class="geo-measure-control">
                 <button id="geo-measure-toggle"
                         type="button"
@@ -289,6 +321,15 @@
     var incidentCreateForm = document.getElementById('geo-incident-create-form');
     var incidentCancel = document.getElementById('geo-incident-cancel');
     var incidentSave = document.getElementById('geo-incident-save');
+    var geoAiTools = document.getElementById('geo-ai-tools');
+    var geoAiToggle = document.getElementById('geo-ai-toggle');
+    var geoAiPanel = document.getElementById('geo-ai-panel');
+    var geoAiClose = document.getElementById('geo-ai-close');
+    var geoAiForm = document.getElementById('geo-ai-form');
+    var geoAiModel = document.getElementById('geo-ai-model');
+    var geoAiSubmit = document.getElementById('geo-ai-submit');
+    var geoAiExtent = document.getElementById('geo-ai-extent');
+    var geoAiStatus = document.getElementById('geo-ai-status');
     var measureTools = document.getElementById('geo-measure-tools');
     var measureToggle = document.getElementById('geo-measure-toggle');
     var measurePanel = document.getElementById('geo-measure-panel');
@@ -319,6 +360,9 @@
     var localIncidentFeatures = [];
     var hoverCoordinate = null;
     var draw = null;
+    var geoAiModels = [];
+    var geoAiCurrentRunId = null;
+    var geoAiPollTimer = null;
 
     function setStatus(message, isError) {
         var collapsed = statusEl.classList.contains('is-collapsed');
@@ -370,6 +414,279 @@
         filterFields.hidden = !open;
         filterToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
         filterToggle.classList.toggle('is-active', open);
+    }
+
+    function geoAiConfig() {
+        return config.geoai || {};
+    }
+
+    function setGeoAiPanelOpen(open) {
+        if (!geoAiPanel || !geoAiToggle) {
+            return;
+        }
+        geoAiPanel.hidden = !open;
+        geoAiToggle.classList.toggle('is-active', open);
+        geoAiToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (open) {
+            setIncidentCreateMode(false);
+            setIncidentPanelOpen(false);
+            setMeasureMode(false);
+            updateGeoAiExtent();
+            if (!geoAiModels.length) {
+                loadGeoAiOptions();
+            }
+        }
+    }
+
+    function setGeoAiStatus(message, isError) {
+        if (!geoAiStatus) {
+            return;
+        }
+        geoAiStatus.textContent = message || '';
+        geoAiStatus.classList.toggle('is-error', !!isError);
+    }
+
+    function setGeoAiControlsEnabled(enabled) {
+        if (geoAiModel) {
+            geoAiModel.disabled = !enabled;
+        }
+        if (geoAiSubmit) {
+            geoAiSubmit.disabled = !enabled || !geoAiModel || !geoAiModel.value;
+        }
+    }
+
+    function geoAiFetch(url, options) {
+        var timeoutMs = Number(geoAiConfig().requestTimeoutMs || 10000);
+        var requestOptions = Object.assign({
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json'
+            }
+        }, options || {});
+        var timeoutId = null;
+
+        if (requestOptions.body && !requestOptions.headers['Content-Type']) {
+            requestOptions.headers['Content-Type'] = 'application/json';
+        }
+
+        if (window.AbortController && timeoutMs > 0) {
+            var controller = new AbortController();
+            requestOptions.signal = controller.signal;
+            timeoutId = window.setTimeout(function () {
+                controller.abort();
+            }, timeoutMs);
+        }
+
+        return fetch(url, requestOptions).then(function (response) {
+            return response.text().then(function (text) {
+                var body = text ? JSON.parse(text) : {};
+                if (!response.ok) {
+                    throw new Error(body.detail || body.error || 'GeoAI returned HTTP ' + response.status);
+                }
+                return body;
+            });
+        }).catch(function (error) {
+            if (error && error.name === 'AbortError') {
+                throw new Error('GeoAI did not respond within ' + timeoutMs + ' ms');
+            }
+            if (error instanceof TypeError) {
+                throw new Error('GeoAI is unavailable');
+            }
+            throw error;
+        }).finally(function () {
+            if (timeoutId) {
+                window.clearTimeout(timeoutId);
+            }
+        });
+    }
+
+    function populateGeoAiModels(models) {
+        geoAiModels = Array.isArray(models) ? models : [];
+        if (!geoAiModel) {
+            return;
+        }
+
+        geoAiModel.innerHTML = '';
+        if (!geoAiModels.length) {
+            var emptyOption = document.createElement('option');
+            emptyOption.value = '';
+            emptyOption.textContent = 'No models';
+            geoAiModel.appendChild(emptyOption);
+            setGeoAiControlsEnabled(false);
+            return;
+        }
+
+        geoAiModels.forEach(function (model) {
+            var option = document.createElement('option');
+            option.value = model.id;
+            option.textContent = model.name || model.id;
+            option.title = model.description || model.id;
+            geoAiModel.appendChild(option);
+        });
+        setGeoAiControlsEnabled(true);
+    }
+
+    function loadGeoAiOptions() {
+        var optionsUrl = geoAiConfig().optionsUrl;
+        if (!geoAiTools || !config.tools.geoaiRequests) {
+            return;
+        }
+        if (!optionsUrl || !window.fetch) {
+            populateGeoAiModels([]);
+            setGeoAiStatus('GeoAI unavailable', true);
+            return;
+        }
+
+        setGeoAiControlsEnabled(false);
+        setGeoAiStatus('Loading models...');
+        geoAiFetch(optionsUrl)
+            .then(function (payload) {
+                populateGeoAiModels(payload.models || []);
+                setGeoAiStatus(geoAiModels.length ? 'Ready' : 'No models returned', !geoAiModels.length);
+            })
+            .catch(function (error) {
+                populateGeoAiModels([]);
+                setGeoAiStatus(error.message || 'GeoAI unavailable', true);
+            });
+    }
+
+    function drawnGeoJson() {
+        if (!draw || typeof draw.getAll !== 'function') {
+            return null;
+        }
+        try {
+            var featureCollection = draw.getAll();
+            return featureCollection && featureCollection.features && featureCollection.features.length
+                ? featureCollection
+                : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function geoAiMapContext() {
+        var bounds = map.getBounds();
+        var center = map.getCenter();
+        var context = {
+            source_app: 'geospatial-status-board',
+            bbox: [
+                bounds.getWest(),
+                bounds.getSouth(),
+                bounds.getEast(),
+                bounds.getNorth()
+            ],
+            map_center: [center.lng, center.lat],
+            zoom: Number(map.getZoom().toFixed(2)),
+            selected_layer: config.selectedLayer || ''
+        };
+        var aoi = drawnGeoJson();
+        if (aoi) {
+            context.aoi_geojson = aoi;
+        }
+        return context;
+    }
+
+    function formatGeoAiExtent() {
+        var bounds = map.getBounds();
+        var west = bounds.getWest().toFixed(3);
+        var south = bounds.getSouth().toFixed(3);
+        var east = bounds.getEast().toFixed(3);
+        var north = bounds.getNorth().toFixed(3);
+        return west + ', ' + south + ' / ' + east + ', ' + north;
+    }
+
+    function updateGeoAiExtent() {
+        if (geoAiExtent && map) {
+            geoAiExtent.textContent = formatGeoAiExtent();
+        }
+    }
+
+    function shortRunId(value) {
+        return String(value || '').slice(0, 8);
+    }
+
+    function geoAiRunError(run) {
+        if (run.error) {
+            return run.error;
+        }
+        var failedResult = (run.results || []).find(function (result) {
+            return result && result.error;
+        });
+        return failedResult ? failedResult.error : '';
+    }
+
+    function pollGeoAiRun(runId) {
+        var statusUrl = (geoAiConfig().runStatusUrlBase || '') + encodeURIComponent(runId);
+        if (!statusUrl) {
+            return;
+        }
+
+        if (geoAiPollTimer) {
+            window.clearTimeout(geoAiPollTimer);
+            geoAiPollTimer = null;
+        }
+
+        geoAiFetch(statusUrl).then(function (run) {
+            var status = run.status || 'unknown';
+            var terminal = ['succeeded', 'failed', 'cancelled', 'canceled'].indexOf(status) >= 0;
+            var message = 'Run ' + shortRunId(run.id || runId) + ': ' + status;
+            var errorMessage = geoAiRunError(run);
+            if (errorMessage) {
+                message += ' - ' + errorMessage;
+            }
+            setGeoAiStatus(message, status === 'failed');
+            if (status === 'failed') {
+                setStatus('GeoAI run failed: ' + (errorMessage || shortRunId(run.id || runId)), true);
+            } else if (status === 'succeeded') {
+                setStatus('GeoAI run succeeded: ' + shortRunId(run.id || runId));
+            }
+            if (!terminal) {
+                geoAiPollTimer = window.setTimeout(function () {
+                    pollGeoAiRun(runId);
+                }, 3000);
+            }
+        }).catch(function (error) {
+            setGeoAiStatus(error.message || 'GeoAI status unavailable', true);
+        });
+    }
+
+    function submitGeoAiRun(event) {
+        if (event) {
+            event.preventDefault();
+        }
+        if (!geoAiModel || !geoAiModel.value) {
+            setGeoAiStatus('Select a model', true);
+            return;
+        }
+
+        var payload = {
+            request_source: 'external_app',
+            submitted_by: 'geospatial-status-board',
+            model_id: geoAiModel.value,
+            map_context: geoAiMapContext(),
+            notes: 'Submitted from Map View'
+        };
+
+        setGeoAiControlsEnabled(false);
+        setGeoAiStatus('Submitting...');
+        geoAiFetch(geoAiConfig().runsUrl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        }).then(function (run) {
+            geoAiCurrentRunId = run.id;
+            setStatus('GeoAI run queued: ' + shortRunId(run.id));
+            setGeoAiStatus('Queued: ' + shortRunId(run.id));
+            pollGeoAiRun(run.id);
+        }).catch(function (error) {
+            setGeoAiStatus(error.message || 'GeoAI request failed', true);
+            setStatus(error.message || 'GeoAI request failed', true);
+        }).finally(function () {
+            setGeoAiControlsEnabled(!!geoAiModels.length);
+        });
     }
 
     function configuredZoomLevels() {
@@ -2074,6 +2391,7 @@
     populateZoomLevels();
     viewTools.hidden = !config.tools.fitLayer;
     incidentTools.hidden = !config.tools.createIncidents;
+    geoAiTools.hidden = !config.tools.geoaiRequests;
     measureTools.hidden = !config.tools.measureDistance;
     drawTools.hidden = true;
     coordinatePanel.hidden = !config.tools.coordinates;
@@ -2105,6 +2423,8 @@
     updateZoomLevelControl();
     updateNorthArrow();
     map.on('zoomend', updateZoomLevelControl);
+    map.on('zoomend', updateGeoAiExtent);
+    map.on('moveend', updateGeoAiExtent);
     map.on('rotate', updateNorthArrow);
     map.on('rotateend', updateNorthArrow);
 
@@ -2145,6 +2465,9 @@
                 map.on('draw.update', updateDrawSummary);
                 map.on('draw.delete', updateDrawSummary);
                 map.on('draw.selectionchange', updateDrawSummary);
+                map.on('draw.create', updateGeoAiExtent);
+                map.on('draw.update', updateGeoAiExtent);
+                map.on('draw.delete', updateGeoAiExtent);
                 updateDrawSummary();
             } catch (error) {
                 drawOutput.textContent = 'Unavailable';
@@ -2279,6 +2602,7 @@
     }
     if (measureToggle) {
         measureToggle.addEventListener('click', function () {
+            setGeoAiPanelOpen(false);
             setMeasureMode(!measureMode);
         });
     }
@@ -2287,6 +2611,7 @@
     }
     if (incidentCreateToggle) {
         incidentCreateToggle.addEventListener('click', function () {
+            setGeoAiPanelOpen(false);
             setIncidentPanelOpen(false);
             clearIncidentDraft();
             setIncidentCreateMode(!incidentCreateMode);
@@ -2311,6 +2636,24 @@
             event.preventDefault();
             saveIncidentDraft();
         });
+    }
+    if (geoAiToggle) {
+        geoAiToggle.addEventListener('click', function () {
+            setGeoAiPanelOpen(geoAiPanel.hidden);
+        });
+    }
+    if (geoAiClose) {
+        geoAiClose.addEventListener('click', function () {
+            setGeoAiPanelOpen(false);
+        });
+    }
+    if (geoAiModel) {
+        geoAiModel.addEventListener('change', function () {
+            setGeoAiControlsEnabled(!!geoAiModels.length);
+        });
+    }
+    if (geoAiForm) {
+        geoAiForm.addEventListener('submit', submitGeoAiRun);
     }
     if (fitLayer) {
         fitLayer.addEventListener('click', fitAllLoadedFeatures);
