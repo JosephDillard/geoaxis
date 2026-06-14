@@ -11,7 +11,7 @@ This repository contains a status app linkable to geospatial data for dashboard 
 - Editable lookup tables for dropdown text used by airport and incident workflows.
 - Development bootstrap data for New Mexico airports and airfields, current status, runway surface condition, support assets, utilities, current incidents, and archived incidents.
 - Single deployable WAR with the application served from `/GeoStatusBoard`.
-- Optional Docker Compose GIS stack for local PostGIS and GeoServer development.
+- Optional Docker Compose GIS stack for local PostGIS, GeoServer, and GeoAI development.
 
 ## Screenshots
 
@@ -30,7 +30,7 @@ The screenshot above shows the geospatial status map with feature popups, readab
 - H2 development and test databases
 - PostGIS and GeoServer for open source GIS deployment
 - MapLibre GL JS for the browser map
-- Docker Compose for optional local GIS infrastructure
+- Docker Compose for optional local GIS and GeoAI infrastructure
 
 ## Project Layout
 
@@ -39,7 +39,7 @@ The screenshot above shows the geospatial status map with feature popups, readab
 - `gsb-incidents/` - Incident, current incident, archived incident, and facility damage module.
 - `docs/` - Geospatial architecture notes, PostGIS spatialization SQL, and README images.
 - `docker/` - Local PostGIS initialization and GeoServer bootstrap scripts.
-- `docker-compose.yml` - Optional local PostGIS and GeoServer services.
+- `docker-compose.yml` - Optional local PostGIS, GeoServer, and GeoAI services.
 - `.env.example` - Local Docker and GIS configuration defaults.
 - `dev.ps1` - Convenience commands for the local Docker GIS stack.
 - `build.gradle` - Root build, WAR packaging, Java compatibility, and module dependencies.
@@ -108,12 +108,20 @@ Equivalent raw Docker command:
 docker compose up -d postgis geoserver
 ```
 
+Start the full dev infrastructure, including the GeoAI API container with
+TensorFlow/Keras:
+
+```powershell
+.\dev.ps1 up-geoai
+```
+
 Default local endpoints:
 
 ```text
 PostGIS:   localhost:5432/geostatusboard
 GeoServer: http://localhost:8081/geoserver
 WFS:       http://localhost:8081/geoserver/gsb/ows
+GeoAI:     http://localhost:8000
 ```
 
 Default local credentials:
@@ -130,6 +138,17 @@ Copy-Item .env.example .env
 ```
 
 Then edit `.env`. The `.env` file is intentionally ignored by Git.
+
+The `geoai` Compose profile builds the sibling GeoAI repo from
+`GEOAI_CONTEXT=../geoai-asset-detection-platform`. It bind-mounts that repo's
+`src/`, `config/`, `scripts/`, and `sql/` folders for a faster dev loop, plus the
+ignored `data/`, `models/`, `outputs/`, and `logs/` folders so downloaded models,
+sample COGs, masks, vectors, and API logs remain local developer artifacts.
+
+On first start, the GeoAI container downloads the open-source HF U-Net/Keras road
+model and fetches the Taos NAIP sample COG if they are missing. Set
+`GEOAI_DOWNLOAD_HF_MODEL=false` or `GEOAI_FETCH_SAMPLE_COG=false` in `.env` to
+disable either automatic download.
 
 ### Keep Grails on H2
 
@@ -176,6 +195,8 @@ Useful Docker helper commands:
 
 ```powershell
 .\dev.ps1 logs
+.\dev.ps1 logs-geoai
+.\dev.ps1 build-geoai
 .\dev.ps1 geoserver-init
 .\dev.ps1 down
 .\dev.ps1 reset
@@ -293,6 +314,7 @@ See:
 ## Recent Local Changes
 
 - Added an optional Docker Compose GIS stack for local PostGIS and GeoServer testing.
+- Added a GeoAI Docker Compose profile for TensorFlow/Keras road segmentation while Grails runs locally.
 - Added a `postgis` Spring profile while keeping H2 as the default development and test database.
 - Added GeoServer WFS timeout handling so missing local GeoServer services fail gracefully in the map status panel.
 - Added PostgreSQL-safe table/formula mappings for the local PostGIS development profile.

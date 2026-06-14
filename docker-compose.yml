@@ -39,6 +39,40 @@ services:
     volumes:
       - gsb-geoserver-data:/opt/geoserver_data
 
+  geoai:
+    profiles: ["geoai"]
+    build:
+      context: ${GEOAI_CONTEXT:-../geoai-asset-detection-platform}
+      dockerfile: Dockerfile
+    image: ${GEOAI_IMAGE:-geoai-road-detection-platform:dev}
+    container_name: gsb-geoai
+    depends_on:
+      postgis:
+        condition: service_healthy
+    environment:
+      GEOAI_WORKFLOW_CATALOG: ${GEOAI_WORKFLOW_CATALOG:-config/workflows.example.yaml}
+      GEOAI_POSTGIS_URL: postgresql+psycopg://${POSTGIS_USER:-gsb}:${POSTGIS_PASSWORD:-gsb}@postgis:5432/${POSTGIS_DB:-geostatusboard}
+      GEOAI_DOWNLOAD_HF_MODEL: ${GEOAI_DOWNLOAD_HF_MODEL:-true}
+      GEOAI_FETCH_SAMPLE_COG: ${GEOAI_FETCH_SAMPLE_COG:-true}
+      GEOAI_CORS_ORIGINS: ${GEOAI_CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080,http://localhost:18088,http://127.0.0.1:18088,http://localhost:18192,http://127.0.0.1:18192}
+    ports:
+      - "${GEOAI_PORT:-8000}:8000"
+    volumes:
+      - ${GEOAI_CONTEXT:-../geoai-asset-detection-platform}/src:/app/src
+      - ${GEOAI_CONTEXT:-../geoai-asset-detection-platform}/config:/app/config
+      - ${GEOAI_CONTEXT:-../geoai-asset-detection-platform}/scripts:/app/scripts
+      - ${GEOAI_CONTEXT:-../geoai-asset-detection-platform}/sql:/app/sql
+      - ${GEOAI_CONTEXT:-../geoai-asset-detection-platform}/data:/app/data
+      - ${GEOAI_CONTEXT:-../geoai-asset-detection-platform}/models:/app/models
+      - ${GEOAI_CONTEXT:-../geoai-asset-detection-platform}/outputs:/app/outputs
+      - ${GEOAI_CONTEXT:-../geoai-asset-detection-platform}/logs:/app/logs
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5).read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 15m
+
   geoserver-init:
     image: ${CURL_IMAGE:-curlimages/curl:8.8.0}
     profiles: ["tools"]

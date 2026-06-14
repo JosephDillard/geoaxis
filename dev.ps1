@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('up', 'down', 'logs', 'spatialize', 'geoserver-init', 'reset')]
+    [ValidateSet('up', 'build-geoai', 'up-geoai', 'down', 'logs', 'logs-geoai', 'spatialize', 'geoserver-init', 'reset')]
     [string] $Command = 'up'
 )
 
@@ -7,7 +7,6 @@ $ErrorActionPreference = 'Stop'
 
 function Invoke-Compose {
     param(
-        [Parameter(ValueFromRemainingArguments = $true)]
         [string[]] $ComposeArgs
     )
 
@@ -19,23 +18,32 @@ function Invoke-Compose {
 
 switch ($Command) {
     'up' {
-        Invoke-Compose up -d postgis geoserver
+        Invoke-Compose -ComposeArgs @('up', '-d', 'postgis', 'geoserver')
+    }
+    'build-geoai' {
+        Invoke-Compose -ComposeArgs @('--profile', 'geoai', 'build', 'geoai')
+    }
+    'up-geoai' {
+        Invoke-Compose -ComposeArgs @('--profile', 'geoai', 'up', '-d', 'postgis', 'geoserver', 'geoai')
     }
     'down' {
-        Invoke-Compose down
+        Invoke-Compose -ComposeArgs @('down')
     }
     'logs' {
-        Invoke-Compose logs -f postgis geoserver
+        Invoke-Compose -ComposeArgs @('logs', '-f', 'postgis', 'geoserver')
+    }
+    'logs-geoai' {
+        Invoke-Compose -ComposeArgs @('--profile', 'geoai', 'logs', '-f', 'postgis', 'geoserver', 'geoai')
     }
     'spatialize' {
-        Invoke-Compose --profile tools run --rm postgis-spatialize
-        Invoke-Compose --profile tools run --rm geoserver-init
+        Invoke-Compose -ComposeArgs @('--profile', 'tools', 'run', '--rm', 'postgis-spatialize')
+        Invoke-Compose -ComposeArgs @('--profile', 'tools', 'run', '--rm', 'geoserver-init')
     }
     'geoserver-init' {
-        Invoke-Compose --profile tools run --rm geoserver-init
+        Invoke-Compose -ComposeArgs @('--profile', 'tools', 'run', '--rm', 'geoserver-init')
     }
     'reset' {
-        Invoke-Compose down -v
-        Invoke-Compose up -d postgis geoserver
+        Invoke-Compose -ComposeArgs @('down', '-v')
+        Invoke-Compose -ComposeArgs @('up', '-d', 'postgis', 'geoserver')
     }
 }
