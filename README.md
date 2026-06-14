@@ -251,8 +251,9 @@ GSP links can open the map with a selected layer and feature filter, for example
 The map configuration lives under `geo.viewer`, `geo.geoserver`, and `geo.layers` in `grails-app/conf/application.yml`. The current default basemaps are CARTO Dark Blue and OpenStreetMap, and configured layers include airport status, current airfield status, airfield surface status, NAVAIDs, engineer assets, fire fighting assets, utility status, GeoAI COG footprints, GeoAI detected roads, current incidents, and incident archive.
 
 The map also includes a compact GeoAI request panel. It loads model choices from the
-GeoAI API through same-origin Grails proxy routes, submits the current MapLibre extent
-and optional drawn AOI, then polls the returned run id:
+GeoAI API through same-origin Grails proxy routes, submits the selected model,
+workflow, current MapLibre extent, and optional drawn AOI, then polls the returned run
+id:
 
 - `GET /GeoStatusBoard/geoAi/options`
 - `POST /GeoStatusBoard/geoAi/runs`
@@ -261,6 +262,10 @@ and optional drawn AOI, then polls the returned run id:
 Configure the target API with `geo.geoai.apiUrl` or the `GEOAI_API_URL` environment
 variable. If GeoAI is unavailable, the map remains usable and the panel shows the
 request failure instead of blocking map tools.
+
+When the selected workflow loads PostGIS features, the map refreshes `Detected Roads`
+and selects the returned API run id in the layer's job filter. Zero-feature runs leave
+the existing road layer intact.
 
 When a GeoAI workflow writes to `public.detected_roads` in the local PostGIS
 database, rerun `.\dev.ps1 geoserver-init` to publish `gsb:detected_roads`.
