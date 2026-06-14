@@ -1,0 +1,144 @@
+package geospatial.statusboard
+
+import grails.core.GrailsApplication
+import grails.plugin.springsecurity.annotation.Secured
+import groovy.json.JsonOutput
+
+import javax.sql.DataSource
+import java.sql.Connection
+import java.sql.ResultSet
+import java.sql.Statement
+import java.time.Instant
+
+@Secured(['ROLE_USER'])
+class GeoHealthController {
+
+    GrailsApplication grailsApplication
+    DataSource dataSource
+
+    def index() {
+        Map geoConfig = asMap(grailsApplication.config.geo)
+        Map geoserverConfig = asMap(geoConfig.geoserver)
+        Map geoaiConfig = asMap(geoConfig.geoai)
+        Map healthConfig = asMap(geoConfig.health)
+        int timeoutMs = asInteger(healthConfig.requestTimeoutMs, 2500)
+
+        Map payload = [
+            checkedAt: Instant.now().toString(),
+            services : [
+                geoserver: checkHttp(
+                    'GeoServer',
+                    geoserverHealthUrl(geoserverConfig.wfsUrl?.toString()),
+                    timeoutMs
+                ),
+                postgis  : checkPostgis(),
+                geoai    : checkHttp(
+                    'GeoAI API',
+                    geoaiHealthUrl(geoaiConfig),
+                    timeoutMs
+                )
+            ]
+        ]
+
+        render(contentType: 'application/json', text: JsonOutput.toJson(payload))
+    }
+
+    private Map checkHttp(String label, String url, int timeoutMs) {
+        if (!url) {
+            return status(false, label, 'Not configured')
+        }
+
+        HttpURLConnection connection = null
+        try {
+            connection = new URL(url).openConnection() as HttpURLConnection
+            connection.connectTimeout = timeoutMs
+            connection.readTimeout = timeoutMs
+            connection.requestMethod = 'GET'
+            int code = connection.responseCode
+            boolean up = code >= 200 && code < 400
+            return status(up, label, "HTTP ${code}", [url: url])
+        } catch (Exception ex) {
+            return status(false, label, ex.message ?: ex.class.simpleName, [url: url])
+        } finally {
+            connection?.disconnect()
+        }
+    }
+
+    private Map checkPostgis() {
+        try {
+            Connection connection = dataSource.connection
+            try {
+                String product = connection.metaData.databaseProductName ?: 'database'
+                if (!product.toLowerCase().contains('postgresql')) {
+                    return status(false, 'PostGIS', "Connected to ${product}, not PostgreSQL")
+                }
+
+                Statement statement = connection.createStatement()
+                try {
+                    ResultSet rs = statement.executeQuery('SELECT PostGIS_Version()')
+                    try {
+                        String version = rs.next() ? rs.getString(1) : 'available'
+                        return status(true, 'PostGIS', version)
+                    } finally {
+                        rs.close()
+                    }
+                } finally {
+                    statement.close()
+                }
+            } finally {
+                connection.close()
+            }
+        } catch (Exception ex) {
+            return status(false, 'PostGIS', ex.message ?: ex.class.simpleName)
+        }
+    }
+
+    private String geoserverHealthUrl(String wfsUrl) {
+        if (!wfsUrl) {
+            return ''
+        }
+        String separator = wfsUrl.contains('?') ? '&' : '?'
+        "${wfsUrl}${separator}service=WFS&version=1.0.0&request=GetCapabilities"
+    }
+
+    private String geoaiHealthUrl(Map geoaiConfig) {
+        String explicitHealthUrl = geoaiConfig.healthUrl?.toString()
+        if (explicitHealthUrl) {
+            return explicitHealthUrl
+        }
+
+        String apiUrl = geoaiConfig.apiUrl?.toString()
+        apiUrl ? "${apiUrl.replaceAll('/+$', '')}/health" : ''
+    }
+
+    private Map status(boolean up, String label, String message, Map details = [:]) {
+        [
+            status : up ? 'up' : 'down',
+            label  : label,
+            message: message,
+            details: details
+        ]
+    }
+
+    private Map asMap(Object value) {
+        if (value instanceof Map) {
+            return value.collectEntries { Object key, Object entryValue ->
+                [key.toString(), entryValue]
+            }
+        }
+
+        [:]
+    }
+
+    private int asInteger(Object value, int defaultValue) {
+        if (value == null) {
+            return defaultValue
+        }
+
+        if (value instanceof Number) {
+            return value as int
+        }
+
+        value.toString().isInteger() ? value.toString() as int : defaultValue
+    }
+}

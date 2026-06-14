@@ -87,7 +87,16 @@ grails-app/conf/application.yml
 Important keys:
 
 - `geo.geoserver.wfsUrl` - GeoServer WFS endpoint.
+- `geo.geoai.apiUrl` and `geo.geoai.healthUrl` - GeoAI workflow API endpoint and health endpoint.
+- `geo.health.requestTimeoutMs` - timeout for map service health checks.
 - `geo.geoserver.defaultSrs` - Target spatial reference, default `EPSG:4326`.
 - `geo.viewer.mapLibreJsUrl` and `geo.viewer.mapLibreCssUrl` - MapLibre assets.
 - `geo.viewer.osmTilesUrl` - Raster basemap tile URL.
 - `geo.layers` - App layer key to GeoServer feature type and filter fields.
+
+## Map Service Health
+
+The map page shows compact health boxes for GeoServer, PostGIS, and the GeoAI API.
+The browser calls the same-origin Grails health endpoint, and the server checks the
+configured dependencies. If GeoAI is unavailable, the map still loads normally and
+only the GeoAI indicator is marked down.

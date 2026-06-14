@@ -88,11 +88,16 @@ server:
     servlet:
         context-path: /GeoStatusBoard
 geo:
+    health:
+        requestTimeoutMs: "${GEO_HEALTH_REQUEST_TIMEOUT_MS:2500}"
     geoserver:
         wfsUrl: "${GEOSERVER_WFS_URL:http://localhost:8081/geoserver/gsb/ows}"
         workspace: "${GEOSERVER_WORKSPACE:gsb}"
         defaultSrs: "${GEOSERVER_DEFAULT_SRS:EPSG:4326}"
         requestTimeoutMs: "${GEOSERVER_REQUEST_TIMEOUT_MS:5000}"
+    geoai:
+        apiUrl: "${GEOAI_API_URL:http://localhost:8000}"
+        healthUrl: "${GEOAI_HEALTH_URL:http://localhost:8000/health}"
     viewer:
         provider: maplibre
         mapLibreJsUrl: https://unpkg.com/maplibre-gl/dist/maplibre-gl.js

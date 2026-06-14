@@ -51,6 +51,26 @@
             </button>
             <span id="geo-map-status-message" class="geo-map-status-message" aria-live="polite">Loading map...</span>
         </div>
+        <div id="geo-service-health" class="geo-service-health" aria-label="Service health">
+            <div class="geo-service-health-item is-checking"
+                 data-service-health="geoserver"
+                 title="Checking GeoServer">
+                <span class="geo-service-health-dot" aria-hidden="true"></span>
+                <span>GeoServer</span>
+            </div>
+            <div class="geo-service-health-item is-checking"
+                 data-service-health="postgis"
+                 title="Checking PostGIS">
+                <span class="geo-service-health-dot" aria-hidden="true"></span>
+                <span>PostGIS</span>
+            </div>
+            <div class="geo-service-health-item is-checking"
+                 data-service-health="geoai"
+                 title="Checking GeoAI API">
+                <span class="geo-service-health-dot" aria-hidden="true"></span>
+                <span>GeoAI</span>
+            </div>
+        </div>
 
         <div class="geo-map-thumb-controls" aria-label="Map panels">
             <button id="geo-layer-toggle"
@@ -258,11 +278,13 @@
     var config = ${raw(mapConfigJson)};
     var incidentLookupOptions = ${raw(incidentLookupOptionsJson)};
     var incidentCreateUrl = '${createLink(controller: 'currentIncidents', action: 'mapCreate')}';
+    var serviceHealthUrl = '${createLink(controller: 'geoHealth', action: 'index')}';
     var statusEl = document.getElementById('geo-map-status');
     var statusMessage = document.getElementById('geo-map-status-message');
     var statusToggle = document.getElementById('geo-map-status-toggle');
     var statusCount = document.getElementById('geo-map-status-count');
     var statusIcon = document.getElementById('geo-map-status-icon');
+    var serviceHealthPanel = document.getElementById('geo-service-health');
     var layerToggle = document.getElementById('geo-layer-toggle');
     var layerDrawer = document.getElementById('geo-layer-drawer');
     var layerClose = document.getElementById('geo-layer-close');
@@ -327,6 +349,48 @@
         statusEl.className = isError ? 'geo-map-status geo-map-status-error' : 'geo-map-status';
         statusEl.classList.toggle('is-collapsed', collapsed);
         updateStatusIssueCount();
+    }
+
+    function setServiceHealth(key, status, message) {
+        var item = serviceHealthPanel &&
+            serviceHealthPanel.querySelector('[data-service-health="' + key + '"]');
+        if (!item) {
+            return;
+        }
+
+        item.classList.toggle('is-up', status === 'up');
+        item.classList.toggle('is-down', status === 'down');
+        item.classList.toggle('is-checking', status !== 'up' && status !== 'down');
+        item.title = message || (status === 'up' ? 'Available' : 'Unavailable');
+    }
+
+    function refreshServiceHealth() {
+        if (!serviceHealthUrl || !window.fetch) {
+            ['geoserver', 'postgis', 'geoai'].forEach(function (key) {
+                setServiceHealth(key, 'down', 'Service health check unavailable');
+            });
+            return;
+        }
+
+        fetch(serviceHealthUrl, { credentials: 'same-origin' })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('Health check returned HTTP ' + response.status);
+                }
+                return response.json();
+            })
+            .then(function (payload) {
+                var services = payload.services || {};
+                ['geoserver', 'postgis', 'geoai'].forEach(function (key) {
+                    var service = services[key] || {};
+                    setServiceHealth(key, service.status || 'down', service.message || 'No status');
+                });
+            })
+            .catch(function (error) {
+                ['geoserver', 'postgis', 'geoai'].forEach(function (key) {
+                    setServiceHealth(key, 'down', error.message || 'Health check failed');
+                });
+            });
     }
 
     function layerIssueCount() {
@@ -2073,6 +2137,8 @@
 
     setFilterOpen(!!(filterFields && !filterFields.hidden));
     populateZoomLevels();
+    refreshServiceHealth();
+    window.setInterval(refreshServiceHealth, 60000);
     viewTools.hidden = !config.tools.fitLayer;
     incidentTools.hidden = !config.tools.createIncidents;
     measureTools.hidden = !config.tools.measureDistance;
