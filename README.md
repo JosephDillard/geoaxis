@@ -45,6 +45,15 @@ The screenshot above shows the geospatial status map with feature popups, readab
 - `build.gradle` - Root build, WAR packaging, Java compatibility, and module dependencies.
 - `settings.gradle` - Includes the airport and incident modules under the `geospatial-status-board` Gradle root project.
 
+## Related Documentation
+
+These links assume this repo sits next to the GeoAI repo in the same parent folder.
+
+- [Geospatial Architecture](docs/geospatial-architecture.md) - map, GeoServer,
+  PostGIS, external layer, and GeoAI integration notes.
+- [GeoAI Asset Detection Platform](../geoai-asset-detection-platform/README.md)
+  - workflow API for road detection and future GeoAI asset-detection jobs.
+
 ## Run Locally
 
 Docker is not required for the normal development path. If no PostGIS profile is enabled, the app uses H2 for the root datasource and the named airport/incident datasources.

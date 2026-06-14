@@ -9,6 +9,16 @@ The status app uses a split responsibility model for geospatial data:
 
 This keeps the existing Grails domains stable while allowing open source GIS services to own spatial querying and map delivery.
 
+## Related Documentation
+
+These links assume `geospatial-status-board` and `geoai-asset-detection-platform`
+are sibling repositories in the same parent folder.
+
+- [Status Board README](../README.md) - app setup, local Docker GIS stack, map view,
+  and deployment notes.
+- [GeoAI Asset Detection Platform](../../geoai-asset-detection-platform/README.md)
+  - workflow API used by the map viewer for future GeoAI requests.
+
 ## Recommended Stack
 
 - PostgreSQL with PostGIS for spatial storage.
