@@ -353,6 +353,7 @@
     var externalLayerState = {};
     var renderLayerToLayerKey = {};
     var layerIssueState = {};
+    var layerFilters = {};
     var measureMode = false;
     var measurePoints = [];
     var incidentCreateMode = false;
@@ -556,30 +557,69 @@
         }
         try {
             var featureCollection = draw.getAll();
-            return featureCollection && featureCollection.features && featureCollection.features.length
-                ? featureCollection
+            var features = featureCollection && featureCollection.features
+                ? featureCollection.features.filter(function (feature) {
+                    var type = feature && feature.geometry && feature.geometry.type;
+                    return type === 'Polygon' || type === 'MultiPolygon';
+                })
+                : [];
+            return features.length
+                ? { type: 'FeatureCollection', features: features }
                 : null;
         } catch (error) {
             return null;
         }
     }
 
-    function geoAiMapContext() {
+    function mapBoundsArray() {
         var bounds = map.getBounds();
+        return [
+            bounds.getWest(),
+            bounds.getSouth(),
+            bounds.getEast(),
+            bounds.getNorth()
+        ];
+    }
+
+    function extendGeoJsonBounds(coords, bounds) {
+        if (!Array.isArray(coords)) {
+            return bounds;
+        }
+        if (coords.length >= 2 && typeof coords[0] === 'number' && typeof coords[1] === 'number') {
+            bounds[0] = Math.min(bounds[0], coords[0]);
+            bounds[1] = Math.min(bounds[1], coords[1]);
+            bounds[2] = Math.max(bounds[2], coords[0]);
+            bounds[3] = Math.max(bounds[3], coords[1]);
+            return bounds;
+        }
+        coords.forEach(function (child) {
+            extendGeoJsonBounds(child, bounds);
+        });
+        return bounds;
+    }
+
+    function geoJsonBounds(geojson) {
+        var bounds = [Infinity, Infinity, -Infinity, -Infinity];
+        (geojson.features || []).forEach(function (feature) {
+            if (feature.geometry) {
+                extendGeoJsonBounds(feature.geometry.coordinates, bounds);
+            }
+        });
+        return Number.isFinite(bounds[0]) ? bounds : null;
+    }
+
+    function geoAiMapContext() {
         var center = map.getCenter();
+        var aoi = drawnGeoJson();
+        var aoiBounds = aoi ? geoJsonBounds(aoi) : null;
         var context = {
             source_app: 'geospatial-status-board',
-            bbox: [
-                bounds.getWest(),
-                bounds.getSouth(),
-                bounds.getEast(),
-                bounds.getNorth()
-            ],
+            bbox: aoiBounds || mapBoundsArray(),
+            area_source: aoiBounds ? 'drawn_aoi' : 'map_view',
             map_center: [center.lng, center.lat],
             zoom: Number(map.getZoom().toFixed(2)),
             selected_layer: config.selectedLayer || ''
         };
-        var aoi = drawnGeoJson();
         if (aoi) {
             context.aoi_geojson = aoi;
         }
@@ -587,12 +627,18 @@
     }
 
     function formatGeoAiExtent() {
-        var bounds = map.getBounds();
-        var west = bounds.getWest().toFixed(3);
-        var south = bounds.getSouth().toFixed(3);
-        var east = bounds.getEast().toFixed(3);
-        var north = bounds.getNorth().toFixed(3);
-        return west + ', ' + south + ' / ' + east + ', ' + north;
+        var aoi = drawnGeoJson();
+        var bounds = aoi ? geoJsonBounds(aoi) : null;
+        if (!bounds) {
+            bounds = mapBoundsArray();
+            aoi = null;
+        }
+        var prefix = aoi ? 'Drawn AOI' : 'Map view';
+        return prefix + ': ' +
+            bounds[0].toFixed(3) + ', ' +
+            bounds[1].toFixed(3) + ' / ' +
+            bounds[2].toFixed(3) + ', ' +
+            bounds[3].toFixed(3);
     }
 
     function updateGeoAiExtent() {
@@ -1717,6 +1763,91 @@
         };
     }
 
+    function layerFilterSelect(key) {
+        return document.querySelector('[data-layer-filter="' + key + '"]');
+    }
+
+    function layerFilterValue(key) {
+        var select = layerFilterSelect(key);
+        return select ? select.value : (layerFilters[key] || '');
+    }
+
+    function filteredLayerData(key, data) {
+        var layer = config.layers[key] || {};
+        var field = layer.filterField;
+        var selected = layerFilterValue(key);
+        if (!field || !selected) {
+            return data;
+        }
+        return {
+            type: 'FeatureCollection',
+            features: (data.features || []).filter(function (feature) {
+                var value = feature.properties ? feature.properties[field] : null;
+                return String(value == null ? '' : value) === selected;
+            })
+        };
+    }
+
+    function layerFeatureStatus(data, rawData) {
+        var count = (data && data.features ? data.features.length : 0);
+        var total = (rawData && rawData.features ? rawData.features.length : count);
+        if (total !== count) {
+            return count + ' of ' + total + ' features';
+        }
+        return count + ' feature' + (count === 1 ? '' : 's');
+    }
+
+    function populateLayerFilterOptions(key, rawData) {
+        var layer = config.layers[key] || {};
+        var field = layer.filterField;
+        var select = layerFilterSelect(key);
+        if (!field || !select) {
+            return;
+        }
+
+        var selected = layerFilters[key] || select.value || '';
+        var values = [];
+        (rawData.features || []).forEach(function (feature) {
+            var rawValue = feature.properties ? feature.properties[field] : null;
+            var value = String(rawValue == null ? '' : rawValue);
+            if (value && values.indexOf(value) < 0) {
+                values.push(value);
+            }
+        });
+        values.sort();
+
+        select.innerHTML = '';
+        var allOption = document.createElement('option');
+        allOption.value = '';
+        allOption.textContent = layer.filterAllLabel || 'All';
+        select.appendChild(allOption);
+
+        values.forEach(function (value) {
+            var option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            select.appendChild(option);
+        });
+
+        select.disabled = values.length === 0;
+        select.value = selected && values.indexOf(selected) >= 0 ? selected : '';
+        layerFilters[key] = select.value;
+    }
+
+    function applyInternalLayerFilter(key) {
+        var state = internalLayerState[key];
+        if (!state || !state.rawData) {
+            return;
+        }
+        var data = filteredLayerData(key, state.rawData);
+        state.data = data;
+        var source = map.getSource(sourceIdFor(key));
+        if (source && source.setData) {
+            source.setData(data);
+        }
+        updateLayerStatus(key, 'internal', layerFeatureStatus(data, state.rawData));
+    }
+
     function removeInternalLayer(key) {
         layerIdsFor(key).forEach(function (id) {
             if (map.getLayer(id)) {
@@ -1730,6 +1861,7 @@
         internalLayerState[key] = Object.assign({}, internalLayerState[key] || {}, {
             loaded: false,
             loading: false,
+            rawData: null,
             data: null
         });
         updateLayerStatus(key, 'internal', '');
@@ -1739,7 +1871,9 @@
         var layer = config.layers[key];
         var sourceId = sourceIdFor(key);
         var ids = layerIdsFor(key);
-        var data = decorateGeoJson(key, geojson);
+        var rawData = decorateGeoJson(key, geojson);
+        populateLayerFilterOptions(key, rawData);
+        var data = filteredLayerData(key, rawData);
         removeInternalLayer(key);
 
         map.addSource(sourceId, {
@@ -1801,6 +1935,7 @@
         internalLayerState[key] = {
             loaded: true,
             loading: false,
+            rawData: rawData,
             data: data
         };
         if (key === 'currentIncidents') {
@@ -1835,9 +1970,10 @@
                     return;
                 }
                 addInternalLayer(key, geojson);
-                var count = (geojson.features || []).length;
-                updateLayerStatus(key, 'internal', count + ' feature' + (count === 1 ? '' : 's'));
-                setStatus(layer.title + ': ' + count + ' feature(s) loaded.');
+                var state = internalLayerState[key] || {};
+                var statusText = layerFeatureStatus(state.data, state.rawData);
+                updateLayerStatus(key, 'internal', statusText);
+                setStatus(layer.title + ': ' + statusText + ' loaded.');
             })
             .catch(function (error) {
                 internalLayerState[key] = { loaded: false, loading: false, data: null };
@@ -2355,6 +2491,36 @@
                 row.appendChild(label);
                 row.appendChild(status);
                 group.appendChild(row);
+
+                if (kind === 'internal' && entry.item.filterField) {
+                    var filterId = 'geo-layer-filter-' + safeId(entry.key);
+                    var filterRow = document.createElement('div');
+                    filterRow.className = 'geo-layer-filter';
+                    filterRow.setAttribute('data-layer-filter-container', entry.key);
+
+                    var filterLabel = document.createElement('label');
+                    filterLabel.setAttribute('for', filterId);
+                    filterLabel.textContent = entry.item.filterLabel || entry.item.filterField;
+
+                    var filterSelect = document.createElement('select');
+                    filterSelect.id = filterId;
+                    filterSelect.disabled = true;
+                    filterSelect.setAttribute('data-layer-filter', entry.key);
+
+                    var filterOption = document.createElement('option');
+                    filterOption.value = '';
+                    filterOption.textContent = entry.item.filterAllLabel || 'All';
+                    filterSelect.appendChild(filterOption);
+
+                    filterRow.appendChild(filterLabel);
+                    filterRow.appendChild(filterSelect);
+                    group.appendChild(filterRow);
+
+                    filterSelect.addEventListener('change', function () {
+                        layerFilters[entry.key] = filterSelect.value;
+                        applyInternalLayerFilter(entry.key);
+                    });
+                }
 
                 checkbox.addEventListener('change', function () {
                     if (kind === 'internal') {

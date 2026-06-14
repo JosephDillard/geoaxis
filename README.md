@@ -248,7 +248,7 @@ GSP links can open the map with a selected layer and feature filter, for example
 /GeoStatusBoard/map?layer=airportStatus&field=site_name&value=Kirtland%20AFB
 ```
 
-The map configuration lives under `geo.viewer`, `geo.geoserver`, and `geo.layers` in `grails-app/conf/application.yml`. The current default basemaps are CARTO Dark Blue and OpenStreetMap, and configured layers include airport status, current airfield status, airfield surface status, NAVAIDs, engineer assets, fire fighting assets, utility status, GeoAI detected roads, current incidents, and incident archive.
+The map configuration lives under `geo.viewer`, `geo.geoserver`, and `geo.layers` in `grails-app/conf/application.yml`. The current default basemaps are CARTO Dark Blue and OpenStreetMap, and configured layers include airport status, current airfield status, airfield surface status, NAVAIDs, engineer assets, fire fighting assets, utility status, GeoAI COG footprints, GeoAI detected roads, current incidents, and incident archive.
 
 The map also includes a compact GeoAI request panel. It loads model choices from the
 GeoAI API through same-origin Grails proxy routes, submits the current MapLibre extent
@@ -264,7 +264,10 @@ request failure instead of blocking map tools.
 
 When a GeoAI workflow writes to `public.detected_roads` in the local PostGIS
 database, rerun `.\dev.ps1 geoserver-init` to publish `gsb:detected_roads`.
-The map exposes it as the `Detected Roads` layer under the `GeoAI` category.
+The map exposes it as the `Detected Roads` layer under the `GeoAI` category and
+adds a job filter under that layer when `job_id` values are present. The COG
+inventory footprint table is `public.geoai_cog_footprints` and is exposed as
+`COG Footprints`.
 
 The recommended open source GIS stack is:
 

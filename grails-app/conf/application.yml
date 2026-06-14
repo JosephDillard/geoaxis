@@ -313,6 +313,15 @@ geo:
             labelField: airfield_name
             geometryType: Geometry
             color: '#16a34a'
+        cogFootprints:
+            title: COG Footprints
+            category: GeoAI
+            enabled: true
+            typeName: 'gsb:geoai_cog_footprints'
+            idField: cog_id
+            labelField: file_name
+            geometryType: Geometry
+            color: '#f59e0b'
         detectedRoads:
             title: Detected Roads
             category: GeoAI
@@ -322,6 +331,9 @@ geo:
             labelField: class_name
             geometryType: Geometry
             color: '#0891b2'
+            filterField: job_id
+            filterLabel: Job
+            filterAllLabel: All Jobs
         currentIncidents:
             title: Current Incidents
             category: Incidents

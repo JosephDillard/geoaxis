@@ -97,6 +97,9 @@ class MapController {
                     color       : layer.color?.toString() ?: '#2563eb',
                     iconSet     : layer.iconSet?.toString() ?: '',
                     iconField   : layer.iconField?.toString() ?: '',
+                    filterField : layer.filterField?.toString() ?: '',
+                    filterLabel : layer.filterLabel?.toString() ?: '',
+                    filterAllLabel: layer.filterAllLabel?.toString() ?: '',
                     category    : layer.category?.toString() ?: 'Internal',
                     enabled     : asBoolean(layer.enabled, false)
                 ]

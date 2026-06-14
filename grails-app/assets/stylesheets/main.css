@@ -1408,6 +1408,44 @@ img.grails-logo {
     white-space: nowrap;
 }
 
+.geo-layer-filter {
+    align-items: center;
+    background: rgba(7, 28, 55, 0.42);
+    border: 1px solid rgba(147, 197, 253, 0.16);
+    border-radius: 4px;
+    display: grid;
+    gap: 0.4rem;
+    grid-template-columns: 54px minmax(0, 1fr);
+    margin-top: -0.25rem;
+    padding: 0.4rem 0.45rem 0.45rem 2.1rem;
+}
+
+.geo-layer-filter label {
+    color: #cfe2ff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.geo-layer-filter select {
+    background: #12365d;
+    border: 1px solid rgba(147, 197, 253, 0.45);
+    border-radius: 4px;
+    color: #eef6ff;
+    font-size: 0.78rem;
+    min-height: 30px;
+    min-width: 0;
+    padding: 0.25rem 0.45rem;
+    width: 100%;
+}
+
+.geo-layer-filter select:disabled {
+    color: #8da9c6;
+    opacity: 0.72;
+}
+
 .geo-left-map-controls {
     display: grid;
     gap: 0.45rem;
