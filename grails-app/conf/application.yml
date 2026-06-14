@@ -313,6 +313,15 @@ geo:
             labelField: airfield_name
             geometryType: Geometry
             color: '#16a34a'
+        detectedRoads:
+            title: Detected Roads
+            category: GeoAI
+            enabled: true
+            typeName: 'gsb:detected_roads'
+            idField: source_tile
+            labelField: class_name
+            geometryType: Geometry
+            color: '#0891b2'
         currentIncidents:
             title: Current Incidents
             category: Incidents

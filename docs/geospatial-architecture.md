@@ -62,6 +62,8 @@ WHERE target.site_name = source.site_name
 1. Create a GeoServer workspace named `gsb`.
 2. Create a PostGIS store pointed at the status app database.
 3. Publish the operational tables listed in `docs/postgis-spatialization.sql`.
+   GeoAI output can also be published from `public.detected_roads` after the
+   GeoAI pipeline loads vectors into the local PostGIS database.
 4. Confirm WFS GeoJSON works. Example:
 
 ```text
@@ -103,6 +105,9 @@ Important keys:
 - `geo.viewer.mapLibreJsUrl` and `geo.viewer.mapLibreCssUrl` - MapLibre assets.
 - `geo.viewer.osmTilesUrl` - Raster basemap tile URL.
 - `geo.layers` - App layer key to GeoServer feature type and filter fields.
+
+The `detectedRoads` layer points at `gsb:detected_roads`, which is produced by
+the sibling GeoAI asset-detection platform when its PostGIS load stage is run.
 
 ## Map Service Health
 

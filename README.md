@@ -6,7 +6,7 @@ This repository contains a status app linkable to geospatial data for dashboard 
 
 - Airport and airfield status dashboards.
 - Geospatial links from status records into the map view.
-- MapLibre map view backed by GeoServer WFS/GeoJSON layers.
+- MapLibre map view backed by GeoServer WFS/GeoJSON layers, including optional GeoAI detection outputs.
 - Configurable basemaps, layer selection, feature filtering, fit-to-layer, fullscreen, distance measurement, drawing, and coordinate readout with MGRS support.
 - Editable lookup tables for dropdown text used by airport and incident workflows.
 - Development bootstrap data for New Mexico airports and airfields, current status, runway surface condition, support assets, utilities, current incidents, and archived incidents.
@@ -248,7 +248,7 @@ GSP links can open the map with a selected layer and feature filter, for example
 /GeoStatusBoard/map?layer=airportStatus&field=site_name&value=Kirtland%20AFB
 ```
 
-The map configuration lives under `geo.viewer`, `geo.geoserver`, and `geo.layers` in `grails-app/conf/application.yml`. The current default basemaps are CARTO Dark Blue and OpenStreetMap, and configured layers include airport status, current airfield status, airfield surface status, NAVAIDs, engineer assets, fire fighting assets, utility status, current incidents, and incident archive.
+The map configuration lives under `geo.viewer`, `geo.geoserver`, and `geo.layers` in `grails-app/conf/application.yml`. The current default basemaps are CARTO Dark Blue and OpenStreetMap, and configured layers include airport status, current airfield status, airfield surface status, NAVAIDs, engineer assets, fire fighting assets, utility status, GeoAI detected roads, current incidents, and incident archive.
 
 The map also includes a compact GeoAI request panel. It loads model choices from the
 GeoAI API through same-origin Grails proxy routes, submits the current MapLibre extent
@@ -261,6 +261,10 @@ and optional drawn AOI, then polls the returned run id:
 Configure the target API with `geo.geoai.apiUrl` or the `GEOAI_API_URL` environment
 variable. If GeoAI is unavailable, the map remains usable and the panel shows the
 request failure instead of blocking map tools.
+
+When a GeoAI workflow writes to `public.detected_roads` in the local PostGIS
+database, rerun `.\dev.ps1 geoserver-init` to publish `gsb:detected_roads`.
+The map exposes it as the `Detected Roads` layer under the `GeoAI` category.
 
 The recommended open source GIS stack is:
 
