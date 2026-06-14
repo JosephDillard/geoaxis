@@ -45,14 +45,17 @@ The screenshot above shows the geospatial status map with feature popups, readab
 - `build.gradle` - Root build, WAR packaging, Java compatibility, and module dependencies.
 - `settings.gradle` - Includes the airport and incident modules under the `geospatial-status-board` Gradle root project.
 
-## Related Documentation
+## Repository Map
 
-These links assume this repo sits next to the GeoAI repo in the same parent folder.
+This repo provides the Grails status-board application, MapLibre map viewer,
+GeoServer/PostGIS local stack, and geospatial architecture notes. The companion GeoAI
+repo provides the workflow API and asset-detection pipeline used by the map viewer.
 
-- [Geospatial Architecture](docs/geospatial-architecture.md) - map, GeoServer,
-  PostGIS, external layer, and GeoAI integration notes.
-- [GeoAI Asset Detection Platform](../geoai-asset-detection-platform/README.md)
-  - workflow API for road detection and future GeoAI asset-detection jobs.
+- [Geospatial Status Board repo](https://github.com/JosephDillard/geospatial-status-board)
+- [Geospatial Status Board README](https://github.com/JosephDillard/geospatial-status-board/blob/master/README.md)
+- [Geospatial Status Board Architecture](docs/geospatial-architecture.md)
+- [GeoAI Asset Detection Platform repo](https://github.com/JosephDillard/geoai-asset-detection-platform)
+- [GeoAI Asset Detection Platform README](https://github.com/JosephDillard/geoai-asset-detection-platform/blob/main/README.md)
 
 ## Run Locally
 
